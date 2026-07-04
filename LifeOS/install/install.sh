@@ -119,7 +119,11 @@ else
   run bash -c "curl -fsSL '$LIFEOS_TARBALL_URL' | tar -xzf - -C '$TMP_DIR'"
   EXTRACTED="$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
   SRC_SKILL="$EXTRACTED/$LIFEOS_RELEASE_SUBPATH"
-  [ -d "$SRC_SKILL" ] || { error "LifeOS skill not in tarball at $LIFEOS_RELEASE_SUBPATH"; exit 1; }
+  # In dry-run the download above is echoed, not executed — nothing was extracted,
+  # so the content check must be skipped or every dry-run fails here.
+  if [ "$DRY_RUN" != "1" ]; then
+    [ -d "$SRC_SKILL" ] || { error "LifeOS skill not in tarball at $LIFEOS_RELEASE_SUBPATH"; exit 1; }
+  fi
 fi
 success "Fetched ${LIFEOS_TAG}"
 
