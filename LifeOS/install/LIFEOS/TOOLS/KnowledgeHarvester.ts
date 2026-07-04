@@ -27,7 +27,7 @@ import * as path from "path";
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
 const MEMORY_DIR = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY_DIR, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY_DIR, "WORK");
@@ -41,7 +41,7 @@ if (!CURRENT_USER) {
   console.error("KnowledgeHarvester: USER env var is required to locate auto-memory dir");
   process.exit(1);
 }
-const AUTO_MEMORY_DIR = path.join(HOME, ".claude", "projects",
+const AUTO_MEMORY_DIR = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "projects",
   `-Users-${CURRENT_USER}--claude`, "memory");
 
 const HARVEST_STATE_FILE = path.join(KNOWLEDGE_DIR, ".harvest-state.json");

@@ -63,9 +63,9 @@ export interface TelegramConfig {
 // ── Constants ──
 
 const HOME = process.env.HOME ?? ""
-const CWD = join(HOME, ".claude")
-const STATE_DIR = join(HOME, ".claude", "LIFEOS", "PULSE", "state", "telegram")
-const LOGS_DIR = join(HOME, ".claude", "LIFEOS", "PULSE", "logs", "telegram")
+const CWD = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"))
+const STATE_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "state", "telegram")
+const LOGS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "logs", "telegram")
 const STALE_ACK_CACHE_DIR = join(STATE_DIR, "ack-cache")
 const MAX_TELEGRAM_LENGTH = 4096
 const CURSOR = " ▌"
@@ -76,7 +76,7 @@ const IDLE_TIMEOUT_MS = 60 * 60 * 1000          // 1 hour — gap of silence tha
 const INFERENCE_HARD_BUDGET_MS = 10_000         // outer race cap on summarize; measured Sonnet subprocess cost is 4-6s, this gives slack without losing the voice trailing the text by too much
 const MIN_FALLBACK_WORDS = 6                    // a fallback summary shorter than this is presumed too thin to be worth voicing
 const MEANINGFUL_REPLY_WORDS = 25               // when a reply is at least this long, a too-short fallback is a regression — skip voice rather than ship a "0:00" stub
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
 
 // Voice ID for outbound voice summaries. Read at module import from
 // LifeosConfig — `[da.voices.main] voice_id` in LIFEOS/USER/CONFIG/LIFEOS_CONFIG.toml.

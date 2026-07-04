@@ -15,7 +15,7 @@
 import { join } from "path"
 
 const HOME = process.env.HOME ?? "~"
-const LifeOS = join(HOME, ".claude", "LIFEOS")
+const LifeOS = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
 const REGISTRY_PATH = join(LifeOS, "USER", "DA", "_registry.yaml")
 
 // ── Types ──

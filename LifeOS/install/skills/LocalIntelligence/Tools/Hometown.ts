@@ -42,9 +42,7 @@ export class NoHometownError extends Error {
   }
 }
 
-const IDENTITY_DEFAULT = join(
-  homedir(),
-  ".claude",
+const IDENTITY_DEFAULT = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"),
   "LIFEOS",
   "USER",
   "PRINCIPAL",

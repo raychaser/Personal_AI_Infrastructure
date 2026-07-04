@@ -51,7 +51,7 @@ export function getLifeosDir(): string {
     return expandPath(envLifeosDir);
   }
 
-  return join(homedir(), '.claude', 'LIFEOS');
+  return join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'LIFEOS');
 }
 
 /**
@@ -69,7 +69,7 @@ export function getClaudeDir(): string {
     return expandPath(pluginRoot);
   }
 
-  return join(homedir(), '.claude');
+  return join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'));
 }
 
 /**

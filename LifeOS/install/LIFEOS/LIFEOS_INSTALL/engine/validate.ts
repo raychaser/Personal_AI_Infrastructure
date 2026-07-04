@@ -180,7 +180,7 @@ export async function runValidation(state: InstallState, emit?: EngineEventHandl
     });
   }
 
-  const paiDir = state.detection?.paiDir || join(homedir(), ".claude");
+  const paiDir = state.detection?.paiDir || join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
   const configDir = state.detection?.configDir || join(homedir(), ".config", "LifeOS");
   const checks: ValidationCheck[] = [];
 

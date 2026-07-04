@@ -25,7 +25,7 @@ export class AgentContextLoader {
   private agentsDir: string;
 
   constructor() {
-    this.claudeHome = join(homedir(), ".claude");
+    this.claudeHome = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
     this.agentsDir = join(this.claudeHome, "Skills", "Agents");
   }
 

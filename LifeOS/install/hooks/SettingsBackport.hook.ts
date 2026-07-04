@@ -16,7 +16,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import { paiPath } from './lib/paths';
 
-const SETTINGS_PATH = join(homedir(), '.claude', 'settings.json');
+const SETTINGS_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'settings.json');
 const BACKPORT = paiPath('TOOLS', 'SettingsBackport.ts');
 
 let input: any;
