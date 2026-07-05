@@ -35,7 +35,7 @@
 import { execFileSync } from "node:child_process";
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { copyMissing, detectDevTree } from "./InstallEngine";
+import { copyMissing, detectDevTree, resolveBunPath } from "./InstallEngine";
 
 // Enhancement components are the à-la-carte half of setup. The "LifeOS Core"
 // (skills + system prompt + base settings + CLAUDE.md) is installed by Setup's
@@ -148,7 +148,7 @@ function deployPulse(ctx: Ctx): ComponentResult {
   r.ready = true;
   if (!ctx.apply) {
     if (!av.inLive) r.actions.push(`copy PULSE from payload → ${pulseDir}`);
-    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home})`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
+    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home}, __BUN_PATH__ → resolved bun binary)`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
     return r;
   }
 
@@ -156,12 +156,11 @@ function deployPulse(ctx: Ctx): ComponentResult {
     ensurePresent("PULSE", ctx);
     const plistSrc = join(pulseDir, "com.lifeos.pulse.plist");
     if (!existsSync(plistSrc)) throw new Error(`plist template missing at ${plistSrc}`);
-    const bunCandidates = [
-      join(ctx.home, ".bun", "bin", "bun"),
-      "/opt/homebrew/bin/bun",
-      "/usr/local/bin/bun",
-    ];
-    const bunPath = bunCandidates.find((p) => existsSync(p)) ?? Bun.which("bun") ?? process.execPath;
+    // Persistent bun binary for the RunAtLoad plist — canonical install locations
+    // first, never an ephemeral `bun install` shim. Single source of truth + the
+    // unit-tested ordering invariant live in resolveBunPath (manage.sh mirrors it
+    // in shell; setup.ts mirrors it inline, both deployment-isolated from Tools/).
+    const bunPath = resolveBunPath({ home: ctx.home });
     const materialized = readFileSync(plistSrc, "utf-8").replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", ctx.home);
     const u = uid();
     const sameOnDisk = existsSync(plistDst) && readFileSync(plistDst, "utf-8") === materialized;

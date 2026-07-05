@@ -360,9 +360,11 @@ async function installService(): Promise<void> {
   // The source plist ships as a template (no hardcoded user paths) so the system
   // file is deny-list clean; the installed copy is per-user materialized.
   const template = await Bun.file(plistSrc).text()
-  // Same canonical-first ordering as manage.sh / DeployComponents — never bake an
-  // ephemeral PATH-resolved shim into a persistent plist. process.execPath is the
-  // guaranteed-valid fallback (this script runs under bun).
+  // Same canonical-first ordering as InstallEngine.resolveBunPath (the unit-tested
+  // canonical reference) and manage.sh — never bake an ephemeral PATH-resolved shim
+  // into a persistent plist. process.execPath is the guaranteed-valid fallback (this
+  // script runs under bun). setup.ts ships standalone into PULSE/ without the Tools/
+  // sibling, so it mirrors the logic inline rather than importing the shared helper.
   const bunCandidates = [`${HOME}/.bun/bin/bun`, "/opt/homebrew/bin/bun", "/usr/local/bin/bun"]
   const bunPath = bunCandidates.find((p) => existsSync(p)) ?? Bun.which("bun") ?? process.execPath
   const materialized = template.replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", HOME)
@@ -371,7 +373,16 @@ async function installService(): Promise<void> {
     stdout: "pipe",
     stderr: "pipe",
   })
-  await proc.exited
+  // Bun.spawn does NOT throw on a non-zero exit, so the exit code must be checked
+  // explicitly — otherwise a failed load (bad bun path, malformed/already-loaded
+  // service) is swallowed and we falsely report success. Step 7's health check
+  // confirms the service actually came up; here we surface the load failure loudly.
+  const code = await proc.exited
+  if (code !== 0) {
+    const stderrText = (await new Response(proc.stderr).text()).trim()
+    warn(`launchctl load exited ${code}${stderrText ? `: ${stderrText}` : ""} — Pulse service may not be running (check ${join(PULSE_DIR, "manage.sh")} status)`)
+    return
+  }
   ok("launchd service installed")
 }
 
