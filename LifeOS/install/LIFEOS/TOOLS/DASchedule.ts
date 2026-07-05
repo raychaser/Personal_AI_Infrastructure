@@ -12,9 +12,10 @@
 
 import { join } from "path"
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from "fs"
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const TASKS_DIR = join(LIFEOS_DIR, "PULSE", "state", "da")
 const TASKS_PATH = join(TASKS_DIR, "scheduled-tasks.jsonl")
 

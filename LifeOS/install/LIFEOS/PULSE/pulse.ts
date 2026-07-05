@@ -15,7 +15,7 @@
  */
 
 import { join } from "path"
-import { normalizeConfigRoot } from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { readFileSync, existsSync } from "fs"
 import { parse } from "smol-toml"
@@ -23,10 +23,10 @@ import { parse } from "smol-toml"
 // ── Load .env before anything else ──
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const PULSE_DIR = join(LIFEOS_DIR, "PULSE")
 
-const envPathCandidates = [join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), ".env"), join(HOME ?? "~", ".claude", ".env")]
+const envPathCandidates = [join(getConfigRoot(), ".env"), join(HOME ?? "~", ".claude", ".env")]
 const envPath = envPathCandidates.find((p) => existsSync(p)) ?? envPathCandidates[0]
 if (envPath !== envPathCandidates[0]) console.error(`[env] .env not found at ${envPathCandidates[0]} — using legacy ${envPath}`)
 try {

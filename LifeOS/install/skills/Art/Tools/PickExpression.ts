@@ -20,8 +20,9 @@
 import { existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
-const DIR = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"), "LIFEOS", "USER", "CUSTOMIZATIONS", "SKILLS", "Art", "HeadshotExamples");
+const DIR = join(getConfigRoot(), "LIFEOS", "USER", "CUSTOMIZATIONS", "SKILLS", "Art", "HeadshotExamples");
 
 // sentiment -> headshot filename (without .png), with topic keywords that route to it.
 const MAP: Array<{ sentiment: string; file: string; keywords: string[] }> = [

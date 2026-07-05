@@ -40,6 +40,7 @@
 import { readFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const colors = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
@@ -50,7 +51,7 @@ const colors = {
 function loadEnv(): Record<string, string> {
   const envPath = process.env.LIFEOS_CONFIG_DIR
     ? join(process.env.LIFEOS_CONFIG_DIR, '.env')
-    : join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), '.env')
+    : join(getConfigRoot(), '.env')
   const env: Record<string, string> = {}
   try {
     const content = readFileSync(envPath, 'utf-8')

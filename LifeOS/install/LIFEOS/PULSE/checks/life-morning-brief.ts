@@ -11,9 +11,10 @@
 
 import { join } from "path"
 import { existsSync, readFileSync } from "fs"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
-const TELOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "USER", "TELOS")
+const TELOS_DIR = join(getConfigRoot(), "LIFEOS", "USER", "TELOS")
 
 function readFile(name: string): string {
   const p = join(TELOS_DIR, name)

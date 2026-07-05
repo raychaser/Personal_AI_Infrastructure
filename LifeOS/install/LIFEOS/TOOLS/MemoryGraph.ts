@@ -27,9 +27,10 @@ import louvain from "graphology-communities-louvain";
 import pagerank from "graphology-metrics/centrality/pagerank";
 import * as fs from "fs";
 import * as path from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const MEMORY = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY, "WORK");

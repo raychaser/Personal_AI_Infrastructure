@@ -28,9 +28,10 @@ import {
   statSync,
 } from "node:fs";
 import { join } from "node:path";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const CLAUDE = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+const CLAUDE = (getConfigRoot());
 const OBS_DIR = join(CLAUDE, "LIFEOS/MEMORY/OBSERVABILITY");
 
 const REVIEW_STATE = join(OBS_DIR, "review-state.json");

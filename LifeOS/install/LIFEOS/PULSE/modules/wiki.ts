@@ -32,19 +32,20 @@ import {
   writeFileSync,
 } from "fs"
 import MiniSearch from "minisearch"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // Path Construction
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const DOCUMENTATION_DIR = join(LIFEOS_DIR, "DOCUMENTATION")
 const KNOWLEDGE_DIR = join(LIFEOS_DIR, "MEMORY", "KNOWLEDGE")
 const BOOKMARKS_DIR = join(LIFEOS_DIR, "MEMORY", "BOOKMARKS")
 const BOOKMARKS_CSV = join(BOOKMARKS_DIR, "bookmarks.csv")
 const ALGORITHM_DIR = join(LIFEOS_DIR, "ALGORITHM")
-const SKILLS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "skills")
-const HOOKS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "hooks")
-const SETTINGS_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "settings.json")
+const SKILLS_DIR = join(getConfigRoot(), "skills")
+const HOOKS_DIR = join(getConfigRoot(), "hooks")
+const SETTINGS_PATH = join(getConfigRoot(), "settings.json")
 const ARBOL_WORKERS_DIR = join(LIFEOS_DIR, "USER", "CUSTOMIZATIONS", "ARBOL", "Workers")
 
 const SYSTEM_PROMPT_PATH = join(LIFEOS_DIR, "LIFEOS_SYSTEM_PROMPT.md")

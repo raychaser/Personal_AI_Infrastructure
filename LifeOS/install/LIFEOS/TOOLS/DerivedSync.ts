@@ -17,6 +17,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 type SpawnReadable = ReadableStream<Uint8Array> | null;
 type SpawnProcess = {
@@ -76,7 +77,7 @@ type RunSummary = {
 };
 
 const HOME = process.env.HOME || "";
-const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+const CLAUDE_DIR = (getConfigRoot());
 const LIFEOS_DIR = join(CLAUDE_DIR, "LIFEOS");
 const USER_DIR = join(LIFEOS_DIR, "USER");
 const TOOLS_DIR = join(LIFEOS_DIR, "TOOLS");

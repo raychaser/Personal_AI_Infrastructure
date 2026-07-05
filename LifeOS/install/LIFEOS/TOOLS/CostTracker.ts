@@ -31,9 +31,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "";
-const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS");
 const OBS_DIR = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY");
 const LEDGER_PATH = join(OBS_DIR, "anthropic-cost.jsonl");
 const CALL_SITES_PATH = join(OBS_DIR, "anthropic-call-sites.json");
@@ -129,11 +130,11 @@ async function fetchApiSpend(): Promise<{ month_used_usd: number | null; source:
 
 // Paths we scan (source-of-truth for LifeOS-local billing risk)
 const SCAN_ROOTS = [
-  join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE"),
-  join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "TOOLS"),
-  join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "USER"),
-  join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "skills"),
-  join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "hooks"),
+  join(getConfigRoot(), "LIFEOS", "PULSE"),
+  join(getConfigRoot(), "LIFEOS", "TOOLS"),
+  join(getConfigRoot(), "LIFEOS", "USER"),
+  join(getConfigRoot(), "skills"),
+  join(getConfigRoot(), "hooks"),
 ];
 
 // Paths to exclude from scan

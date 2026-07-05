@@ -13,9 +13,10 @@
  */
 
 import { join } from "path"
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "~"
-const LifeOS = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
+const LifeOS = join(getConfigRoot(), "LIFEOS")
 const REGISTRY_PATH = join(LifeOS, "USER", "DA", "_registry.yaml")
 
 // ── Types ──

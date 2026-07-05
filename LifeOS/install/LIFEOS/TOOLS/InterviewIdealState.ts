@@ -17,9 +17,10 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const TELOS_DIR = join(LIFEOS_DIR, "USER", "TELOS");
 const IDEAL_DIR = join(TELOS_DIR, "IDEAL_STATE");
 const STATE_FILE = join(LIFEOS_DIR, "USER", "TELOS", "CURRENT_STATE", "interview-state.json");

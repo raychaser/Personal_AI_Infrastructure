@@ -78,14 +78,16 @@ export function getLifeosDir(): string {
 }
 
 /**
- * Get the Claude Code home directory.
+ * THE single config-root accessor. Every hook, tool, and daemon should call this
+ * instead of inlining `process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude')`
+ * — that pattern (previously duplicated at ~110 sites) let a non-canonical env
+ * value resolve to a different root in different places, a silent fail-open class.
  *
- * Plugin install: CLAUDE_PLUGIN_ROOT is the flattened plugin root that plays the
- * live ~/.claude role (skills/ and hooks/ sit directly under it, matching live
- * .claude/skills and .claude/hooks). Live default: ~/.claude — byte-identical to
- * pre-plugin behavior, since CLAUDE_PLUGIN_ROOT is unset on a normal install.
+ * Precedence: CLAUDE_PLUGIN_ROOT (flattened plugin root) > CLAUDE_CONFIG_DIR
+ * (normalized) > ~/.claude. Byte-identical to pre-CLAUDE_CONFIG_DIR behavior when
+ * neither env var is set.
  */
-export function getClaudeDir(): string {
+export function getConfigRoot(): string {
   const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 
   if (pluginRoot) {
@@ -97,6 +99,14 @@ export function getClaudeDir(): string {
     return normalizeConfigRoot(configDir);
   }
   return join(homedir(), '.claude');
+}
+
+/**
+ * Back-compat alias for {@link getConfigRoot}. The config root IS the Claude
+ * home directory; existing callers use this name.
+ */
+export function getClaudeDir(): string {
+  return getConfigRoot();
 }
 
 /**

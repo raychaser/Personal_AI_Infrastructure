@@ -12,6 +12,7 @@ import type { InstallState, EngineEventHandler, DetectionResult, ExistingUserCon
 import { LIFEOS_VERSION, ALGORITHM_VERSION, DEFAULT_VOICES } from "./types";
 import { detectSystem, detectExistingUserContent, scanApiKeys, validateElevenLabsKey } from "./detect";
 import { generateSettingsJson } from "./config-gen";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 type ChoiceOption = {
   label: string;
@@ -311,7 +312,7 @@ export async function migrateBackupContent(
 ): Promise<void> {
   if (!state.backupPath || state.collected.scanConsent !== "yes-full") return;
 
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
   const vars = buildTemplateVars(state);
   const optedOut = new Set<string>();
   const substituteCopiedFile = (filePath: string): void => {
@@ -509,7 +510,7 @@ function readKeyFromFile(envPath: string, keyName: string): string {
 function findExistingEnvKey(keyName: string): string {
   const home = homedir();
   const primary = [
-    join(process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"), ".env"),
+    join(getConfigRoot(), ".env"),
     join(home, ".claude", ".env"),
     join(home, ".config", "LifeOS", ".env"),
   ];
@@ -1014,7 +1015,7 @@ export async function migrateUserContentFromBackup(
     return;
   }
 
-  const targetUserDir = join(state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude")), "LifeOS", "USER");
+  const targetUserDir = join(state.detection?.paiDir || (getConfigRoot()), "LifeOS", "USER");
   if (!existsSync(targetUserDir)) mkdirSync(targetUserDir, { recursive: true });
 
   const entries =
@@ -1069,7 +1070,7 @@ export async function moveExistingClaudeToBackup(
 ): Promise<void> {
   if (!state.backupPath) return;
 
-  const claudeDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const claudeDir = state.detection?.paiDir || (getConfigRoot());
   if (!existsSync(claudeDir) || !pathLooksLikeExistingClaudeRoot(claudeDir)) return;
 
   try {
@@ -1620,7 +1621,7 @@ export async function runRepository(
     "Laying down a fresh ~/.claude tree and restoring any consented content",
     5
   );
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
 
   await moveExistingClaudeToBackup(state, emit);
 
@@ -1749,7 +1750,7 @@ export async function runConfiguration(
     "Writing settings, env files, aliases, and identity templates",
     6
   );
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
   const configDir = state.detection?.configDir || join(homedir(), ".config", "LifeOS");
 
   // Generate settings.json
@@ -2292,7 +2293,7 @@ export async function runVoiceSetup(
     await emit({ event: "message", content: "No ElevenLabs key — voice will fall back to macOS text-to-speech. You can add a key later in ~/.claude/.env" });
   }
 
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
 
   // ── Write ELEVENLABS_API_KEY to ~/.claude/.env BEFORE Pulse starts ──
   // Pulse loads .env at boot. If we install Pulse before writing the key,
@@ -2712,7 +2713,7 @@ export async function runTelegramSetup(
     return;
   }
 
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
 
   // ── Step 1: Check primary .env locations (no permission needed) ──
   let token = findExistingEnvKey("TELEGRAM_BOT_TOKEN");

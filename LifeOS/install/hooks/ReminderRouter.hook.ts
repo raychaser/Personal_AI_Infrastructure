@@ -22,9 +22,10 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { createHash } from "crypto";
 import { join, dirname } from "path";
 import { loadWorkConfig } from "./lib/work-config";
+import { getConfigRoot } from "./lib/paths";
 
 const HOME = process.env.HOME || "";
-const STATE_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "MEMORY", "STATE", "reminder-router-seen.json");
+const STATE_PATH = join(getConfigRoot(), "LIFEOS", "MEMORY", "STATE", "reminder-router-seen.json");
 
 interface HookInput {
   session_id?: string;

@@ -12,6 +12,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // ============================================================================
 // Types
@@ -53,7 +54,7 @@ const DEFAULTS = {
  * Load configuration from environment
  */
 function loadConfig(): Config {
-  const envPath = process.env.LIFEOS_CONFIG_DIR ? join(process.env.LIFEOS_CONFIG_DIR, '.env') : join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), '.env');
+  const envPath = process.env.LIFEOS_CONFIG_DIR ? join(process.env.LIFEOS_CONFIG_DIR, '.env') : join(getConfigRoot(), '.env');
 
   try {
     const envContent = readFileSync(envPath, 'utf-8');

@@ -12,9 +12,10 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { parse as parseYaml } from "yaml";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+const CLAUDE_DIR = (getConfigRoot());
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Terminal Width Detection

@@ -35,9 +35,10 @@
 
 import { readdirSync, existsSync, statSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+const CLAUDE_DIR = (getConfigRoot());
 // skills/, hooks/, settings.json live under CLAUDE_DIR.
 // MEMORY/, USER/ live under LIFEOS_DIR (which is CLAUDE_DIR/PAI).
 const LIFEOS_DIR = process.env.LIFEOS_DIR || join(CLAUDE_DIR, "LIFEOS");
@@ -129,7 +130,7 @@ function countSkills(): number {
  * count — only what Claude Code will actually fire.
  */
 function countHooks(): number {
-  const settingsPath = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "settings.json");
+  const settingsPath = join(getConfigRoot(), "settings.json");
   try {
     const fs = require('fs');
     const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));

@@ -9,6 +9,7 @@ import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import { join, resolve } from "path";
 import type { DetectionResult, ExistingUserContentDetection } from "./types";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 function tryExec(cmd: string): string | null {
   try {
@@ -344,7 +345,7 @@ function detectVoice(): DetectionResult["voice"] {
  */
 export function detectSystem(): DetectionResult {
   const home = homedir();
-  const paiDir = process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  const paiDir = getConfigRoot();
   const configDir = process.env.LIFEOS_CONFIG_DIR || join(home, ".config", "LifeOS");
 
   return {

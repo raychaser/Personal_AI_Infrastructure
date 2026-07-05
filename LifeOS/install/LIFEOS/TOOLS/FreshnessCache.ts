@@ -15,9 +15,10 @@
 import { writeFileSync, renameSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { readContextFreshness } from "./TelosFreshness";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const CACHE_DIR = join(LIFEOS_DIR, "USER", "CACHE");
 const CACHE_PATH = join(CACHE_DIR, "freshness.json");
 

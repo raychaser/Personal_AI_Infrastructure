@@ -20,9 +20,10 @@
 import { appendFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { randomUUID } from "crypto";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const QUEUE_FILE = join(LIFEOS_DIR, "USER", "TELOS", "CURRENT_STATE", "proposals.jsonl");
 
 const ALLOWED_SOURCES = ["lifelog", "calendar", "gmail", "homebridge", "manual", "amazon", "bills"];

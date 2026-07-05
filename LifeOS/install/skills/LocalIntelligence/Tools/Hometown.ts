@@ -19,6 +19,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { homedir } from "node:os"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 export interface Hometown {
   city: string
@@ -42,7 +43,7 @@ export class NoHometownError extends Error {
   }
 }
 
-const IDENTITY_DEFAULT = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"),
+const IDENTITY_DEFAULT = join(getConfigRoot(),
   "LIFEOS",
   "USER",
   "PRINCIPAL",

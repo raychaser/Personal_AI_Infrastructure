@@ -17,8 +17,9 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 import { parseArgs } from "util";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
-const STATE_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"), "LIFEOS", "MEMORY", "STATE");
+const STATE_DIR = join(getConfigRoot(), "LIFEOS", "MEMORY", "STATE");
 const STATE_FILE = join(STATE_DIR, "algorithm-phase.json");
 
 interface AlgorithmState {

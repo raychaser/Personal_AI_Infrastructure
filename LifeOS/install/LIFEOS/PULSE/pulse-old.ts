@@ -8,13 +8,13 @@
  */
 
 import { join } from "path"
-import { normalizeConfigRoot } from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { readFileSync, existsSync } from "fs"
 
 // ── Load .env before anything else ──
 
-const envPathCandidates = [join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"), ".env"), join(process.env.HOME ?? "~", ".claude", ".env")]
+const envPathCandidates = [join(getConfigRoot(), ".env"), join(process.env.HOME ?? "~", ".claude", ".env")]
 const envPath = envPathCandidates.find((p) => existsSync(p)) ?? envPathCandidates[0]
 if (envPath !== envPathCandidates[0]) console.error(`[env] .env not found at ${envPathCandidates[0]} — using legacy ${envPath}`)
 try {
@@ -50,7 +50,7 @@ import {
 
 // ── Constants ──
 
-const PULSE_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"), "LIFEOS", "PULSE")
+const PULSE_DIR = join(getConfigRoot(), "LIFEOS", "PULSE")
 const STATE_PATH = join(PULSE_DIR, "state", "state.json")
 const PID_PATH = join(PULSE_DIR, "state", "pulse.pid")
 const HOOK_PORT = parseInt(process.env.HOOK_SERVER_PORT || "8686", 10)

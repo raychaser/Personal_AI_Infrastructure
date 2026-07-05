@@ -26,9 +26,10 @@
 
 import { existsSync, readFileSync, readdirSync, writeFileSync, unlinkSync, mkdirSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const FRAMES_DIR = join(LIFEOS_DIR, "MEMORY", "WISDOM", "FRAMES");
 const HYPOTHESES_DIR = join(FRAMES_DIR, "_hypotheses");
 const ARCHIVE_DIR = join(HYPOTHESES_DIR, "_archive");

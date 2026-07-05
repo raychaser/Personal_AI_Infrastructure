@@ -8,6 +8,7 @@
  *   bun ~/.claude/LIFEOS/TOOLS/MigrateContextFreshness.ts --dry-run
  */
 
+import { getConfigRoot } from "../../hooks/lib/paths";
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { basename, dirname, join, relative } from "path";
@@ -19,7 +20,7 @@ import {
 } from "./TelosFreshness";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const CLAUDE_DIR = dirname(LIFEOS_DIR);
 const SEED_ISO = "2026-05-03T23:00:00-07:00";
 const BACKUP_TS = "2026-05-03-23-00-00";

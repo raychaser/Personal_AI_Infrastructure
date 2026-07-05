@@ -21,14 +21,14 @@
 import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
-import { normalizeConfigRoot } from "../../hooks/lib/paths";
+import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const MEMORY_DIR = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY_DIR, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY_DIR, "WORK");

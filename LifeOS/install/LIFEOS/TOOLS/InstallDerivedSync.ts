@@ -9,6 +9,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync, realpathSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 type SpawnProcess = {
   stdout: ReadableStream<Uint8Array> | null;
@@ -34,7 +35,7 @@ type LaunchctlResult = {
 };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "TOOLS", "com.lifeos.derivedsync.plist.template");
+const TEMPLATE_PATH = join(getConfigRoot(), "LIFEOS", "TOOLS", "com.lifeos.derivedsync.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.derivedsync.plist");
 const LABEL = "com.lifeos.derivedsync";
@@ -87,11 +88,11 @@ async function install(): Promise<void> {
   }
   const bunPath = await detectBun();
   const bunDir = bunPath.replace(/\/bun$/, "");
-  const userDir = realpathSync(join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "USER"));
+  const userDir = realpathSync(join(getConfigRoot(), "LIFEOS", "USER"));
   console.log(`[InstallDerivedSync] detected bun at ${bunPath}`);
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   const materialized = template
-    .replace(/\{\{HOME\}\}\/\.claude/g, process.env.CLAUDE_CONFIG_DIR || `${HOME}/.claude`)
+    .replace(/\{\{HOME\}\}\/\.claude/g, getConfigRoot())
     .replace(/\{\{HOME\}\}/g, HOME)
     .replace(/\{\{BUN\}\}/g, bunPath)
     .replace(/\{\{BUN_DIR\}\}/g, bunDir)

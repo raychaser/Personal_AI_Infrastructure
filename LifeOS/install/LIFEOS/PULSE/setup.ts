@@ -11,12 +11,12 @@
  */
 
 import { join, resolve } from "path"
-import { normalizeConfigRoot } from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { existsSync, mkdirSync } from "fs"
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const PULSE_DIR = join(LIFEOS_DIR, "PULSE")
 
 // ── Helpers ──
@@ -237,7 +237,7 @@ enabled = true
     ``,
   ]
 
-  const envPath = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), ".env")
+  const envPath = join(getConfigRoot(), ".env")
   if (existsSync(envPath)) {
     warn(`.env already exists — appending worker config`)
     const existing = await Bun.file(envPath).text()
@@ -362,7 +362,7 @@ async function installService(): Promise<void> {
   // The source plist ships as a template (no hardcoded user paths) so the system
   // file is deny-list clean; the installed copy is per-user materialized.
   const template = await Bun.file(plistSrc).text()
-  const cfgRoot = process.env.CLAUDE_CONFIG_DIR || `${HOME}/.claude`
+  const cfgRoot = getConfigRoot()
   const materialized = template
     .replaceAll("__HOME__/.claude", cfgRoot)
     .replaceAll("__CONFIG_ROOT__", cfgRoot)
@@ -450,7 +450,7 @@ ${"═".repeat(50)}
   Time: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s
 
   Next steps:
-  - Verify ANTHROPIC_API_KEY is set in ${join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), ".env")}
+  - Verify ANTHROPIC_API_KEY is set in ${join(getConfigRoot(), ".env")}
   - Create a test issue with label "status:ready" in one of your repos
   - Watch: tail -f ${join(PULSE_DIR, "logs", "pulse-stdout.log")}
   - Status: ${join(PULSE_DIR, "manage.sh")} status

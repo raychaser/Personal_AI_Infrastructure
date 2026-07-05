@@ -13,6 +13,7 @@
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 interface AgentContext {
   agentType: string;
@@ -25,7 +26,7 @@ export class AgentContextLoader {
   private agentsDir: string;
 
   constructor() {
-    this.claudeHome = (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+    this.claudeHome = (getConfigRoot());
     this.agentsDir = join(this.claudeHome, "Skills", "Agents");
   }
 

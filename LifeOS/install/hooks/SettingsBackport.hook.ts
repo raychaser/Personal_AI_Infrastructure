@@ -14,9 +14,9 @@ import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { homedir } from 'os';
 import { join } from 'path';
-import { paiPath } from './lib/paths';
+import { getConfigRoot, paiPath ,} from './lib/paths';
 
-const SETTINGS_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'settings.json');
+const SETTINGS_PATH = join(getConfigRoot(), 'settings.json');
 const BACKPORT = paiPath('TOOLS', 'SettingsBackport.ts');
 
 let input: any;

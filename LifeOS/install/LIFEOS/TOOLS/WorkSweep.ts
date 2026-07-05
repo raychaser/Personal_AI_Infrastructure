@@ -27,11 +27,12 @@
 import { existsSync, readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, appendFileSync } from "fs";
 import { join } from "path";
 import { loadWorkConfig } from "../../hooks/lib/work-config";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 declare const Bun: { spawn: (cmd: string[], opts?: any) => any };
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const WORK_DIR = join(LIFEOS_DIR, "MEMORY", "WORK");
 const OBS_DIR = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY");
 const OBS_LOG = join(OBS_DIR, "worksweep.jsonl");
@@ -599,7 +600,7 @@ async function main(): Promise<void> {
   // Final step: regenerate the TASKLIST.md and push (best-effort, never blocks)
   if (!dryRun) {
     const proc = Bun.spawn(
-      ["bun", join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "skills", "_ULWORK", "Tools", "RegenerateTasklist.ts"), "--commit-push"],
+      ["bun", join(getConfigRoot(), "skills", "_ULWORK", "Tools", "RegenerateTasklist.ts"), "--commit-push"],
       { stdout: "inherit", stderr: "inherit", timeout: 30000 },
     );
     await proc.exited;

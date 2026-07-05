@@ -18,6 +18,7 @@ import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 import { homedir } from 'os';
 import { parse as parseYaml } from 'yaml';
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 // Types
 interface CustomizationMetadata {
@@ -35,7 +36,7 @@ interface ExtendManifest {
 
 // Constants
 const HOME = homedir();
-const CUSTOMIZATION_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, '.claude'), 'LIFEOS', 'USER', 'SKILLCUSTOMIZATIONS');
+const CUSTOMIZATION_DIR = join(getConfigRoot(), 'LIFEOS', 'USER', 'SKILLCUSTOMIZATIONS');
 
 /**
  * Deep merge two objects recursively

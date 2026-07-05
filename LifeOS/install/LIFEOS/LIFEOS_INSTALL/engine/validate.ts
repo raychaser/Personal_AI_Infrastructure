@@ -9,6 +9,7 @@ import { spawnSync } from "child_process";
 import type { InstallState, ValidationCheck, InstallSummary, EngineEventHandler } from "./types";
 import { LIFEOS_VERSION } from "./types";
 import { homedir } from "os";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 /**
  * Check if Pulse is running. LifeOS 5.0 absorbed the standalone voice server
@@ -180,7 +181,7 @@ export async function runValidation(state: InstallState, emit?: EngineEventHandl
     });
   }
 
-  const paiDir = state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"));
+  const paiDir = state.detection?.paiDir || (getConfigRoot());
   const configDir = state.detection?.configDir || join(homedir(), ".config", "LifeOS");
   const checks: ValidationCheck[] = [];
 
