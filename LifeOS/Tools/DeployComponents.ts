@@ -148,7 +148,7 @@ function deployPulse(ctx: Ctx): ComponentResult {
   r.ready = true;
   if (!ctx.apply) {
     if (!av.inLive) r.actions.push(`copy PULSE from payload → ${pulseDir}`);
-    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home})`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
+    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home}, __BUN_PATH__ → resolved bun binary)`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
     return r;
   }
 
@@ -156,7 +156,17 @@ function deployPulse(ctx: Ctx): ComponentResult {
     ensurePresent("PULSE", ctx);
     const plistSrc = join(pulseDir, "com.lifeos.pulse.plist");
     if (!existsSync(plistSrc)) throw new Error(`plist template missing at ${plistSrc}`);
-    const bunPath = Bun.which("bun") ?? join(ctx.home, ".bun", "bin", "bun");
+    // Canonical install locations FIRST, PATH resolution last: during `bun install`,
+    // Bun.which can resolve to an ephemeral /private/tmp/bun-node-*/bun shim, and a
+    // persistent RunAtLoad plist must never bake that in (see manage.sh's identical
+    // ordering and rationale). process.execPath is the guaranteed-valid last resort —
+    // this tool itself runs under bun.
+    const bunCandidates = [
+      join(ctx.home, ".bun", "bin", "bun"),
+      "/opt/homebrew/bin/bun",
+      "/usr/local/bin/bun",
+    ];
+    const bunPath = bunCandidates.find((p) => existsSync(p)) ?? Bun.which("bun") ?? process.execPath;
     const materialized = readFileSync(plistSrc, "utf-8").replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", ctx.home);
     const u = uid();
     const sameOnDisk = existsSync(plistDst) && readFileSync(plistDst, "utf-8") === materialized;

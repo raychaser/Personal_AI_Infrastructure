@@ -360,7 +360,12 @@ async function installService(): Promise<void> {
   // The source plist ships as a template (no hardcoded user paths) so the system
   // file is deny-list clean; the installed copy is per-user materialized.
   const template = await Bun.file(plistSrc).text()
-  const materialized = template.replaceAll("__HOME__", HOME)
+  // Same canonical-first ordering as manage.sh / DeployComponents — never bake an
+  // ephemeral PATH-resolved shim into a persistent plist. process.execPath is the
+  // guaranteed-valid fallback (this script runs under bun).
+  const bunCandidates = [`${HOME}/.bun/bin/bun`, "/opt/homebrew/bin/bun", "/usr/local/bin/bun"]
+  const bunPath = bunCandidates.find((p) => existsSync(p)) ?? Bun.which("bun") ?? process.execPath
+  const materialized = template.replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", HOME)
   await Bun.write(plistDst, materialized)
   const proc = Bun.spawn(["launchctl", "load", plistDst], {
     stdout: "pipe",
