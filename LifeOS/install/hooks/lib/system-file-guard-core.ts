@@ -18,7 +18,7 @@ import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./conta
 const HOME = process.env.HOME ?? homedir();
 // Normalize the env-provided root: expand a leading ~ and strip trailing slashes.
 // Raw use would make containment prefix-checks miss (fail-open) on cosmetic variants.
-function normalizeRoot(p: string): string {
+export function normalizeRoot(p: string): string {
   let out = p.trim();
   if (out === "~" || out.startsWith("~/")) out = join(HOME, out.slice(1));
   while (out.length > 1 && out.endsWith("/")) out = out.slice(0, -1);

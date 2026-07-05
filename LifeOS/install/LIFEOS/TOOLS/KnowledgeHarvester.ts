@@ -41,8 +41,11 @@ if (!CURRENT_USER) {
   console.error("KnowledgeHarvester: USER env var is required to locate auto-memory dir");
   process.exit(1);
 }
-const AUTO_MEMORY_DIR = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "projects",
-  `-Users-${CURRENT_USER}--claude`, "memory");
+// Claude Code names each project dir by the workspace path with [/.] mapped to "-".
+// Derive the slug from the real config root so relocated installs resolve correctly.
+const CONFIG_ROOT = process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude");
+const PROJECT_SLUG = CONFIG_ROOT.replace(/[/.]/g, "-");
+const AUTO_MEMORY_DIR = path.join(CONFIG_ROOT, "projects", PROJECT_SLUG, "memory");
 
 const HARVEST_STATE_FILE = path.join(KNOWLEDGE_DIR, ".harvest-state.json");
 const REFLECTIONS_FILE = path.join(LEARNING_DIR, "REFLECTIONS", "algorithm-reflections.jsonl");

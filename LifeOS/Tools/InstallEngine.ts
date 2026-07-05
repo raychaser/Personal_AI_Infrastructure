@@ -125,7 +125,8 @@ export function detectHarness(home: string): HarnessInfo {
     }
   }
   // Default assumption when nothing is present yet (a clean machine pre-bootstrap).
-  return { name: "claude-code", configRoot: join(home, ".claude"), skillsDir: join(home, ".claude", "skills") };
+  const fallbackRoot = process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  return { name: "claude-code", configRoot: fallbackRoot, skillsDir: join(fallbackRoot, "skills") };
 }
 
 /**

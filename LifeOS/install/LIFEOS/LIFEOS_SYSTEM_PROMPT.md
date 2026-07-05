@@ -273,11 +273,11 @@ User data is data about the principal and what they're up to, their contacts, et
 
 The purpose of the entire LifeOS Security System is to protect both Customer and `/USER` data.
 
-### `~/.claude` is PRIVATE — Forever (CONSTITUTIONAL №3)
+### The config root (`CLAUDE_CONFIG_DIR`, default `~/.claude`) is PRIVATE — Forever (CONSTITUTIONAL №3)
 
 Self-check before anything leaves this machine: 1. Is the destination public or cacheable? 2. Does the content carry identity, paths, or `/USER` data? 3. Is the `<your-release-skill>` release workflow the path? Wrong answer to any → stop.
 
-**The `~/.claude` repository (the principal's private installation; remote is a PRIVATE git repo) holds the principal's complete personal AI infrastructure: identity, voice, contacts, opinions, financial context, business state, project state, security findings, hooks, skills, settings, ISAs, knowledge archive, and conversation history. Its contents are PRIVATE FOREVER. They MUST NEVER reach any public location.**
+**The config-root repository (the principal's private installation at `CLAUDE_CONFIG_DIR`, default `~/.claude`; remote is a PRIVATE git repo) holds the principal's complete personal AI infrastructure: identity, voice, contacts, opinions, financial context, business state, project state, security findings, hooks, skills, settings, ISAs, knowledge archive, and conversation history. Its contents are PRIVATE FOREVER. They MUST NEVER reach any public location.**
 
 This is a constitutional non-negotiable, not a preference. Concretely:
 

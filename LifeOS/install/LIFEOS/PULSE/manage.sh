@@ -44,12 +44,14 @@ case "$1" in
       if [ ! -f "$PLIST_SRC" ]; then
         echo "ERROR: plist template not found at $PLIST_SRC" >&2; exit 1
       fi
-      if [ ! -f "$PLIST_DST" ]; then
+      if [ ! -f "$PLIST_DST" ] || [ "$PLIST_SRC" -nt "$PLIST_DST" ]; then
         # Substitute __HOME__ + __BUN_PATH__ placeholders (public template);
         # no-op on plists that already have literal paths.
         sed -e "s|__CONFIG_ROOT__|$CLAUDE_HOME|g" -e "s|__HOME__/.claude|$CLAUDE_HOME|g" -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$PLIST_SRC" > "$PLIST_DST"
       fi
-      if launchctl load "$PLIST_DST"; then
+      if launchctl list "$PLIST_NAME" >/dev/null 2>&1; then
+        echo "LifeOS Pulse already running"
+      elif launchctl load "$PLIST_DST"; then
         echo "LifeOS Pulse started"
       else
         echo "ERROR: launchctl load failed for $PLIST_DST" >&2; exit 1

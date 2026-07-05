@@ -291,7 +291,7 @@ if [ "$context_pct" = "0" ] && [ "$total_input" -eq 0 ] 2>/dev/null; then
         done < <(jq -r '.loadAtStartup.files[]? // empty' "$SETTINGS_FILE" 2>/dev/null)
 
         # Project memory files (CC native memory at ~/.claude/projects/*/memory/)
-        for _f in "$HOME"/.claude/projects/*/memory/MEMORY.md; do
+        for _f in "$CLAUDE_HOME"/projects/*/memory/MEMORY.md; do
             [ -f "$_f" ] && _est=$((_est + $(wc -c < "$_f") * 10 / 35))
         done
 
@@ -747,7 +747,7 @@ USAGEEOF
             if [ "$(uname -s)" = "Darwin" ]; then
                 cred_json=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
             else
-                cred_json=$(cat "${HOME}/.claude/.credentials.json" 2>/dev/null)
+                cred_json=$(cat "${CLAUDE_HOME}/.credentials.json" 2>/dev/null)
             fi
             token=$(echo "$cred_json" | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
 

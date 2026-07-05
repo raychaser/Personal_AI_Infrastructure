@@ -502,7 +502,8 @@ function readKeyFromFile(envPath: string, keyName: string): string {
 
 /**
  * Check primary key locations only — current process env, ~/.claude/.env,
- * ~/.config/LIFEOS/.env. These are the user's own active install; no permission
+ * the active config root's .env (CLAUDE_CONFIG_DIR, falling back to ~/.claude/.env),
+ * then ~/.config/LifeOS/.env. These are the user's own active install; no permission
  * prompt needed.
  */
 function findExistingEnvKey(keyName: string): string {

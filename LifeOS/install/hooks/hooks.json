@@ -125,7 +125,7 @@
           },
           {
             "type": "command",
-            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts --posttool",
+            "command": "bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts\" --posttool",
             "timeout": 5
           }
         ]
@@ -161,7 +161,7 @@
           },
           {
             "type": "command",
-            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts --posttool",
+            "command": "bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts\" --posttool",
             "timeout": 5
           }
         ]
@@ -329,7 +329,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts",
+            "command": "bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts\"",
             "timeout": 10
           },
           {
@@ -342,13 +342,13 @@
           },
           {
             "type": "command",
-            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/FreshnessCache.ts --quiet",
+            "command": "bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/FreshnessCache.ts\" --quiet",
             "timeout": 5,
             "async": true
           },
           {
             "type": "command",
-            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/SettingsBackport.ts; bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/MergeSettings.ts --system ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.system.json --user ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/USER/CONFIG/settings.user.json --output ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json",
+            "command": "bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/SettingsBackport.ts;\" bun \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/MergeSettings.ts\" --system ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.system.json --user ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/USER/CONFIG/settings.user.json --output ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json",
             "timeout": 15,
             "async": true
           }
