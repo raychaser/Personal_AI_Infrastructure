@@ -629,4 +629,52 @@ export function activateImports(claudeMdPath: string, configRoot: string): { act
   return { activated, skipped };
 }
 
+/** Which tier of the bun-resolution ordering actually won. */
+export type BunSource = "canonical" | "path" | "execPath";
+
+/**
+ * Resolve a PERSISTENT bun binary for a RunAtLoad launchd / systemd unit —
+ * the single source of truth for the two DeployComponents materializers
+ * (setup.ts and manage.sh mirror this ordering in their own deployment trees,
+ * which ship without this Tools/ sibling and so cannot import it).
+ *
+ * Ordering is load-bearing: try canonical install locations FIRST and only fall
+ * back to PATH resolution (`Bun.which`) LAST. Inside a `bun install` the child
+ * shell's PATH can resolve `bun` to an ephemeral shim under a temporary
+ * `/private/tmp/bun-node-<tmp>` dir; baking that into a persistent plist yields a
+ * service that dies at next
+ * login. `process.execPath` is the guaranteed-valid final fallback (callers run
+ * under bun). Pure + fully injectable so the ordering invariant is unit-testable
+ * without a real filesystem — see install/tests/resolveBunPath.test.ts.
+ *
+ * Returns the `source` tier alongside the path (unified contract with setup.ts's
+ * resolveBunForPlist) so callers can warn LOUDLY when resolution falls past the
+ * canonical tier — surfacing a likely-non-persistent bun at install time instead
+ * of as a dead launchd service at next login. Invisible resolution is the
+ * hard-to-debug-6-months-later failure.
+ */
+export function resolveBunPath(
+  opts: {
+    home?: string;
+    exists?: (p: string) => boolean;
+    which?: (cmd: string) => string | null;
+    execPath?: string;
+  } = {},
+): { bunPath: string; source: BunSource } {
+  const home = opts.home ?? process.env.HOME ?? homedir();
+  const exists = opts.exists ?? existsSync;
+  const which = opts.which ?? ((cmd: string) => Bun.which(cmd));
+  const execPath = opts.execPath ?? process.execPath;
+  const candidates = [
+    join(home, ".bun", "bin", "bun"),
+    "/opt/homebrew/bin/bun",
+    "/usr/local/bin/bun",
+  ];
+  const canonical = candidates.find((p) => exists(p));
+  if (canonical) return { bunPath: canonical, source: "canonical" };
+  const viaPath = which("bun");
+  if (viaPath) return { bunPath: viaPath, source: "path" };
+  return { bunPath: execPath, source: "execPath" };
+}
+
 export { resolve };

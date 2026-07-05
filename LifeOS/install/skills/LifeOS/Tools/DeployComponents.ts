@@ -35,7 +35,7 @@
 import { execFileSync } from "node:child_process";
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { copyMissing, detectDevTree } from "./InstallEngine";
+import { type BunSource, copyMissing, detectDevTree, resolveBunPath } from "./InstallEngine";
 
 // Enhancement components are the à-la-carte half of setup. The "LifeOS Core"
 // (skills + system prompt + base settings + CLAUDE.md) is installed by Setup's
@@ -58,6 +58,9 @@ interface ComponentResult {
   ready: boolean; // can be deployed (present in live tree OR payload)
   actions: string[]; // what apply will / did do
   blockers: string[]; // why it can't run — a non-empty list FAILS the run
+  // Non-fatal but LOUD: surfaced in the JSON output without failing the run (e.g.
+  // a bun resolved past the canonical tier that may not survive next login).
+  warnings?: string[];
   applied?: boolean;
   probe?: { name: string; passed: boolean; detail: string };
   error?: string;
@@ -134,6 +137,61 @@ function httpCode(url: string): string {
 
 // ── component deployers ──────────────────────────────────────────────
 
+/**
+ * Materialize the Pulse plist: resolve a persistent bun binary, then substitute
+ * BOTH template tokens (__BUN_PATH__, __HOME__). Extracted as a pure, exported,
+ * injectable helper so the exact substitution the installer SHIPS is unit-tested
+ * against the real plist template (see install/tests/plist-substitution.test.ts) —
+ * a regression that drops a replaceAll, drops the resolveBunPath call, or reorders
+ * the subs now fails the suite instead of shipping a plist launchd cannot exec.
+ * Returns the resolved bun `source` tier so deployPulse can warn LOUDLY when it
+ * falls past the canonical install locations (a non-canonical/ephemeral bun yields
+ * a launchd service that dies at next login). `resolveOpts` is forwarded to
+ * resolveBunPath for deterministic, FS-free testing.
+ */
+export function materializePulsePlist(
+  template: string,
+  home: string,
+  resolveOpts: Parameters<typeof resolveBunPath>[0] = {},
+): { materialized: string; bunPath: string; source: BunSource } {
+  const { bunPath, source } = resolveBunPath({ home, ...resolveOpts });
+  const materialized = template.replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", home);
+  return { materialized, bunPath, source };
+}
+
+/**
+ * Build the loud, NON-FATAL warning for a bun binary resolved PAST the canonical
+ * install tier (returns null for a canonical resolution). A PATH shim (e.g.
+ * /private/tmp/bun-node-*) or the process.execPath fallback is likely ephemeral;
+ * baking it into the RunAtLoad plist yields a launchd service that dies at next
+ * login, and the install-time healthz probe cannot catch it (the shim is still
+ * valid this session). Extracted as a pure, exported helper so the surfacing
+ * contract — deployPulse pushes this into ComponentResult.warnings for a
+ * non-canonical source — is unit-testable (see install/tests/deploy-warnings.test.ts).
+ */
+export function bunResolutionWarning(source: BunSource, bunPath: string): string | null {
+  if (source === "canonical") return null;
+  return (
+    `bun resolved via ${source === "path" ? "PATH (Bun.which)" : "process.execPath"}, not a canonical install location (${bunPath}). ` +
+    `If that path is ephemeral (e.g. a /private/tmp bun-install shim) the Pulse launchd service will die at next login — ` +
+    `the install-time healthz probe cannot catch this (the shim is still valid now). ` +
+    `Install bun to ~/.bun/bin, /opt/homebrew/bin, or /usr/local/bin for a durable service.`
+  );
+}
+
+/**
+ * Whether a single component result counts as a pass: no blockers, no error, and
+ * either no probe or a passing probe. `warnings` is DELIBERATELY excluded — a
+ * non-canonical-bun warning is a loud but NON-FATAL signal, so a populated
+ * `warnings` must never flip a run to failure. Exported + pure so both halves of
+ * that contract are pinned by a test: a refactor that folds `r.warnings?.length`
+ * into the fail predicate (turning every non-canonical-bun install into exit 1),
+ * or one that stops populating warnings, now fails the suite.
+ */
+export function componentResultOk(r: ComponentResult): boolean {
+  return r.blockers.length === 0 && !r.error && (!r.probe || r.probe.passed);
+}
+
 /** Pulse: ensure the PULSE tree is laid down, then install + load its plist. */
 function deployPulse(ctx: Ctx): ComponentResult {
   const r: ComponentResult = { component: "pulse", ready: false, actions: [], blockers: [] };
@@ -148,7 +206,7 @@ function deployPulse(ctx: Ctx): ComponentResult {
   r.ready = true;
   if (!ctx.apply) {
     if (!av.inLive) r.actions.push(`copy PULSE from payload → ${pulseDir}`);
-    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home})`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
+    r.actions.push(`materialize ${plistDst} (__HOME__ → ${ctx.home}, __BUN_PATH__ → resolved bun binary)`, "launchctl bootstrap gui/<uid> (skip if already loaded + unchanged)", "poll 127.0.0.1:31337/healthz until 200");
     return r;
   }
 
@@ -156,7 +214,20 @@ function deployPulse(ctx: Ctx): ComponentResult {
     ensurePresent("PULSE", ctx);
     const plistSrc = join(pulseDir, "com.lifeos.pulse.plist");
     if (!existsSync(plistSrc)) throw new Error(`plist template missing at ${plistSrc}`);
-    const materialized = readFileSync(plistSrc, "utf-8").replaceAll("__HOME__", ctx.home);
+    // Persistent bun binary for the RunAtLoad plist — canonical install locations
+    // first, never an ephemeral `bun install` shim. Single source of truth + the
+    // unit-tested ordering invariant live in resolveBunPath (manage.sh mirrors it
+    // in shell; setup.ts mirrors it inline, both deployment-isolated from Tools/).
+    // materializePulsePlist is the real substitution, exercised by the plist test.
+    const { materialized, bunPath, source } = materializePulsePlist(readFileSync(plistSrc, "utf-8"), ctx.home);
+    r.actions.push(`plist bun → ${bunPath}`);
+    // Non-canonical resolution → warn LOUDLY at install time. A PATH shim (e.g.
+    // /private/tmp/bun-node-*) or the process.execPath fallback is likely
+    // ephemeral; baking it into the RunAtLoad plist yields a launchd service that
+    // dies at next login. The healthz poll below can't catch this — the shim is
+    // still valid this session. Mirrors setup.ts installService()'s warn().
+    const bunWarning = bunResolutionWarning(source, bunPath);
+    if (bunWarning) (r.warnings ??= []).push(bunWarning);
     const u = uid();
     const sameOnDisk = existsSync(plistDst) && readFileSync(plistDst, "utf-8") === materialized;
     const alreadyLoaded = launchctl(["print", `gui/${u}/com.lifeos.pulse`]).ok;
@@ -424,7 +495,9 @@ function main(): void {
   const results = selected.map((c) => deploy(c, ctx));
   // A blocked component (prereq absent, nothing written) is a FAILURE, not a
   // silent success — `ok` factors in blockers, error, AND probe in both modes.
-  const ok = results.every((r) => r.blockers.length === 0 && !r.error && (!r.probe || r.probe.passed));
+  // warnings are NON-FATAL by contract (componentResultOk omits them), so a
+  // non-canonical-bun warning never flips the run to exit 1.
+  const ok = results.every(componentResultOk);
 
   console.log(JSON.stringify({
     ok,
@@ -439,4 +512,6 @@ function main(): void {
   process.exit(ok ? 0 : 1);
 }
 
-main();
+// Guard the entry point so importing this module (e.g. from plist-substitution.test.ts,
+// which exercises the real materializePulsePlist) does not run the CLI and process.exit.
+if (import.meta.main) main();
