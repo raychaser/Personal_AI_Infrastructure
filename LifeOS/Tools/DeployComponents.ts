@@ -156,7 +156,7 @@ function deployPulse(ctx: Ctx): ComponentResult {
     ensurePresent("PULSE", ctx);
     const plistSrc = join(pulseDir, "com.lifeos.pulse.plist");
     if (!existsSync(plistSrc)) throw new Error(`plist template missing at ${plistSrc}`);
-    const cfgRoot = process.env.CLAUDE_CONFIG_DIR || join(ctx.home, ".claude");
+    const cfgRoot = ctx.configRoot;
     const materialized = readFileSync(plistSrc, "utf-8")
       .replaceAll("__HOME__/.claude", cfgRoot)
       .replaceAll("__CONFIG_ROOT__", cfgRoot)

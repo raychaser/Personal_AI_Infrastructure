@@ -541,9 +541,9 @@ type HooksMap = Record<string, MatcherGroup[]>;
  * a single canonical token and squeeze whitespace, so the same hook expressed as
  * `${LIFEOS_DIR}/x`, `$CLAUDE_PROJECT_DIR/x`, or `~/.claude/x` dedupes to one.
  */
-function normalizeCommand(cmd: string): string {
+export function normalizeCommand(cmd: string): string {
   return cmd
-    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|\$\{CLAUDE_CONFIG_DIR(?::-[^}]*)?\}|\$CLAUDE_CONFIG_DIR|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
+    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|\$\{CLAUDE_CONFIG_DIR(?::-(?:[^{}]|\$\{[^}]*\})*)?\}|\$CLAUDE_CONFIG_DIR|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
     .replace(/\s+/g, " ")
     .trim();
 }

@@ -508,6 +508,7 @@ function readKeyFromFile(envPath: string, keyName: string): string {
 function findExistingEnvKey(keyName: string): string {
   const home = homedir();
   const primary = [
+    join(process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"), ".env"),
     join(home, ".claude", ".env"),
     join(home, ".config", "LifeOS", ".env"),
   ];
@@ -1012,7 +1013,7 @@ export async function migrateUserContentFromBackup(
     return;
   }
 
-  const targetUserDir = join(state.detection?.paiDir || join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude")), "LifeOS", "USER");
+  const targetUserDir = join(state.detection?.paiDir || (process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude")), "LifeOS", "USER");
   if (!existsSync(targetUserDir)) mkdirSync(targetUserDir, { recursive: true });
 
   const entries =

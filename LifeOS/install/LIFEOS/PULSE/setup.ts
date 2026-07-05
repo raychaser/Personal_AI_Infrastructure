@@ -360,8 +360,10 @@ async function installService(): Promise<void> {
   // The source plist ships as a template (no hardcoded user paths) so the system
   // file is deny-list clean; the installed copy is per-user materialized.
   const template = await Bun.file(plistSrc).text()
+  const cfgRoot = process.env.CLAUDE_CONFIG_DIR || `${HOME}/.claude`
   const materialized = template
-    .replaceAll("__CONFIG_ROOT__", process.env.CLAUDE_CONFIG_DIR || `${HOME}/.claude`)
+    .replaceAll("__HOME__/.claude", cfgRoot)
+    .replaceAll("__CONFIG_ROOT__", cfgRoot)
     .replaceAll("__HOME__", HOME)
   await Bun.write(plistDst, materialized)
   const proc = Bun.spawn(["launchctl", "load", plistDst], {
