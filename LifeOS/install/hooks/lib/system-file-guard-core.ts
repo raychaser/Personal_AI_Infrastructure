@@ -16,31 +16,19 @@ import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
 
 const HOME = process.env.HOME ?? homedir();
-// Normalize the env-provided root: expand a leading ~ and strip trailing slashes.
-// Raw use would make containment prefix-checks miss (fail-open) on cosmetic variants.
-export function normalizeRoot(p: string): string {
-  let out = p.trim();
-  if (out === "~" || out.startsWith("~/")) out = join(HOME, out.slice(1));
-  // resolve() collapses ".." segments and doubled separators and absolutizes
-  // relative roots — a non-canonical root must never fail the guard open.
-  out = resolve(out);
-  while (out.length > 1 && out.endsWith("/")) out = out.slice(0, -1);
-  return out;
-}
-function resolveClaudeRoot(): string {
-  const fallback = join(HOME, ".claude");
-  const env = process.env.CLAUDE_CONFIG_DIR;
-  if (!env) return fallback;
-  const candidate = normalizeRoot(env);
-  // A guard must never fail open because of a typo'd/stale env value: if the
-  // env-derived root does not exist, fall back to ~/.claude and say so.
-  if (!existsSync(candidate)) {
-    console.error(`[SystemFileGuard] CLAUDE_CONFIG_DIR points at nonexistent ${candidate} — guarding ${fallback} instead`);
-    return fallback;
-  }
-  return candidate;
-}
-const CLAUDE_ROOT = resolveClaudeRoot();
+import { normalizeConfigRoot } from "./paths";
+
+// Single canonical normalizer shared with paths.ts — the guard and the tools
+// must derive a byte-identical root or containment prefix-checks fail open.
+export const normalizeRoot = normalizeConfigRoot;
+
+// Fail CLOSED: guard the normalized env root even when the directory does not
+// exist yet (fresh install into a custom root) — a nonexistent tree has nothing
+// to misclassify, whereas re-pointing the guard at ~/.claude while every tool
+// writes to the env root would silently un-protect the active tree.
+const CLAUDE_ROOT = process.env.CLAUDE_CONFIG_DIR
+  ? normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
+  : join(HOME, ".claude");
 const DEFAULT_DENY_LIST_PATH = join(CLAUDE_ROOT, "skills/_LIFEOS/DENY_LIST.txt");
 
 export type GuardClassification = "system" | "user" | "out-of-tree";

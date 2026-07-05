@@ -10,7 +10,31 @@
  */
 
 import { homedir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
+
+/**
+ * THE canonical config-root normalizer: trim, expand ~/$HOME/${HOME}, resolve()
+ * (collapses '..' and doubled separators, absolutizes), strip trailing slashes.
+ * Guard, tools, and daemons must all derive a byte-identical root — divergent
+ * normalizers were a recurring fail-open class (see system-file-guard-core).
+ */
+export function normalizeConfigRoot(p: string): string {
+  let out = p.trim()
+    .replace(/^~(?=\/|$)/, homedir())
+    .replace(/^\$\{HOME\}(?=\/|$)/, homedir())
+    .replace(/^\$HOME(?=\/|$)/, homedir());
+  out = resolve(out);
+  while (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
+  return out;
+}
+
+// Normalize the env var ONCE at module load: every downstream consumer —
+// including the ~100 raw `process.env.CLAUDE_CONFIG_DIR ||` call sites that
+// never import this module's helpers — then sees the canonical form for the
+// lifetime of any process that loads this library.
+if (process.env.CLAUDE_CONFIG_DIR) {
+  process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR);
+}
 
 /**
  * Expand shell variables in a path string
@@ -72,11 +96,7 @@ export function getClaudeDir(): string {
 
   const configDir = process.env.CLAUDE_CONFIG_DIR;
   if (configDir) {
-    // Normalized like system-file-guard-core.normalizeRoot: expand ~/$HOME forms,
-    // strip trailing slashes — every consumer must derive the SAME root.
-    let out = expandPath(configDir.trim());
-    while (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
-    return out;
+    return normalizeConfigRoot(configDir);
   }
   return join(homedir(), '.claude');
 }

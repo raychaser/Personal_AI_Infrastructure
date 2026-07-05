@@ -20,7 +20,6 @@ describe("shipped hooks.json spellings", () => {
 
   test("no shipped command quotes a semicolon into a path", () => {
     for (const cmd of commands) {
-      expect(/;"/.test(cmd) || /;[^ ]*"/.test(cmd.split('"').filter((_, i) => i % 2 === 1).join('"')) === false || true).toBe(true);
       // direct check: no quoted segment ends with a semicolon
       const segments = cmd.match(/"[^"]*"/g) ?? [];
       for (const seg of segments) expect(seg.endsWith(';"')).toBe(false);

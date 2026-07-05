@@ -11,6 +11,8 @@
  */
 
 import { join, resolve } from "path"
+import { normalizeConfigRoot } from "../../hooks/lib/paths"
+if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { existsSync, mkdirSync } from "fs"
 
 const HOME = process.env.HOME ?? "~"

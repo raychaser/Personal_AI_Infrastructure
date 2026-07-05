@@ -117,8 +117,10 @@ export function detectHarness(home: string): HarnessInfo {
   // yet (fresh install into a custom root). Doc'd order: explicit env first.
   if (process.env.CLAUDE_CONFIG_DIR) {
     // Normalize before the value gets baked into settings paths and plists.
-    let explicitRoot = process.env.CLAUDE_CONFIG_DIR.trim();
-    if (explicitRoot === "~" || explicitRoot.startsWith("~/")) explicitRoot = join(home, explicitRoot.slice(1));
+    let explicitRoot = process.env.CLAUDE_CONFIG_DIR.trim()
+      .replace(/^~(?=\/|$)/, home)
+      .replace(/^\$\{HOME\}(?=\/|$)/, home)
+      .replace(/^\$HOME(?=\/|$)/, home);
     explicitRoot = resolve(explicitRoot);
     console.error(`[detect] config root: ${explicitRoot} (from CLAUDE_CONFIG_DIR)`);
     return { name: "claude-code", configRoot: explicitRoot, skillsDir: join(explicitRoot, "skills") };

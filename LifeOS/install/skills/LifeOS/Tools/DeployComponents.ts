@@ -382,7 +382,9 @@ function deploy(component: Component, ctx: Ctx): ComponentResult {
 function main(): void {
   const a = process.argv.slice(2);
   const home = process.env.HOME || "";
-  const configRoot = arg(a, "--config-root") || process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  const rawConfigRoot = arg(a, "--config-root") || process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  // Normalize before the value is baked into plists/launchd env (no shell there).
+  const configRoot = (() => { let o = rawConfigRoot.trim().replace(/^~(?=\/|$)/, home).replace(/^\$\{HOME\}(?=\/|$)/, home).replace(/^\$HOME(?=\/|$)/, home); o = resolve(o); while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1); return o; })();
   const skillRoot = arg(a, "--skill-root") || join(import.meta.dir, "..");
   const apply = a.includes("--apply");
   const allowDev = a.includes("--allow-dev");

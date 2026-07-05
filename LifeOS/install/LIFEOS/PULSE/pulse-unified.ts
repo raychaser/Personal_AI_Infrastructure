@@ -15,6 +15,8 @@
  */
 
 import { join } from "path"
+import { normalizeConfigRoot } from "../../hooks/lib/paths"
+if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { readFileSync, existsSync } from "fs"
 import { parse } from "smol-toml"
 
