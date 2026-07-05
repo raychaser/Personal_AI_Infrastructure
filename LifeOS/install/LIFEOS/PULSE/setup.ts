@@ -337,6 +337,71 @@ async function setupLocalHTTPS(): Promise<void> {
   }
 }
 
+// ── launchd / bun-path helpers (pure + injectable) ──
+// Exported so their invariants are unit-testable without running the interactive
+// installer: setup-bun-path.test.ts pins the resolveBunForPlist ordering and
+// setup-launchctl.test.ts pins classifyLaunchctlLoad. main() is import.meta.main-
+// guarded below so importing this module in a test does not launch setup.
+
+/**
+ * Resolve a PERSISTENT bun binary for the RunAtLoad plist. Ordering is
+ * load-bearing: canonical install locations FIRST, PATH resolution (`Bun.which`)
+ * LAST — inside a `bun install` the child PATH can resolve `bun` to an ephemeral
+ * shim under /private/tmp/bun-node-<tmp>, and baking that into a persistent plist
+ * yields a service that dies at next login. `process.execPath` is the
+ * guaranteed-valid final fallback (this script runs under bun). setup.ts ships
+ * standalone into PULSE/ without the Tools/ sibling, so this mirrors
+ * InstallEngine.resolveBunPath inline (see install/tests/resolveBunPath.test.ts
+ * for the canonical copy's invariant). The returned `source` lets the caller emit
+ * the resolved path and warn loudly when resolution falls past the canonical tier
+ * — surfacing a likely-non-persistent bun at install time instead of as a dead
+ * launchd service at next login.
+ */
+export function resolveBunForPlist(
+  opts: {
+    home?: string
+    exists?: (p: string) => boolean
+    which?: (cmd: string) => string | null
+    execPath?: string
+  } = {},
+): { bunPath: string; source: "canonical" | "path" | "execPath" } {
+  const home = opts.home ?? HOME
+  const exists = opts.exists ?? existsSync
+  const which = opts.which ?? ((cmd: string) => Bun.which(cmd))
+  const execPath = opts.execPath ?? process.execPath
+  const candidates = [`${home}/.bun/bin/bun`, "/opt/homebrew/bin/bun", "/usr/local/bin/bun"]
+  const canonical = candidates.find((p) => exists(p))
+  if (canonical) return { bunPath: canonical, source: "canonical" }
+  const viaPath = which("bun")
+  if (viaPath) return { bunPath: viaPath, source: "path" }
+  return { bunPath: execPath, source: "execPath" }
+}
+
+/**
+ * Classify the result of `launchctl load`. Bun.spawn does NOT throw on a non-zero
+ * exit, so the code must be checked explicitly — otherwise a real load failure is
+ * silently reported as success (the bug this restores loud failure for). But
+ * `launchctl load` (the legacy command) ALSO exits non-zero when the service is
+ * already loaded — the normal state on an idempotent re-run of setup.ts — which is
+ * benign, not a failure. Classify the two apart so a healthy re-run is reported as
+ * ok rather than a scary false negative. Pure so both branches are unit-testable.
+ */
+export function classifyLaunchctlLoad(
+  code: number,
+  stderr: string,
+  manageHint: string,
+): { level: "ok" | "warn"; message: string } {
+  const err = (stderr ?? "").trim()
+  if (code === 0) return { level: "ok", message: "launchd service installed" }
+  if (/already loaded|Operation already in progress/i.test(err)) {
+    return { level: "ok", message: "launchd service already loaded (idempotent re-run)" }
+  }
+  return {
+    level: "warn",
+    message: `launchctl load exited ${code}${err ? `: ${err}` : ""} — Pulse service may not be running (check ${manageHint})`,
+  }
+}
+
 // ── Step 6: Install launchd Service ──
 
 async function installService(): Promise<void> {
@@ -360,13 +425,20 @@ async function installService(): Promise<void> {
   // The source plist ships as a template (no hardcoded user paths) so the system
   // file is deny-list clean; the installed copy is per-user materialized.
   const template = await Bun.file(plistSrc).text()
-  // Same canonical-first ordering as InstallEngine.resolveBunPath (the unit-tested
-  // canonical reference) and manage.sh — never bake an ephemeral PATH-resolved shim
-  // into a persistent plist. process.execPath is the guaranteed-valid fallback (this
-  // script runs under bun). setup.ts ships standalone into PULSE/ without the Tools/
-  // sibling, so it mirrors the logic inline rather than importing the shared helper.
-  const bunCandidates = [`${HOME}/.bun/bin/bun`, "/opt/homebrew/bin/bun", "/usr/local/bin/bun"]
-  const bunPath = bunCandidates.find((p) => existsSync(p)) ?? Bun.which("bun") ?? process.execPath
+  // Resolve a persistent bun for the plist (canonical locations first, never an
+  // ephemeral PATH shim) and surface which tier won it — invisible resolution is
+  // the hard-to-debug-6-months-later failure. Emit the path, and warn loudly when
+  // it falls past the canonical tier so a likely-non-persistent bun is caught here
+  // rather than as a dead launchd service at next login.
+  const { bunPath, source } = resolveBunForPlist({ home: HOME })
+  ok(`plist bun → ${bunPath}`)
+  if (source !== "canonical") {
+    warn(
+      `bun resolved via ${source === "path" ? "PATH (Bun.which)" : "process.execPath"}, not a canonical install location — ` +
+        `if ${bunPath} is ephemeral (e.g. a /private/tmp bun-install shim) the Pulse launchd service will die at next login. ` +
+        `Install bun to ~/.bun/bin, /opt/homebrew/bin, or /usr/local/bin for a durable service.`,
+    )
+  }
   const materialized = template.replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", HOME)
   await Bun.write(plistDst, materialized)
   const proc = Bun.spawn(["launchctl", "load", plistDst], {
@@ -374,16 +446,17 @@ async function installService(): Promise<void> {
     stderr: "pipe",
   })
   // Bun.spawn does NOT throw on a non-zero exit, so the exit code must be checked
-  // explicitly — otherwise a failed load (bad bun path, malformed/already-loaded
-  // service) is swallowed and we falsely report success. Step 7's health check
-  // confirms the service actually came up; here we surface the load failure loudly.
+  // explicitly — otherwise a failed load is swallowed and we falsely report success.
+  // classifyLaunchctlLoad also distinguishes the benign already-loaded re-run from a
+  // real failure. Step 7's health check confirms the service actually came up.
   const code = await proc.exited
-  if (code !== 0) {
-    const stderrText = (await new Response(proc.stderr).text()).trim()
-    warn(`launchctl load exited ${code}${stderrText ? `: ${stderrText}` : ""} — Pulse service may not be running (check ${join(PULSE_DIR, "manage.sh")} status)`)
+  const stderrText = await new Response(proc.stderr).text()
+  const result = classifyLaunchctlLoad(code, stderrText, `${join(PULSE_DIR, "manage.sh")} status`)
+  if (result.level === "warn") {
+    warn(result.message)
     return
   }
-  ok("launchd service installed")
+  ok(result.message)
 }
 
 // ── Step 7: Health Check ──
@@ -468,7 +541,12 @@ ${"═".repeat(50)}
 `)
 }
 
-main().catch((err) => {
-  console.error(`Setup failed: ${err}`)
-  process.exit(1)
-})
+// Guard the entry point so importing this module (e.g. from the unit tests that
+// exercise resolveBunForPlist / classifyLaunchctlLoad) does not launch the
+// interactive installer. Only runs when setup.ts is the executed entry.
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error(`Setup failed: ${err}`)
+    process.exit(1)
+  })
+}
