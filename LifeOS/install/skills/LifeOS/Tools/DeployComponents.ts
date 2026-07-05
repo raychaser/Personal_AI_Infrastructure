@@ -159,6 +159,39 @@ export function materializePulsePlist(
   return { materialized, bunPath, source };
 }
 
+/**
+ * Build the loud, NON-FATAL warning for a bun binary resolved PAST the canonical
+ * install tier (returns null for a canonical resolution). A PATH shim (e.g.
+ * /private/tmp/bun-node-*) or the process.execPath fallback is likely ephemeral;
+ * baking it into the RunAtLoad plist yields a launchd service that dies at next
+ * login, and the install-time healthz probe cannot catch it (the shim is still
+ * valid this session). Extracted as a pure, exported helper so the surfacing
+ * contract — deployPulse pushes this into ComponentResult.warnings for a
+ * non-canonical source — is unit-testable (see install/tests/deploy-warnings.test.ts).
+ */
+export function bunResolutionWarning(source: BunSource, bunPath: string): string | null {
+  if (source === "canonical") return null;
+  return (
+    `bun resolved via ${source === "path" ? "PATH (Bun.which)" : "process.execPath"}, not a canonical install location (${bunPath}). ` +
+    `If that path is ephemeral (e.g. a /private/tmp bun-install shim) the Pulse launchd service will die at next login — ` +
+    `the install-time healthz probe cannot catch this (the shim is still valid now). ` +
+    `Install bun to ~/.bun/bin, /opt/homebrew/bin, or /usr/local/bin for a durable service.`
+  );
+}
+
+/**
+ * Whether a single component result counts as a pass: no blockers, no error, and
+ * either no probe or a passing probe. `warnings` is DELIBERATELY excluded — a
+ * non-canonical-bun warning is a loud but NON-FATAL signal, so a populated
+ * `warnings` must never flip a run to failure. Exported + pure so both halves of
+ * that contract are pinned by a test: a refactor that folds `r.warnings?.length`
+ * into the fail predicate (turning every non-canonical-bun install into exit 1),
+ * or one that stops populating warnings, now fails the suite.
+ */
+export function componentResultOk(r: ComponentResult): boolean {
+  return r.blockers.length === 0 && !r.error && (!r.probe || r.probe.passed);
+}
+
 /** Pulse: ensure the PULSE tree is laid down, then install + load its plist. */
 function deployPulse(ctx: Ctx): ComponentResult {
   const r: ComponentResult = { component: "pulse", ready: false, actions: [], blockers: [] };
@@ -193,14 +226,8 @@ function deployPulse(ctx: Ctx): ComponentResult {
     // ephemeral; baking it into the RunAtLoad plist yields a launchd service that
     // dies at next login. The healthz poll below can't catch this — the shim is
     // still valid this session. Mirrors setup.ts installService()'s warn().
-    if (source !== "canonical") {
-      (r.warnings ??= []).push(
-        `bun resolved via ${source === "path" ? "PATH (Bun.which)" : "process.execPath"}, not a canonical install location (${bunPath}). ` +
-          `If that path is ephemeral (e.g. a /private/tmp bun-install shim) the Pulse launchd service will die at next login — ` +
-          `the install-time healthz probe cannot catch this (the shim is still valid now). ` +
-          `Install bun to ~/.bun/bin, /opt/homebrew/bin, or /usr/local/bin for a durable service.`,
-      );
-    }
+    const bunWarning = bunResolutionWarning(source, bunPath);
+    if (bunWarning) (r.warnings ??= []).push(bunWarning);
     const u = uid();
     const sameOnDisk = existsSync(plistDst) && readFileSync(plistDst, "utf-8") === materialized;
     const alreadyLoaded = launchctl(["print", `gui/${u}/com.lifeos.pulse`]).ok;
@@ -468,7 +495,9 @@ function main(): void {
   const results = selected.map((c) => deploy(c, ctx));
   // A blocked component (prereq absent, nothing written) is a FAILURE, not a
   // silent success — `ok` factors in blockers, error, AND probe in both modes.
-  const ok = results.every((r) => r.blockers.length === 0 && !r.error && (!r.probe || r.probe.passed));
+  // warnings are NON-FATAL by contract (componentResultOk omits them), so a
+  // non-canonical-bun warning never flips the run to exit 1.
+  const ok = results.every(componentResultOk);
 
   console.log(JSON.stringify({
     ok,

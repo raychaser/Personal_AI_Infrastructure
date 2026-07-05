@@ -440,7 +440,24 @@ async function installService(): Promise<void> {
     )
   }
   const materialized = template.replaceAll("__BUN_PATH__", bunPath).replaceAll("__HOME__", HOME)
+  // The legacy `launchctl load` is a NO-OP when the label is already loaded: it exits
+  // non-zero ("already loaded") and does NOT pick up the new plist contents. On a
+  // re-run that fixes a previously-baked bad bun path (the exact scenario this guards —
+  // an ephemeral /private/tmp shim replaced by ~/.bun/bin), that would silently keep
+  // the OLD definition running, and Step 7's PID/health probe sees the old instance
+  // still up — so the "applied" success is false until reboot or a manual unload.
+  // Mirror DeployComponents: when the materialized plist differs from what is already
+  // on disk (and a prior copy exists), force an unload first so the corrected
+  // definition actually takes effect. An unchanged re-run skips the unload and stays a
+  // benign idempotent load.
+  const priorPlist = existsSync(plistDst) ? await Bun.file(plistDst).text() : null
+  const plistChanged = priorPlist !== materialized
   await Bun.write(plistDst, materialized)
+  if (plistChanged && priorPlist !== null) {
+    // Unload any prior definition so `load` below re-reads the corrected plist.
+    // Ignore its exit — "not loaded" is a fine state to unload from.
+    await Bun.spawn(["launchctl", "unload", plistDst], { stdout: "pipe", stderr: "pipe" }).exited
+  }
   const proc = Bun.spawn(["launchctl", "load", plistDst], {
     stdout: "pipe",
     stderr: "pipe",
