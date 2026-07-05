@@ -72,8 +72,7 @@ async function computeHealth(): Promise<DimensionGap> {
       target: "0 TBD",
       direction: "below",
       severity: "warning",
-      note: "Complete health dimension interview to enable gap computation",
-    });
+      note: "Complete health dimension interview to enable gap computation" });
   }
 
   if (!currentMetrics.trim()) {
@@ -83,16 +82,14 @@ async function computeHealth(): Promise<DimensionGap> {
       target: "populated with current values",
       direction: "below",
       severity: "info",
-      note: "Apple Health daily export (P4) will populate this",
-    });
+      note: "Apple Health daily export (P4) will populate this" });
   }
 
   return {
     dimension: "health",
     entries,
     summary: entries.length === 0 ? "No gaps detected." : `${entries.length} gap(s).`,
-    timestamp: new Date().toISOString(),
-  };
+    timestamp: new Date().toISOString() };
 }
 
 async function computeMoney(): Promise<DimensionGap> {
@@ -108,16 +105,14 @@ async function computeMoney(): Promise<DimensionGap> {
       target: "0 TBD",
       direction: "below",
       severity: "warning",
-      note: "Complete money dimension interview",
-    });
+      note: "Complete money dimension interview" });
   }
 
   return {
     dimension: "money",
     entries,
     summary: entries.length === 0 ? "No gaps detected." : `${entries.length} gap(s).`,
-    timestamp: new Date().toISOString(),
-  };
+    timestamp: new Date().toISOString() };
 }
 
 async function computeFreedom(): Promise<DimensionGap> {
@@ -132,16 +127,14 @@ async function computeFreedom(): Promise<DimensionGap> {
       target: "0 TBD",
       direction: "below",
       severity: "warning",
-      note: "Complete freedom dimension interview",
-    });
+      note: "Complete freedom dimension interview" });
   }
 
   return {
     dimension: "freedom",
     entries,
     summary: entries.length === 0 ? "No gaps detected." : `${entries.length} gap(s).`,
-    timestamp: new Date().toISOString(),
-  };
+    timestamp: new Date().toISOString() };
 }
 
 async function computeDimension(dim: MetricDimension): Promise<DimensionGap> {

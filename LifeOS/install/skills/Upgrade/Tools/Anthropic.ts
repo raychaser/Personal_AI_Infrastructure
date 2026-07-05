@@ -27,7 +27,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { createHash } from 'crypto';
 import { join } from 'path';
-import { homedir } from 'os';
 import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // Types
@@ -85,7 +84,6 @@ interface State {
 }
 
 // Config
-const HOME = homedir();
 const SKILL_DIR = join(getConfigRoot(), 'skills', 'Upgrade');
 const STATE_DIR = join(SKILL_DIR, 'State');
 const STATE_FILE = join(STATE_DIR, 'last-check.json');

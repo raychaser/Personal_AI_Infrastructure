@@ -562,8 +562,7 @@ async function main(): Promise<void> {
     goal_issues_created: 0,
     bpe_reminder_created: 0,
     duration_ms: 0,
-    errors: [],
-  };
+    errors: [] };
 
   const cfg = loadWorkConfig();
   if (!cfg.enabled || !cfg.repo) {

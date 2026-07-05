@@ -2,7 +2,20 @@
 // Raw env use fails containment prefix-checks open on cosmetic variants —
 // these tests pin the normalization so that can't regress.
 import { describe, expect, test } from "bun:test";
-import { normalizeRoot } from "./system-file-guard-core";
+import { normalizeRoot, classifyTarget } from "./system-file-guard-core";
+
+describe("classifyTarget under a custom config root", () => {
+  const root = "/opt/custom-root";
+  test("a system file under the custom root classifies as system (guarded)", () => {
+    expect(classifyTarget(`${root}/hooks/Safety.hook.ts`, root).classification).toBe("system");
+  });
+  test("a file under a DIFFERENT root is out-of-tree (never blocked)", () => {
+    expect(classifyTarget("/Users/u/.claude/hooks/Safety.hook.ts", root).classification).toBe("out-of-tree");
+  });
+  test("the root itself classifies as system", () => {
+    expect(classifyTarget(root, root).classification).toBe("system");
+  });
+});
 
 describe("normalizeRoot", () => {
   test("strips a single trailing slash", () => {

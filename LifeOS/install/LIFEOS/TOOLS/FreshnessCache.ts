@@ -69,8 +69,7 @@ export function buildFreshnessPayload(): FreshnessCachePayload {
           reviewed_age_days: c.most_stale.effective_reviewed_age_days,
           pct: c.most_stale.pct,
           grade: c.most_stale.grade,
-          why: c.most_stale.why,
-        }
+          why: c.most_stale.why }
       : null,
     files: c.files.map((f) => ({
       slug: f.slug,
@@ -81,10 +80,8 @@ export function buildFreshnessPayload(): FreshnessCachePayload {
       pct: f.pct,
       grade: f.grade,
       stale: f.stale,
-      why: f.why,
-    })),
-    generated_at: new Date().toISOString(),
-  };
+      why: f.why })),
+    generated_at: new Date().toISOString() };
 }
 
 export interface WriteResult {

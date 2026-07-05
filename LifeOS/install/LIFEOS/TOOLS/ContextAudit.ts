@@ -91,8 +91,7 @@ function scanTbd(info: BodyInfo): Finding[] {
     severity: "info",
     kind: "TBD",
     message: `${count} occurrences (lines ${lines.join(", ")})`,
-    line: lines[0],
-  }];
+    line: lines[0] }];
 }
 
 function substantiveText(lines: string[]): string {
@@ -121,8 +120,7 @@ function scanEmptySections(entry: ContextFile, info: BodyInfo): Finding[] {
         severity: "warn",
         kind: "empty-section",
         message: `## ${heading[1].trim()} has less than 20 chars of substantive content`,
-        line: info.startLine + i,
-      });
+        line: info.startLine + i });
     }
   }
   return findings;
@@ -156,8 +154,7 @@ function scanPrincipalTelos(info: BodyInfo): Finding[] {
         severity: "critical",
         kind: "principal-telos-empty",
         message: `## ${heading} section is empty - generator bug (likely LEGACY_FILE_TO_SECTION case mismatch in GenerateTelosSummary.ts)`,
-        line: lineIndex === -1 ? undefined : info.startLine + lineIndex,
-      });
+        line: lineIndex === -1 ? undefined : info.startLine + lineIndex });
     }
   }
   return findings;
@@ -171,8 +168,7 @@ function scanProjectsBudget(info: BodyInfo): Finding[] {
     severity: "warn",
     kind: "context-budget",
     message: `${actual} lines exceeds declared CONTEXT-BUDGET of ~45 lines`,
-    line: info.startLine,
-  }];
+    line: info.startLine }];
 }
 
 function scanSystemPromptModel(info: BodyInfo): Finding[] {
@@ -183,8 +179,7 @@ function scanSystemPromptModel(info: BodyInfo): Finding[] {
   return [{
     severity: "info",
     kind: "model-drift",
-    message: `latest model ID '${latest}' (from models.ts registry) not found - may have drifted; verify against current model family`,
-  }];
+    message: `latest model ID '${latest}' (from models.ts registry) not found - may have drifted; verify against current model family` }];
 }
 
 function normalizeReference(raw: string): string | null {
@@ -223,8 +218,7 @@ function scanCrossRefs(info: BodyInfo): Finding[] {
           severity: "warn",
           kind: "broken cross-ref",
           message: `${ref} (line ${info.startLine + i})`,
-          line: info.startLine + i,
-        });
+          line: info.startLine + i });
       }
     }
   }
@@ -250,8 +244,7 @@ function scanPlaceholders(info: BodyInfo): Finding[] {
       severity: "info",
       kind: "placeholder",
       message: `${pattern.label}: ${count} occurrences (lines ${lines.join(", ")})`,
-      line: lines[0],
-    });
+      line: lines[0] });
   }
   return findings;
 }
@@ -264,9 +257,7 @@ function auditFile(entry: ContextFile): FileAudit {
       findings: [{
         severity: "critical",
         kind: "missing-file",
-        message: `file missing: ${entry.path}`,
-      }],
-    };
+        message: `file missing: ${entry.path}` }] };
   }
 
   const content = readFileSync(entry.path, "utf-8");
@@ -294,16 +285,14 @@ function buildReport(): AuditReport {
     file: basename(file.path),
     critical: countSeverity(file.findings, "critical"),
     warn: countSeverity(file.findings, "warn"),
-    info: countSeverity(file.findings, "info"),
-  }));
+    info: countSeverity(file.findings, "info") }));
 
   const total = summary.reduce(
     (acc, row) => ({
       file: "**TOTAL**",
       critical: acc.critical + row.critical,
       warn: acc.warn + row.warn,
-      info: acc.info + row.info,
-    }),
+      info: acc.info + row.info }),
     { file: "**TOTAL**", critical: 0, warn: 0, info: 0 },
   );
   summary.push(total);

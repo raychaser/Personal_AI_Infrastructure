@@ -15,7 +15,6 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
-import { homedir } from "os";
 import { parseArgs } from "util";
 import { getConfigRoot } from "../../hooks/lib/paths";
 
@@ -88,8 +87,7 @@ function readState(): AlgorithmState {
       criteria: [],
       agents: [],
       capabilities: [],
-      phaseHistory: [],
-    };
+      phaseHistory: [] };
   }
 }
 
@@ -161,8 +159,7 @@ try {
         phase,
         startedAt: Date.now(),
         criteriaCount: state.criteria.length,
-        agentCount: state.agents.length,
-      });
+        agentCount: state.agents.length });
 
       break;
     }
@@ -192,8 +189,7 @@ try {
           type: type ?? "criterion",
           status: status ?? "pending",
           evidence,
-          createdInPhase: state.currentPhase,
-        });
+          createdInPhase: state.currentPhase });
       }
       break;
     }
@@ -221,8 +217,7 @@ try {
           agentType: agentType ?? "general-purpose",
           status: status ?? "active",
           task,
-          phase: state.currentPhase,
-        });
+          phase: state.currentPhase });
       }
       break;
     }
@@ -246,8 +241,7 @@ try {
           preset: null,
           focus: null,
           params: {},
-          mode: "standard",
-        };
+          mode: "standard" };
       }
 
       if (preset !== undefined) state.algorithmConfig.preset = preset;
@@ -287,8 +281,7 @@ try {
         parameter: param,
         previousValue: parseFloat(fromStr),
         newValue: parseFloat(toStr),
-        rationale: rationale ?? "",
-      });
+        rationale: rationale ?? "" });
       break;
     }
 

@@ -9,21 +9,11 @@
 // copies produce the SAME result as the canonical for home === homedir().
 import { describe, expect, test } from "bun:test";
 import { homedir } from "node:os";
-import { resolve } from "node:path";
 import { normalizeConfigRoot as canonical } from "../install/hooks/lib/paths";
-
-// Re-implement the 2-arg form exactly as injected into the Deploy/Install copies,
-// so a drift in that text (which the byte-identical PayloadSync test also guards)
-// changes THIS expected implementation and is caught here too.
-function copyForm(raw: string, home: string): string {
-  let o = raw.trim()
-    .replace(/^~(?=\/|$)/, home)
-    .replace(/^\$\{HOME\}(?=\/|$)/, home)
-    .replace(/^\$HOME(?=\/|$)/, home);
-  o = resolve(o);
-  while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1);
-  return o;
-}
+// Import the REAL 2-arg copies the twins actually run — not a re-implementation —
+// so a drift in either copy's regex/ordering fails this test (that's the point).
+import { normalizeConfigRoot as deployCopy } from "./DeployComponents";
+import { normalizeConfigRoot as installCopy } from "./InstallEngine";
 
 const HOME = homedir();
 const CASES = [
@@ -38,8 +28,9 @@ const CASES = [
 
 describe("all config-root normalizers agree", () => {
   for (const c of CASES) {
-    test(`canonical(1-arg) === copyForm(2-arg) for ${JSON.stringify(c)}`, () => {
-      expect(copyForm(c, HOME)).toBe(canonical(c));
+    test(`DeployComponents + InstallEngine copies === canonical for ${JSON.stringify(c)}`, () => {
+      expect(deployCopy(c, HOME)).toBe(canonical(c));
+      expect(installCopy(c, HOME)).toBe(canonical(c));
     });
     test(`${JSON.stringify(c)} normalizes to a clean absolute path`, () => {
       const out = canonical(c);

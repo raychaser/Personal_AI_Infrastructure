@@ -21,7 +21,7 @@
 import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
-import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths";
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
@@ -62,8 +62,7 @@ const TYPE_KEYWORDS: Record<string, string[]> = {
   People: ["osint", "person", "contact", "linkedin", "career", "background", "dossier", "profile", "biography"],
   Companies: ["company", "corporation", "startup", "organization", "acquired", "revenue", "employees", "founded"],
   Ideas: ["insight", "pattern", "thesis", "analysis", "framework", "discovery", "finding", "principle", "technique"],
-  Research: ["research", "investigation", "multi-source", "extensive", "deep-dive", "methodology", "findings", "verified", "agents"],
-};
+  Research: ["research", "investigation", "multi-source", "extensive", "deep-dive", "methodology", "findings", "verified", "agents"] };
 
 // ============================================================================
 // Types
@@ -138,8 +137,7 @@ function scanAutoMemory(state: HarvestState): HarvestCandidate[] {
       content: content.replace(/^---[\s\S]*?---\n*/, ""), // Strip frontmatter
       domain,
       type,
-      tags: extractTags(content),
-    });
+      tags: extractTags(content) });
   }
   return candidates;
 }
@@ -189,8 +187,7 @@ function scanWorkISAs(state: HarvestState, backfillMode: boolean = false): Harve
             content: `Flagged by Algorithm LEARN phase.\n\n**Source ISA:** ${dir}\n**Task:** ${frontmatter.task || dir}\n\n${description}`,
             domain: domainName,
             type: "idea",
-            tags: extractTags(content),
-          });
+            tags: extractTags(content) });
         }
       }
       continue; // Explicit flags found — don't also scan Decisions/Verification
@@ -212,8 +209,7 @@ function scanWorkISAs(state: HarvestState, backfillMode: boolean = false): Harve
       content: [decisions, verification].filter(Boolean).join("\n\n"),
       domain,
       type: "idea",
-      tags: extractTags(content),
-    });
+      tags: extractTags(content) });
   }
   return candidates;
 }
@@ -249,8 +245,7 @@ function scanResearch(state: HarvestState): HarvestCandidate[] {
         content: content.substring(0, 5000), // Cap content length
         domain,
         type,
-        tags: extractTags(content),
-      });
+        tags: extractTags(content) });
     }
   }
   walk(RESEARCH_DIR);
@@ -271,8 +266,7 @@ function scanHarvestQueue(state: HarvestState): HarvestCandidate[] {
         content: data.content || "",
         domain: data.domain || "Ideas",
         type: data.type || "reference",
-        tags: data.tags || [],
-      });
+        tags: data.tags || [] });
       // Remove queue file after processing
       fs.unlinkSync(path.join(HARVEST_QUEUE_DIR, file));
     } catch { /* skip malformed */ }
@@ -478,8 +472,7 @@ function regenerateMOC(domain: string): void {
       quality: typeof fm.quality === "number" ? fm.quality : (fm.quality ? parseInt(fm.quality) : 5),
       tags: Array.isArray(fm.tags) ? fm.tags : (typeof fm.tags === "string" ? fm.tags.split(",").map((t: string) => t.trim()) : []),
       updated: fm.updated || fm.created || "unknown",
-      backlinkCount,
-    });
+      backlinkCount });
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -571,8 +564,7 @@ function regenerateMasterMOC(): void {
         slug: `${domain.toLowerCase()}/${file.replace(/\.md$/, "")}`,
         domain: domain.toLowerCase(),
         title: fm.title || file.replace(/\.md$/, ""),
-        updated: fm.updated || fm.created || "unknown",
-      });
+        updated: fm.updated || fm.created || "unknown" });
     }
     domainStats.push({ name: domain, count });
   }
@@ -634,8 +626,7 @@ function getArchiveStats(): ArchiveStats {
     byType: {},
     orphanLinks: [],
     staleSeedlings: [],
-    lastHarvest: null,
-  };
+    lastHarvest: null };
 
   const state = loadHarvestState();
   stats.lastHarvest = state.lastHarvest !== "1970-01-01T00:00:00Z" ? state.lastHarvest : null;
@@ -916,8 +907,7 @@ function cmdContradictions(): void {
         title: fm.title || file.replace(/\.md$/, ""),
         tags,
         path: filePath,
-        fm,
-      });
+        fm });
     }
   }
 
@@ -1002,11 +992,9 @@ const { values, positionals } = parseArgs({
     "dry-run": { type: "boolean" },
     backfill: { type: "boolean" },
     limit: { type: "string", short: "n" },
-    help: { type: "boolean", short: "h" },
-  },
+    help: { type: "boolean", short: "h" } },
   allowPositionals: true,
-  strict: false,
-});
+  strict: false });
 
 const command = positionals[0] || "status";
 

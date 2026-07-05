@@ -86,8 +86,7 @@ const proposal: Proposal = {
   source,
   target,
   payload,
-  status: "pending",
-};
+  status: "pending" };
 
 enqueue(proposal);
 

@@ -22,7 +22,7 @@ import { paiUserDir } from "./LifeosConfig";
 import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = (getConfigRoot());
+const CLAUDE_DIR = getConfigRoot();
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Terminal Width Detection
@@ -147,8 +147,7 @@ const BOX = {
   blockTop: "▀",
   blockBottom: "▄",
   blockLeft: "▌",
-  blockRight: "▐",
-};
+  blockRight: "▐" };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Isometric LifeOS Cube - Classic ASCII Art
@@ -397,8 +396,7 @@ function getStats(): SystemStats {
     hooks: countHooks(),
     workItems: countWorkItems(),
     learnings: countLearnings(),
-    model: "Opus 4.5",
-  };
+    model: "Opus 4.5" };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -56,7 +56,7 @@ import { getConfigRoot } from "../../hooks/lib/paths";
 // ─── Paths ───────────────────────────────────────────────────────────────────
 
 const HOME = process.env.HOME || "~";
-const BASE_DIR = process.env.LIFEOS_DIR || (getConfigRoot());
+const BASE_DIR = process.env.LIFEOS_DIR || getConfigRoot();
 const ALGORITHMS_DIR = join(BASE_DIR, "MEMORY", "STATE", "algorithms");
 const SESSION_NAMES_PATH = join(BASE_DIR, "MEMORY", "STATE", "session-names.json");
 const PROJECTS_DIR = process.env.PROJECTS_DIR || join(HOME, "Projects");
@@ -162,15 +162,13 @@ const IDEATE_DEFAULTS: Record<string, number> = {
   generativeTemperature: 0.5,
   maxCycles: 3,
   contextCarryover: 0.6,
-  parallelAgents: 1,
-};
+  parallelAgents: 1 };
 
 const OPTIMIZE_DEFAULTS: Record<string, number> = {
   stepSize: 0.3,
   regressionTolerance: 0.1,
   earlyStopPatience: 3,
-  maxIterations: 10,
-};
+  maxIterations: 10 };
 
 const FOCUS_MAPPING: Record<string, { at0: number; at1: number }> = {
   problemConnection:      { at0: 0.05, at1: 0.95 },
@@ -180,8 +178,7 @@ const FOCUS_MAPPING: Record<string, { at0: number; at1: number }> = {
   ideaVolume:             { at0: 40,   at1: 5    },
   mutationRate:           { at0: 0.80, at1: 0.10 },
   generativeTemperature:  { at0: 0.90, at1: 0.10 },
-  contextCarryover:       { at0: 0.30, at1: 0.80 },
-};
+  contextCarryover:       { at0: 0.30, at1: 0.80 } };
 
 interface PresetDef {
   focus?: number;
@@ -200,8 +197,7 @@ const PRESETS: Record<string, PresetDef> = {
   // Optimize presets
   cautious:             { overrides: { stepSize: 0.15, regressionTolerance: 0.0, earlyStopPatience: 5, maxIterations: 20 } },
   "standard-optimize":  { overrides: { stepSize: 0.3, regressionTolerance: 0.1, earlyStopPatience: 3, maxIterations: 10 } },
-  aggressive:           { overrides: { stepSize: 0.7, regressionTolerance: 0.5, earlyStopPatience: 2, maxIterations: 15 } },
-};
+  aggressive:           { overrides: { stepSize: 0.7, regressionTolerance: 0.5, earlyStopPatience: 2, maxIterations: 15 } } };
 
 function resolveParameters(
   mode: string,
@@ -439,8 +435,7 @@ function voiceNotify(message: string): void {
     fetch(VOICE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, voice_id: VOICE_ID }),
-    }).catch(() => {});
+      body: JSON.stringify({ message, voice_id: VOICE_ID }) }).catch(() => {});
   } catch {}
 }
 
@@ -494,11 +489,9 @@ function readISA(path: string): { frontmatter: ISAFrontmatter; content: string; 
       last_phase: (fm.last_phase as string) || null,
       failing_criteria: Array.isArray(fm.failing_criteria) ? fm.failing_criteria as string[] : [],
       verification_summary: (fm.verification_summary as string) || "0/0",
-      ...fm,
-    },
+      ...fm },
     content,
-    raw,
-  };
+    raw };
 }
 
 function updateFrontmatter(path: string, updates: Record<string, unknown>): void {
@@ -567,8 +560,7 @@ function syncCriteriaToState(state: LoopAlgorithmState, criteriaInfo: CriteriaIn
       ? "anti-criterion" as const
       : "criterion" as const,
     status: c.status === "passing" ? "completed" as const : "pending" as const,
-    createdInPhase: "OBSERVE",
-  }));
+    createdInPhase: "OBSERVE" }));
 }
 
 function createLoopState(
@@ -602,8 +594,7 @@ function createLoopState(
     loopIsaPath: isaPath,
     loopHistory: [],
     parallelAgents: agentCount,
-    mode: "loop",
-  };
+    mode: "loop" };
   syncCriteriaToState(state, criteriaInfo);
   return state;
 }
@@ -842,8 +833,7 @@ async function runParallelIteration(
       cwd: dirname(isaPath),
       env: workerEnv,
       stdout: "pipe",
-      stderr: "pipe",
-    });
+      stderr: "pipe" });
     return { assignment, proc };
   });
 
@@ -896,8 +886,7 @@ async function runParallelIteration(
       ? `[${postCriteria.failingIds.join(", ")}]`
       : "[]",
     last_phase: "VERIFY",
-    updated: new Date().toISOString().split("T")[0],
-  });
+    updated: new Date().toISOString().split("T")[0] });
 
   // ── Per-agent results ──
   console.log(`  \x1b[1mAgent Results:\x1b[0m`);
@@ -1107,8 +1096,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
   // Initialize Loop in ISA
   updateFrontmatter(absPath, {
     loopStatus: "running",
-    maxIterations: max,
-  });
+    maxIterations: max });
 
   const bar = (p: number, t: number, w: number = 20) => {
     const pct = t > 0 ? p / t : 0;
@@ -1235,8 +1223,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
         status: "active",
         task: `Criteria: ${a.criteriaIds.join(", ")}`,
         criteriaIds: a.criteriaIds,
-        phase: "EXECUTE",
-      }));
+        phase: "EXECUTE" }));
     }
 
     writeAlgorithmState(state);
@@ -1278,8 +1265,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
         startedAt: iterStartTime,
         completedAt: iterEndTime,
         criteriaPassing: postCriteria.passing,
-        criteriaTotal: postCriteria.total,
-      });
+        criteriaTotal: postCriteria.total });
 
       // Dashboard: Sync updated criteria
       syncCriteriaToState(state, postCriteria);
@@ -1337,8 +1323,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
         startedAt: iterStartTime,
         completedAt: iterEndTime,
         criteriaPassing: criteria.passing,
-        criteriaTotal: criteria.total,
-      });
+        criteriaTotal: criteria.total });
       writeAlgorithmState(state);
       continue;
     }
@@ -1353,8 +1338,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
         startedAt: iterStartTime,
         completedAt: iterEndTime,
         criteriaPassing: criteria.passing,
-        criteriaTotal: criteria.total,
-      });
+        criteriaTotal: criteria.total });
       writeAlgorithmState(state);
       continue;
     }
@@ -1370,8 +1354,7 @@ async function runLoop(isaPath: string, maxOverride?: number, agentCount: number
       startedAt: iterStartTime,
       completedAt: iterEndTime,
       criteriaPassing: postCriteria.passing,
-      criteriaTotal: postCriteria.total,
-    });
+      criteriaTotal: postCriteria.total });
 
     // Dashboard: Sync updated criteria
     syncCriteriaToState(state, postCriteria);
@@ -1437,8 +1420,7 @@ function runInteractive(isaPath: string): void {
   ], {
     stdio: "inherit",
     cwd: dirname(absPath),
-    env: { ...process.env, CLAUDECODE: undefined },
-  });
+    env: { ...process.env, CLAUDECODE: undefined } });
 
   child.on("exit", (code) => {
     if (code === 0) {
@@ -1475,8 +1457,7 @@ function runIdeate(
   // Write algorithm_config to ISA frontmatter
   const userOverrides = Object.keys(paramOverrides);
   updateFrontmatter(absPath, {
-    mode: "ideate",
-  });
+    mode: "ideate" });
 
   const configSummary = [
     preset ? `preset=${preset}` : null,
@@ -1503,8 +1484,7 @@ function runIdeate(
   ], {
     stdio: "inherit",
     cwd: dirname(absPath),
-    env: { ...process.env, CLAUDECODE: undefined },
-  });
+    env: { ...process.env, CLAUDECODE: undefined } });
 
   child.on("exit", (code) => {
     if (code === 0) {
@@ -1551,8 +1531,7 @@ function createNewISA(title: string, effortLevel: string = "Standard", outputDir
     title,
     slug,
     effortLevel,
-    mode: "interactive",
-  });
+    mode: "interactive" });
 
   const fullPath = join(targetDir, filename);
   writeFileSync(fullPath, isaContent, "utf-8");

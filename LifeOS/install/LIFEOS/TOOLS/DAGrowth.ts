@@ -66,8 +66,7 @@ function daysAgoStr(days: number): string {
 const MOOD_ICON: Record<string, string> = {
   positive: "+",
   neutral: "~",
-  frustrated: "-",
-}
+  frustrated: "-" }
 
 // ── Commands ──
 
@@ -128,8 +127,7 @@ async function cmdOpinions(daDir: string) {
       position: get("position"),
       confidence: parseFloat(get("confidence") || "0"),
       confirmations: parseInt(get("confirmations") || "0", 10),
-      contradictions: parseInt(get("contradictions") || "0", 10),
-    })
+      contradictions: parseInt(get("contradictions") || "0", 10) })
   }
 
   if (opinions.length === 0) {

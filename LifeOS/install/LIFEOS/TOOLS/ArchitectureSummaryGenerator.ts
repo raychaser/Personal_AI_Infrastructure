@@ -381,8 +381,7 @@ function cmdCheck(): void {
 const { positionals } = parseArgs({
   args: process.argv.slice(2),
   allowPositionals: true,
-  strict: false,
-});
+  strict: false });
 
 const command = positionals[0];
 

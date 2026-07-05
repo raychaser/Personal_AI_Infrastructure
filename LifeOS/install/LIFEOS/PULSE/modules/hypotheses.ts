@@ -60,8 +60,7 @@ interface ModuleState {
 
 const moduleState: ModuleState = {
   running: false,
-  startedAt: null,
-};
+  startedAt: null };
 
 // ── Parsing ────────────────────────────────────────────────────────────────
 
@@ -128,8 +127,7 @@ function loadHypothesis(filename: string): Hypothesis | null {
     evidence: extractSection(body, "Evidence"),
     suggested_action: extractSection(body, "Suggested Action"),
     raw_body: body,
-    expires_in_days: expiresInDays,
-  };
+    expires_in_days: expiresInDays };
 }
 
 function listPending(): Hypothesis[] {
@@ -205,8 +203,7 @@ function graduateToFrame(slug: string, target_frame: string, claim: string): voi
 function jsonResponse(body: any, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json" },
-  });
+    headers: { "content-type": "application/json" } });
 }
 
 function summarizeForList(h: Hypothesis) {
@@ -217,8 +214,7 @@ function summarizeForList(h: Hypothesis) {
     target_frame: h.target_frame,
     evidence_count: h.evidence_signals.length,
     generated: h.generated,
-    expires_in_days: h.expires_in_days,
-  };
+    expires_in_days: h.expires_in_days };
 }
 
 export async function handleRequest(req: Request, pathname: string): Promise<Response | null> {

@@ -112,7 +112,7 @@ export function detectTool(name: string, versionCmd: string): ToolInfo {
  * Order: explicit env (CLAUDE_CONFIG_DIR) → Claude Code (~/.claude) →
  * Hermes (~/.hermes) → Cursor (~/.cursor) → OpenClaw (~/.openclaw) → unknown.
  */
-function normalizeConfigRoot(raw: string, home: string): string {
+export function normalizeConfigRoot(raw: string, home: string): string {
   let o = raw.trim()
     .replace(/^~(?=\/|$)/, home)
     .replace(/^\$\{HOME\}(?=\/|$)/, home)

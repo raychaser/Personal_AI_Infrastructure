@@ -30,8 +30,7 @@ const MODEL_PRICING: Record<string, { input: number; output: number; cacheWrite:
   "claude-sonnet-4-6": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.30 },
   "claude-sonnet-4-5-20250514": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.30 },
   // Haiku 4.5
-  "claude-haiku-4-5-20251001": { input: 0.80, output: 4, cacheWrite: 1.00, cacheRead: 0.08 },
-}
+  "claude-haiku-4-5-20251001": { input: 0.80, output: 4, cacheWrite: 1.00, cacheRead: 0.08 } }
 
 function getPricing(model: string): { input: number; output: number; cacheWrite: number; cacheRead: number } {
   // Exact match
@@ -180,8 +179,7 @@ function processSessionFile(filePath: string, projectSlug: string): SessionCost 
       costCacheRead: Math.round(costCacheRead * 10000) / 10000,
       costTotal: Math.round((costInput + costOutput + costCacheWrite + costCacheRead) * 10000) / 10000,
       fileSize,
-      filePath,
-    }
+      filePath }
   } catch {
     return null
   }

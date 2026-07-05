@@ -91,8 +91,7 @@ async function main() {
   const payload = {
     fetched_at: now,
     count: monitors.length,
-    monitors,
-  }
+    monitors }
   writeFileSync(LATEST, JSON.stringify(payload, null, 2))
 
   // Append one line per monitor to history (for sparkline / trend UI later)
@@ -106,8 +105,7 @@ async function main() {
     rhum: m.rhum_corrected ?? m.rhum,
     tvoc: m.tvocIndex,
     nox: m.noxIndex,
-    ts_reading: m.timestamp,
-  }))
+    ts_reading: m.timestamp }))
   appendFileSync(HISTORY, rows.map((r) => JSON.stringify(r)).join("\n") + "\n")
 
   console.log("NO_ACTION")

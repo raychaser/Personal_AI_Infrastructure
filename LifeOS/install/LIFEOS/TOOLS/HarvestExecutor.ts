@@ -94,10 +94,8 @@ function parseCli(): Cli {
       item: { type: "string" },
       limit: { type: "string", default: "50" },
       force: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    allowPositionals: false,
-  });
+      help: { type: "boolean", default: false } },
+    allowPositionals: false });
 
   if (parsed.values.help) {
     console.log(`HarvestExecutor
@@ -132,8 +130,7 @@ Options:
     dryRun: parsed.values["dry-run"],
     itemId,
     limit,
-    force: parsed.values.force,
-  };
+    force: parsed.values.force };
 }
 
 function loadAuthToken(): string {
@@ -163,10 +160,8 @@ async function fetchHarvestItems(token: string, limit: number, itemId?: number):
   const response = await fetch(url.toString(), {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
-  });
+      Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS) });
 
   if (!response.ok) {
     const body = await response.text();
@@ -330,8 +325,7 @@ function loadKnowledgeIndex(): KnowledgeNoteIndex[] {
         path: notePath,
         type: typeDir,
         slug: path.basename(entry, ".md"),
-        frontmatter: parseFrontmatter(raw),
-      });
+        frontmatter: parseFrontmatter(raw) });
     }
   }
 
@@ -559,8 +553,7 @@ async function handleCreateKnowledgeIdea(
       verb: action.verb,
       status: "backfilled",
       paths: matches.map((match) => path.relative(KNOWLEDGE_DIR, match.path)),
-      reason: "source_url or source+title match",
-    };
+      reason: "source_url or source+title match" };
   }
 
   if (ctx.dryRun) {
@@ -581,8 +574,7 @@ async function handleCreateKnowledgeIdea(
     return {
       verb: action.verb,
       status: "skipped",
-      reason: "would overwrite (no --force in v1)",
-    };
+      reason: "would overwrite (no --force in v1)" };
   }
 
   // body unavailable from /items in v1; synthesizing from title+url+reasoning+classification.
@@ -599,8 +591,7 @@ async function handleCreateKnowledgeIdea(
       "",
       "Write a compact knowledge note body with a short summary, key points, and practical implications. Do not invent facts beyond these inputs.",
     ].join("\n"),
-    level: "medium",
-  });
+    level: "medium" });
 
   if (!inferenceResult.success || typeof inferenceResult.output !== "string") {
     throw new Error(inferenceResult.error ?? "Inference failed to produce note body");
@@ -635,8 +626,7 @@ async function handleCreateKnowledgeIdea(
   return {
     verb: action.verb,
     status: "executed",
-    paths: [path.relative(KNOWLEDGE_DIR, targetPath)],
-  };
+    paths: [path.relative(KNOWLEDGE_DIR, targetPath)] };
 }
 
 async function handleCreateLearningQueue(
@@ -674,8 +664,7 @@ async function handleCreateLearningQueue(
   return {
     verb: action.verb,
     status: "executed",
-    paths: [path.relative(MEMORY_DIR, LEARNING_QUEUE_PATH)],
-  };
+    paths: [path.relative(MEMORY_DIR, LEARNING_QUEUE_PATH)] };
 }
 
 async function handleOpenGithubIssue(
@@ -689,8 +678,7 @@ async function handleOpenGithubIssue(
     verb: action.verb,
     status: "deferred",
     reason: "stub — github dispatch not implemented in v1",
-    params: action.params,
-  };
+    params: action.params };
 }
 
 async function handleTelosUpdate(
@@ -704,8 +692,7 @@ async function handleTelosUpdate(
     verb: action.verb,
     status: "deferred",
     reason: "stub — telos updates flow through Telos skill, not raw appends",
-    params: action.params,
-  };
+    params: action.params };
 }
 
 async function dispatchAction(item: HarvestItem, action: Action, ctx: ExecCtx): Promise<ActionResult> {
@@ -747,8 +734,7 @@ async function executeItem(
         actionResults.push({
           verb: action.verb,
           status: "error",
-          error: error instanceof Error ? error.message : String(error),
-        });
+          error: error instanceof Error ? error.message : String(error) });
       }
     }
   }
@@ -756,8 +742,7 @@ async function executeItem(
   const newRecord: SidecarItemRecord = {
     executed_at: new Date().toISOString(),
     external_id: item.external_id,
-    action_results: actionResults,
-  };
+    action_results: actionResults };
 
   return { newRecord, alreadyDone: false };
 }
@@ -790,8 +775,7 @@ function countStatuses(results: ActionResult[]): Record<ActionStatus, number> {
     backfilled: results.filter((result) => result.status === "backfilled").length,
     skipped: results.filter((result) => result.status === "skipped").length,
     deferred: results.filter((result) => result.status === "deferred").length,
-    error: results.filter((result) => result.status === "error").length,
-  };
+    error: results.filter((result) => result.status === "error").length };
 }
 
 async function main(): Promise<void> {
@@ -811,8 +795,7 @@ async function main(): Promise<void> {
     backfilled: 0,
     skipped: 0,
     deferred: 0,
-    error: 0,
-  };
+    error: 0 };
   const perItemSummaries: string[] = [];
 
   for (const item of items) {

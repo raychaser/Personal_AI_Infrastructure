@@ -134,8 +134,7 @@ const ROOT_FALLBACK: Record<string, { category: Category; kind: Kind; publish: P
   "ARCHITECTURE.md":         { category: "ops",      kind: "reference",  publish: "false" },
   "SECURITY_MONITORING.md":  { category: "ops",      kind: "reference",  publish: "false" },
   "ADMIN_EMAIL_API.md":      { category: "ops",      kind: "reference",  publish: "false" },
-  "README.md":               { category: "identity", kind: "narrative",  publish: "false" },
-}
+  "README.md":               { category: "identity", kind: "narrative",  publish: "false" } }
 
 const TELOS_FALLBACK: Record<string, { category: Category; kind: Kind; publish: PublishValue }> = {
   "MISSION.md":        { category: "domain", kind: "narrative",  publish: "daemon-summary" },
@@ -163,8 +162,7 @@ const TELOS_FALLBACK: Record<string, { category: Category; kind: Kind; publish: 
   "LEARNED.md":        { category: "mind",   kind: "collection", publish: "false" },
   "WRONG.md":          { category: "mind",   kind: "collection", publish: "daemon-summary" },
   "PROJECTS.md":       { category: "domain", kind: "reference",  publish: "false" },
-  "STATUS.md":         { category: "domain", kind: "reference",  publish: "false" },
-}
+  "STATUS.md":         { category: "domain", kind: "reference",  publish: "false" } }
 
 function inferFallback(userRelPath: string): { category: Category; kind: Kind; publish: PublishValue } | null {
   const parts = userRelPath.split("/")
@@ -367,8 +365,7 @@ function parseFile(absolutePath: string): UserIndexEntry {
     word_count,
     size_bytes: stat.size,
     inferred,
-    frontmatter_raw: meta,
-  }
+    frontmatter_raw: meta }
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -426,8 +423,7 @@ function buildIndex(): UserIndex {
     shape: [] as UserIndexEntry[],
     ops: [] as UserIndexEntry[],
     domain: [] as UserIndexEntry[],
-    unknown: [] as UserIndexEntry[],
-  }
+    unknown: [] as UserIndexEntry[] }
   for (const f of files) by_category[f.category].push(f)
 
   // Domains — group by top-level directory
@@ -452,8 +448,7 @@ function buildIndex(): UserIndex {
       total_size_bytes: totalSize,
       avg_completeness: Math.round(avgComp),
       any_overdue: entries.some(e => e.overdue_review),
-      files: entries,
-    })
+      files: entries })
   }
   domains.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -465,8 +460,7 @@ function buildIndex(): UserIndex {
     .map(f => ({
       path: f.path,
       reason: f.has_tbd ? "contains TBD markers" : `low completeness (${f.completeness})`,
-      interview_phase: f.interview_phase,
-    }))
+      interview_phase: f.interview_phase }))
     .sort((a, b) => (a.interview_phase ?? 99) - (b.interview_phase ?? 99))
 
   const by_kind = { collection: 0, narrative: 0, reference: 0, index: 0, metric: 0, unknown: 0 }
@@ -496,9 +490,7 @@ function buildIndex(): UserIndex {
         : 0,
       by_kind,
       by_publish,
-      frontmatter_coverage,
-    },
-  }
+      frontmatter_coverage } }
 }
 
 function writeIndex(index: UserIndex): void {
@@ -523,8 +515,7 @@ const state: ModuleState = {
   startedAt: null,
   lastIndexed: null,
   watcher: null,
-  debounceTimer: null,
-}
+  debounceTimer: null }
 
 function reindexDebounced(reason: string): void {
   if (state.debounceTimer) clearTimeout(state.debounceTimer)
@@ -584,9 +575,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
         ? Math.floor((Date.now() - state.startedAt.getTime()) / 1000)
         : 0,
       last_indexed: state.lastIndexed?.toISOString() ?? null,
-      index_path: INDEX_PATH,
-    },
-  }
+      index_path: INDEX_PATH } }
 }
 
 export async function handleRequest(path: string, _body: Record<string, unknown>): Promise<Response> {

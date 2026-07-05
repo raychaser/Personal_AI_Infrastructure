@@ -82,16 +82,14 @@ const FALLBACK_VOICE_SETTINGS: ElevenLabsVoiceSettings = {
   similarity_boost: 0.75,
   style: 0.0,
   speed: 1.0,
-  use_speaker_boost: true,
-}
+  use_speaker_boost: true }
 
 const FALLBACK_VOLUME = 1.0
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "http://localhost",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-}
+  "Access-Control-Allow-Headers": "Content-Type" }
 
 // 13 Emotional Presets — overlay onto resolved voice settings
 const EMOTIONAL_PRESETS: Record<string, EmotionalOverlay> = {
@@ -116,8 +114,7 @@ const EMOTIONAL_PRESETS: Record<string, EmotionalOverlay> = {
   caution:   { stability: 0.4, similarity_boost: 0.6 },
 
   // Urgent / Critical
-  urgent: { stability: 0.3, similarity_boost: 0.9 },
-}
+  urgent: { stability: 0.3, similarity_boost: 0.9 } }
 
 // Emoji → emotion mapping for marker extraction
 const EMOJI_TO_EMOTION: Record<string, string> = {
@@ -133,8 +130,7 @@ const EMOJI_TO_EMOTION: Record<string, string> = {
   "\u{1F914}": "pondering",
   "\u{1F3AF}": "focused",
   "\u{26A0}\u{FE0F}": "caution",
-  "\u{1F6A8}": "urgent",
-}
+  "\u{1F6A8}": "urgent" }
 
 // ── Rate Limiting ──
 
@@ -174,8 +170,7 @@ function loadPronunciations(customPath?: string): void {
 
       pronunciationRules = Object.entries(flat).map(([term, phonetic]) => ({
         regex: new RegExp(`\\b${escapeRegex(term)}\\b`, "g"),
-        phonetic,
-      }))
+        phonetic }))
 
       log("info", `Voice: loaded ${pronunciationRules.length} pronunciation rules from ${userPronPath}`)
     } else {
@@ -226,8 +221,7 @@ function loadVoiceConfigFromSettings(): LoadedVoiceConfig {
           style: (entry.style ?? entry.STYLE ?? 0.0) as number,
           speed: (entry.speed ?? entry.SPEED ?? 1.0) as number,
           use_speaker_boost: (entry.use_speaker_boost ?? entry.USE_SPEAKER_BOOST ?? entry.useSpeakerBoost ?? true) as boolean,
-          volume: (entry.volume ?? entry.VOLUME ?? 1.0) as number,
-        }
+          volume: (entry.volume ?? entry.VOLUME ?? 1.0) as number }
         voices[name.toLowerCase()] = voiceEntry
         voicesByVoiceId[vid] = voiceEntry
       }
@@ -236,8 +230,7 @@ function loadVoiceConfigFromSettings(): LoadedVoiceConfig {
     const resolvedDefaultVoiceId = voices.main?.voiceId || (daidentity.mainDAVoiceID as string) || ""
 
     log("info", `Voice: loaded ${Object.keys(voices).length} voice config(s) from settings.json`, {
-      voices: Object.keys(voices),
-    })
+      voices: Object.keys(voices) })
 
     return { defaultVoiceId: resolvedDefaultVoiceId, voices, voicesByVoiceId, desktopNotifications }
   } catch (error) {
@@ -293,8 +286,7 @@ function extractEmotionalMarker(message: string): { cleaned: string; emotion?: s
     if (EMOJI_TO_EMOTION[emoji] === emotionName) {
       return {
         cleaned: message.replace(emotionMatch[0], "").trim(),
-        emotion: emotionName,
-      }
+        emotion: emotionName }
     }
   }
 
@@ -329,14 +321,11 @@ async function generateSpeech(
     headers: {
       Accept: "audio/mpeg",
       "Content-Type": "application/json",
-      "xi-api-key": apiKey,
-    },
+      "xi-api-key": apiKey },
     body: JSON.stringify({
       text: pronouncedText,
       model_id: "eleven_turbo_v2_5",
-      voice_settings: voiceSettings,
-    }),
-  })
+      voice_settings: voiceSettings }) })
 
   if (!response.ok) {
     const errorText = await response.text()
@@ -434,8 +423,7 @@ async function sendNotification(
           similarity_boost: callerVoiceSettings.similarity_boost ?? FALLBACK_VOICE_SETTINGS.similarity_boost,
           style: callerVoiceSettings.style ?? FALLBACK_VOICE_SETTINGS.style,
           speed: callerVoiceSettings.speed ?? FALLBACK_VOICE_SETTINGS.speed,
-          use_speaker_boost: callerVoiceSettings.use_speaker_boost ?? FALLBACK_VOICE_SETTINGS.use_speaker_boost,
-        }
+          use_speaker_boost: callerVoiceSettings.use_speaker_boost ?? FALLBACK_VOICE_SETTINGS.use_speaker_boost }
         resolvedVolume = callerVolume ?? FALLBACK_VOLUME
         log("info", "Voice settings: pass-through from caller")
       } else {
@@ -447,8 +435,7 @@ async function sendNotification(
             similarity_boost: voiceEntry.similarity_boost,
             style: voiceEntry.style,
             speed: voiceEntry.speed,
-            use_speaker_boost: voiceEntry.use_speaker_boost,
-          }
+            use_speaker_boost: voiceEntry.use_speaker_boost }
           resolvedVolume = callerVolume ?? voiceEntry.volume ?? FALLBACK_VOLUME
           log("info", `Voice settings: from settings.json (${voiceEntry.voiceName || voice})`)
         } else {
@@ -463,8 +450,7 @@ async function sendNotification(
         resolvedSettings = {
           ...resolvedSettings,
           stability: EMOTIONAL_PRESETS[emotion].stability,
-          similarity_boost: EMOTIONAL_PRESETS[emotion].similarity_boost,
-        }
+          similarity_boost: EMOTIONAL_PRESETS[emotion].similarity_boost }
         log("info", `Voice emotion overlay: ${emotion}`)
       }
 
@@ -474,8 +460,7 @@ async function sendNotification(
         stability: resolvedSettings.stability,
         boost: resolvedSettings.similarity_boost,
         style: resolvedSettings.style,
-        volume: resolvedVolume,
-      })
+        volume: resolvedVolume })
 
       const audioBuffer = await generateSpeech(safeMessage, voice, resolvedSettings)
       await playAudio(audioBuffer, resolvedVolume)
@@ -498,8 +483,7 @@ async function sendNotification(
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return new Response(JSON.stringify(body), {
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    status,
-  })
+    status })
 }
 
 function errorStatus(message: string): number {
@@ -541,8 +525,7 @@ export function startVoice(config: VoiceConfig): void {
     defaultVoiceId,
     pronunciationRules: pronunciationRules.length,
     configuredVoices: Object.keys(voiceConfig.voices),
-    apiKeyConfigured: !!config.elevenlabs_api_key,
-  })
+    apiKeyConfigured: !!config.elevenlabs_api_key })
 }
 
 /**
@@ -557,8 +540,7 @@ export function voiceHealth(): Record<string, unknown> {
     api_key_configured: !!moduleConfig.elevenlabs_api_key,
     pronunciation_rules: pronunciationRules.length,
     configured_voices: Object.keys(voiceConfig.voices),
-    desktop_notifications: voiceConfig.desktopNotifications,
-  }
+    desktop_notifications: voiceConfig.desktopNotifications }
 }
 
 // ── Phase Capture: REMOVED ──
@@ -625,8 +607,7 @@ export async function handleVoiceRequest(req: Request): Promise<Response | null>
 
       log("info", `Voice: notification "${title}" - "${message}"`, {
         voiceEnabled,
-        voiceId: voiceId || defaultVoiceId,
-      })
+        voiceId: voiceId || defaultVoiceId })
 
       const result = await sendNotification(title, message, voiceEnabled, voiceId, voiceSettings, volume)
 

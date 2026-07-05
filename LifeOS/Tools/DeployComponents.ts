@@ -379,7 +379,7 @@ function deploy(component: Component, ctx: Ctx): ComponentResult {
 
 // ── main ─────────────────────────────────────────────────────────────
 
-function normalizeConfigRoot(raw: string, home: string): string {
+export function normalizeConfigRoot(raw: string, home: string): string {
   let o = raw.trim()
     .replace(/^~(?=\/|$)/, home)
     .replace(/^\$\{HOME\}(?=\/|$)/, home)
@@ -434,8 +434,7 @@ function main(): void {
     installRoot: join(skillRoot, "install"),
     home,
     launchAgents: join(home, "Library", "LaunchAgents"),
-    apply,
-  };
+    apply };
 
   const results = selected.map((c) => deploy(c, ctx));
   // A blocked component (prereq absent, nothing written) is a FAILURE, not a
@@ -450,9 +449,9 @@ function main(): void {
     payloadRoot: ctx.payloadRoot,
     selected,
     results,
-    note: apply ? undefined : "dry-run — re-run with --apply --components <csv> after the user opts in",
-  }, null, 2));
+    note: apply ? undefined : "dry-run — re-run with --apply --components <csv> after the user opts in" }, null, 2));
   process.exit(ok ? 0 : 1);
 }
 
-main();
+
+if (import.meta.main) main();

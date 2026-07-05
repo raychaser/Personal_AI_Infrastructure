@@ -22,7 +22,7 @@ import { paiUserDir } from "./LifeosConfig";
 import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = (getConfigRoot());
+const CLAUDE_DIR = getConfigRoot();
 
 // ═══════════════════════════════════════════════════════════════════════
 // Terminal Width Detection
@@ -156,8 +156,7 @@ const BOX = {
   bottomRight: "\u256F",
   leftT: "\u251C",
   rightT: "\u2524",
-  cross: "\u253C",
-};
+  cross: "\u253C" };
 
 // Sparkline characters for sentiment histogram
 const SPARK = ["\u2581", "\u2582", "\u2583", "\u2584", "\u2585", "\u2586", "\u2587", "\u2588"];
@@ -311,8 +310,7 @@ const LETTERS: Record<string, string[]> = {
     "\u2588\u2588\u2551",
     "\u2588\u2588\u2551",
   ],
-  " ": ["   ", "   ", "   ", "   ", "   "],
-};
+  " ": ["   ", "   ", "   ", "   ", "   "] };
 
 // ═══════════════════════════════════════════════════════════════════════
 // Dynamic Stats Collection
@@ -414,8 +412,7 @@ function getStats(): SystemStats {
     workItems: countWorkItems(),
     learnings: countLearnings(),
     userFiles: countUserFiles(),
-    model: "Opus 4.5",
-  };
+    model: "Opus 4.5" };
 }
 
 // ═══════════════════════════════════════════════════════════════════════

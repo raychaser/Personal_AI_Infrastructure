@@ -66,8 +66,7 @@ function detectIntent(prompt: string): RouteMatch | null {
       return {
         kind: t.kind,
         imperative: m[1].trim(),
-        remainder: (m[2] || "").trim(),
-      };
+        remainder: (m[2] || "").trim() };
     }
   }
   return null;

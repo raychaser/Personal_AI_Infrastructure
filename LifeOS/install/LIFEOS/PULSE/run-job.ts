@@ -4,7 +4,7 @@
  * Usage: bun run run-job.ts <job-name>
  */
 import { join } from "path"
-import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { readFileSync, existsSync } from "fs"
 
@@ -25,7 +25,9 @@ try {
       value = value.slice(1, -1)
     if (!process.env[key]) process.env[key] = value
   }
-} catch {}
+} catch (e) {
+  if ((e as { code?: string })?.code !== "ENOENT") console.error("[env] failed to read", envPath + ":", e);
+}
 
 import { loadConfig, spawnClaude, spawnScript, dispatch, isSentinel, log } from "./lib"
 

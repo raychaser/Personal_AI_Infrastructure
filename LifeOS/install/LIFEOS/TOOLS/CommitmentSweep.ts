@@ -164,8 +164,7 @@ async function main() {
     due_this_week: [],
     future: [],
     notified: false,
-    errors: [],
-  };
+    errors: [] };
 
   if (!cfg.enabled || !cfg.repo) {
     digest.errors.push(`work_config_disabled: ${cfg.reason || "unknown"}`);
@@ -198,8 +197,7 @@ async function main() {
       due,
       beneficiary: parseBeneficiaryFromBody(issue.body || ""),
       daysUntilDue,
-      bucket: bucket(daysUntilDue),
-    };
+      bucket: bucket(daysUntilDue) };
     if (c.bucket === "overdue") digest.overdue.push(c);
     else if (c.bucket === "due_today") digest.due_today.push(c);
     else if (c.bucket === "due_this_week") digest.due_this_week.push(c);

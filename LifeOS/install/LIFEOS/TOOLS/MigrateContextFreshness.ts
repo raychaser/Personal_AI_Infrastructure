@@ -16,8 +16,7 @@ import {
   CONTEXT_FRESHNESS_REGISTRY,
   MARKER_RE,
   readFileFrontmatter,
-  type ContextFile,
-} from "./TelosFreshness";
+  type ContextFile } from "./TelosFreshness";
 
 const HOME = process.env.HOME || "";
 const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
@@ -82,8 +81,7 @@ function insertFreshnessIntoExistingBlock(content: string): { content: string; a
     `convention: pai-freshness-v1\n`;
   return {
     content: "---\n" + injected + block + "\n---\n" + content.slice(end + 5),
-    action: "upgraded-block",
-  };
+    action: "upgraded-block" };
 }
 
 function newFrontmatterBlock(entry: ContextFile): string {
@@ -145,8 +143,7 @@ function migrateFile(entry: ContextFile, dryRun: boolean): MigrationResult {
       preHash: "",
       postHash: "",
       preview: [],
-      error: `MISSING: ${entry.path}`,
-    };
+      error: `MISSING: ${entry.path}` };
   }
 
   const original = readFileSync(entry.path, "utf-8");
@@ -171,8 +168,7 @@ function migrateFile(entry: ContextFile, dryRun: boolean): MigrationResult {
       preHash,
       postHash: preHash,
       preview: [],
-      error: `${entry.path}: ${message}`,
-    };
+      error: `${entry.path}: ${message}` };
   }
 
   const postHash = strippedHash(next);
@@ -188,8 +184,7 @@ function migrateFile(entry: ContextFile, dryRun: boolean): MigrationResult {
       preHash,
       postHash,
       preview: previewLines(next),
-      error: `content hash mismatch for ${entry.path}`,
-    };
+      error: `content hash mismatch for ${entry.path}` };
   }
 
   if (!dryRun && next !== original) {
@@ -206,8 +201,7 @@ function migrateFile(entry: ContextFile, dryRun: boolean): MigrationResult {
     bytesAfter: Buffer.byteLength(next),
     preHash,
     postHash,
-    preview: previewLines(next),
-  };
+    preview: previewLines(next) };
 }
 
 function printPreview(result: MigrationResult): void {

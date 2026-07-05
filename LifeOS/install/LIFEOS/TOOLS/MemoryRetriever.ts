@@ -457,11 +457,9 @@ function loadMemoryFiles(): KnowledgeNote[] {
         frontmatter: {
           ...frontmatter,
           title,
-          type: "memory",
-        },
+          type: "memory" },
         body: cleaned,
-        wordCount,
-      });
+        wordCount });
     } catch {
       // Skip unreadable
     }
@@ -573,7 +571,7 @@ function formatRelevantBlock(results: RelevantResultItem[]): string {
     lines.push(`### [${r.type} · ${r.score.toFixed(1)}] ${r.title}`);
     lines.push(`<!-- ${shortPath} -->`);
     // Trim noisy whitespace and limit to roughly the excerpt budget
-    const excerpt = r.excerpt.replace(/\n{3,}/g, "\n\n").trim();
+    const excerpt = r.excerpt.replace(/\n{3 }/g, "\n\n").trim();
     lines.push(excerpt);
   }
   return lines.join("\n");
@@ -631,11 +629,9 @@ async function main(): Promise<void> {
       top: { type: "string", short: "t" },
       raw: { type: "boolean", short: "r", default: false },
       budget: { type: "string", short: "b" },
-      help: { type: "boolean", short: "h", default: false },
-    },
+      help: { type: "boolean", short: "h", default: false } },
     allowPositionals: true,
-    strict: true,
-  });
+    strict: true });
 
   if (values.help) {
     printHelp();

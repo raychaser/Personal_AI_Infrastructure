@@ -110,8 +110,7 @@ const MINING_PATTERN_MAP: Record<MemoryType, RegExp[]> = {
   decision: DECISION_PATTERNS,
   preference: PREFERENCE_PATTERNS,
   milestone: MILESTONE_PATTERNS,
-  problem: PROBLEM_PATTERNS,
-};
+  problem: PROBLEM_PATTERNS };
 
 // ============================================================================
 // Types
@@ -353,8 +352,7 @@ function mineMemories(sessionPath: string): MinedMemory[] {
           context: textContent.slice(0, 300),
           confidence,
           sourcePattern: firstMatchedPattern,
-          sourceLine: lineIdx + 1,
-        });
+          sourceLine: lineIdx + 1 });
       }
     } catch {
       // Skip malformed lines
@@ -417,8 +415,7 @@ function writeToQueue(mem: MinedMemory): string {
     confidence: mem.confidence,
     sourcePattern: mem.sourcePattern,
     sourcePath: mem.sessionId,
-    minedAt: now.toISOString(),
-  };
+    minedAt: now.toISOString() };
 
   fs.writeFileSync(filepath, JSON.stringify(candidate, null, 2));
   return filepath;
@@ -505,9 +502,7 @@ const { values } = parseArgs({
     "projects-dir": { type: "string" },
     "dry-run": { type: "boolean" },
     mine: { type: "boolean", short: "m" },
-    help: { type: "boolean", short: "h" },
-  },
-});
+    help: { type: "boolean", short: "h" } } });
 
 if (values.help) {
   console.log(`

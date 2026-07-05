@@ -220,8 +220,7 @@ function classify(body: string): { target: Target; confidence: number; reasons: 
     target: top[0] as Target,
     confidence,
     reasons: top[1].reasons.slice(0, 3),
-    alternatives: entries.slice(1, 4).map(([t]) => t as Target),
-  };
+    alternatives: entries.slice(1, 4).map(([t]) => t as Target) };
 }
 
 // ─── Main ───
@@ -257,8 +256,7 @@ function main(): void {
         classification_confidence: confidence,
         classification_reasons: reasons,
         alternatives,
-        status: "pending",
-      });
+        status: "pending" });
     }
   }
 

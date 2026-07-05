@@ -83,8 +83,7 @@ function computeFromCurrent(file: string): DimensionState | null {
     pct,
     tbd_count: missing,
     last_updated: readFrontmatterDate(content),
-    source_file: `CURRENT_STATE/${file}`,
-  };
+    source_file: `CURRENT_STATE/${file}` };
 }
 
 function computeFromIdeal(file: string): DimensionState {
@@ -99,8 +98,7 @@ function computeFromIdeal(file: string): DimensionState {
     pct,
     tbd_count,
     last_updated: readFrontmatterDate(content),
-    source_file: `IDEAL_STATE/${file}`,
-  };
+    source_file: `IDEAL_STATE/${file}` };
 }
 
 function computeState(file: string): DimensionState {
@@ -114,8 +112,7 @@ function build(): LifeosState {
   }
   return {
     generated_at: new Date().toISOString(),
-    dimensions,
-  };
+    dimensions };
 }
 
 function main(): void {

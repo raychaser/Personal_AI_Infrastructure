@@ -16,7 +16,6 @@
 
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
-import { homedir } from 'os';
 import { parse as parseYaml } from 'yaml';
 import { getConfigRoot } from "../../hooks/lib/paths";
 
@@ -35,7 +34,6 @@ interface ExtendManifest {
 }
 
 // Constants
-const HOME = homedir();
 const CUSTOMIZATION_DIR = join(getConfigRoot(), 'LIFEOS', 'USER', 'SKILLCUSTOMIZATIONS');
 
 /**

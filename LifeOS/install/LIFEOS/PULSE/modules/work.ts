@@ -71,8 +71,7 @@ const state: ModuleState = {
   startedAt: null,
   lastFetch: null,
   pollHandle: null,
-  config: null,
-};
+  config: null };
 
 // ── Column derivation ───────────────────────────────────────────────────────
 
@@ -94,8 +93,7 @@ const LEGACY_STATUS_ALIASES: Record<string, string> = {
   "blocked": "Blocked",
   "needs-human": "In-Review",
   "in-review": "In-Review",
-  "complete": "Complete",
-};
+  "complete": "Complete" };
 
 // Source detection — derives where the issue came from based on labels.
 // Used by the kanban card badge.
@@ -210,8 +208,7 @@ async function fetchIssues(repo: string): Promise<IssueRecord[] | null> {
       column: deriveColumn({ labels, state: i.state }, cfg.kanbanColumns),
       slug,
       source: issueSource(labels),
-      principal_stated_goal: extractPrincipalGoal(slug),
-    };
+      principal_stated_goal: extractPrincipalGoal(slug) };
   });
 }
 
@@ -241,8 +238,7 @@ async function refresh(): Promise<{ ok: boolean; reason?: string }> {
   writeCache({
     fetchedAt: state.lastFetch.toISOString(),
     repo: state.config.repo,
-    issues,
-  });
+    issues });
   return { ok: true };
 }
 
@@ -295,9 +291,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
         : 0,
       last_fetch: state.lastFetch?.toISOString() ?? null,
       poll_interval_seconds: cfg?.pollIntervalSeconds ?? null,
-      cache_path: CACHE_PATH,
-    },
-  };
+      cache_path: CACHE_PATH } };
 }
 
 // ── HTTP surface ────────────────────────────────────────────────────────────
@@ -315,8 +309,7 @@ function setupTemplate(reason: string): Response {
       "Restart Pulse so this module re-reads work_repo.json: `bun ~/.claude/LIFEOS/PULSE/manage.sh restart`.",
       "Run an Algorithm session — ULWorkSync.hook.ts will open the first issue at SessionEnd.",
     ],
-    docs: "skills/_ULWORK/SKILL.md (search 'Capture flow')",
-  };
+    docs: "skills/_ULWORK/SKILL.md (search 'Capture flow')" };
   return Response.json(body);
 }
 
@@ -332,8 +325,7 @@ function buildResponseFromCache(): Response {
       items: [],
       lastFetch: null,
       stale: true,
-      stale_reason: "no cache yet — first poll pending",
-    });
+      stale_reason: "no cache yet — first poll pending" });
   }
 
   const cacheAgeMs = Date.now() - statSync(CACHE_PATH).mtimeMs;
@@ -354,8 +346,7 @@ function buildResponseFromCache(): Response {
     items: cache.issues,
     lastFetch: cache.fetchedAt,
     stale,
-    stale_reason: stale ? "gh fetch stale (offline or rate-limited?)" : undefined,
-  });
+    stale_reason: stale ? "gh fetch stale (offline or rate-limited?)" : undefined });
 }
 
 export async function handleRequest(req: Request, pathname: string): Promise<Response | null> {
@@ -381,8 +372,7 @@ export async function handleRequest(req: Request, pathname: string): Promise<Res
 
   if (req.method === "GET" && (sub === "/ui" || sub === "/view")) {
     return new Response(renderKanbanHTML(), {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+      headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 
   return Response.json({ error: "Not found" }, { status: 404 });

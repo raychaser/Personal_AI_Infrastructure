@@ -127,8 +127,7 @@ function normalizeBookmark(value: unknown): Bookmark | null {
     created_at: typeof item.created_at === "string" ? item.created_at : undefined,
     url: typeof item.url === "string" ? item.url : undefined,
     metrics: item.metrics,
-    urls: Array.isArray(item.urls) ? item.urls.filter((u): u is string => typeof u === "string") : undefined,
-  };
+    urls: Array.isArray(item.urls) ? item.urls.filter((u): u is string => typeof u === "string") : undefined };
 }
 
 async function fetchBookmarks(): Promise<{ bookmarks: Bookmark[]; error?: string }> {
@@ -148,8 +147,7 @@ function loadState(): BookmarkState {
     return {
       seenIds: Array.isArray(parsed.seenIds) ? parsed.seenIds.filter((id): id is string => typeof id === "string") : [],
       lastPull: typeof parsed.lastPull === "string" ? parsed.lastPull : null,
-      pullCount: typeof parsed.pullCount === "number" && Number.isFinite(parsed.pullCount) ? parsed.pullCount : 0,
-    };
+      pullCount: typeof parsed.pullCount === "number" && Number.isFinite(parsed.pullCount) ? parsed.pullCount : 0 };
   } catch {
     return emptyState();
   }
@@ -161,8 +159,7 @@ function writeState(state: BookmarkState, newIds: string[], ts: string): void {
   const next: BookmarkState = {
     seenIds: Array.from(seen),
     lastPull: ts,
-    pullCount: state.pullCount + 1,
-  };
+    pullCount: state.pullCount + 1 };
   mkdirSync(STATE_DIR, { recursive: true });
   // Atomic write: a launchd job killed mid-write must never truncate the seen-state
   // (a truncated state reads as "everything is new" → re-classify churn). temp + rename.
@@ -186,8 +183,7 @@ function makeLogLine(partial: Partial<SweepLogLine>): SweepLogLine {
     auditExit: partial.auditExit ?? null,
     issueUrls: partial.issueUrls ?? [],
     ...(partial.error ? { error: partial.error } : {}),
-    ...(partial.errors && partial.errors.length > 0 ? { errors: partial.errors } : {}),
-  };
+    ...(partial.errors && partial.errors.length > 0 ? { errors: partial.errors } : {}) };
 }
 
 function logAndPrint(line: SweepLogLine, dryRun: boolean, summary: string): void {
@@ -241,8 +237,7 @@ function normalizeDecision(value: unknown): Decision | null {
     title: typeof item.title === "string" ? item.title.trim() : undefined,
     body: typeof item.body === "string" ? item.body.trim() : undefined,
     property: typeof item.property === "string" && VALID_PROPERTIES.has(item.property) ? item.property : undefined,
-    reason: typeof item.reason === "string" ? item.reason.trim() : undefined,
-  };
+    reason: typeof item.reason === "string" ? item.reason.trim() : undefined };
 }
 
 async function classifyBookmarks(bookmarks: Bookmark[]): Promise<{ decisions: Decision[]; error?: string }> {
@@ -279,8 +274,7 @@ function dispositionFor(bookmark: Bookmark, decisionsById: Map<string, Decision>
   return {
     ...decision,
     title: decision.title || titleFromBookmark(bookmark),
-    body: decision.body || bodyFromBookmark(bookmark),
-  };
+    body: decision.body || bodyFromBookmark(bookmark) };
 }
 
 function applyMaxCreateCap(decisions: Decision[], maxCreate: number): Decision[] {
@@ -420,8 +414,7 @@ async function main(): Promise<void> {
     skipped,
     auditExit,
     issueUrls,
-    errors,
-  });
+    errors });
   writeLogLine(line);
   console.log(`[BookmarkSweep] fetched=${fetched.bookmarks.length} new=${newBookmarks.length} created=${created} skipped=${skipped} auditExit=${auditExit}`);
   process.exit(0);

@@ -44,8 +44,7 @@ function loadWorkerConfig(): WorkerConfig | null {
       github_installation_id: (w.github_installation_id as string) ?? process.env.GITHUB_INSTALLATION_ID ?? "",
       repos: (w.repos as string[]) ?? [],
       specialization: (w.specialization as string[]) ?? [],
-      max_concurrent: (w.max_concurrent as number) ?? 1,
-    }
+      max_concurrent: (w.max_concurrent as number) ?? 1 }
   } catch {
     return null
   }
@@ -90,10 +89,8 @@ async function getInstallationToken(config: WorkerConfig): Promise<string> {
       method: "POST",
       headers: {
         Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      signal: AbortSignal.timeout(10_000),
-    }
+        Authorization: `Bearer ${jwt}` },
+      signal: AbortSignal.timeout(10_000) }
   )
 
   if (!resp.ok) throw new Error(`GitHub App token exchange failed: ${resp.status}`)
@@ -125,10 +122,8 @@ async function findReadyIssues(config: WorkerConfig, token: string): Promise<Iss
       const resp = await fetch(url, {
         headers: {
           Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${token}`,
-        },
-        signal: AbortSignal.timeout(10_000),
-      })
+          Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10_000) })
 
       if (!resp.ok) continue
       const items = (await resp.json()) as Array<{
@@ -158,8 +153,7 @@ async function findReadyIssues(config: WorkerConfig, token: string): Promise<Iss
           title: item.title,
           body: item.body ?? "",
           labels,
-          repo,
-        })
+          repo })
       }
     } catch {}
   }
@@ -171,8 +165,7 @@ async function claimIssue(issue: Issue, config: WorkerConfig, token: string): Pr
   const headers = {
     Accept: "application/vnd.github+json",
     Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  }
+    "Content-Type": "application/json" }
 
   // Self-assign
   try {
@@ -180,8 +173,7 @@ async function claimIssue(issue: Issue, config: WorkerConfig, token: string): Pr
       method: "POST",
       headers,
       body: JSON.stringify({ assignees: [`${config.name}[bot]`] }),
-      signal: AbortSignal.timeout(10_000),
-    })
+      signal: AbortSignal.timeout(10_000) })
   } catch {}
 
   // Relabel: remove status:ready, add status:claimed
@@ -192,8 +184,7 @@ async function claimIssue(issue: Issue, config: WorkerConfig, token: string): Pr
     method: "PUT",
     headers,
     body: JSON.stringify({ labels: newLabels }),
-    signal: AbortSignal.timeout(10_000),
-  })
+    signal: AbortSignal.timeout(10_000) })
 
   return resp.ok
 }
@@ -208,8 +199,7 @@ async function completeIssue(
   const headers = {
     Accept: "application/vnd.github+json",
     Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  }
+    "Content-Type": "application/json" }
 
   // Comment with result
   await fetch(`https://api.github.com/repos/${issue.repo}/issues/${issue.number}/comments`, {
@@ -218,10 +208,8 @@ async function completeIssue(
     body: JSON.stringify({
       body: success
         ? `**${config.name}** completed this task.\n\n${result.slice(0, 60_000)}`
-        : `**${config.name}** failed on this task.\n\nError: ${result.slice(0, 2_000)}`,
-    }),
-    signal: AbortSignal.timeout(10_000),
-  }).catch(() => {})
+        : `**${config.name}** failed on this task.\n\nError: ${result.slice(0, 2_000)}` }),
+    signal: AbortSignal.timeout(10_000) }).catch(() => {})
 
   if (success) {
     // Relabel to status:done and close
@@ -231,15 +219,13 @@ async function completeIssue(
       method: "PUT",
       headers,
       body: JSON.stringify({ labels: newLabels }),
-      signal: AbortSignal.timeout(10_000),
-    }).catch(() => {})
+      signal: AbortSignal.timeout(10_000) }).catch(() => {})
 
     await fetch(`https://api.github.com/repos/${issue.repo}/issues/${issue.number}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ state: "closed" }),
-      signal: AbortSignal.timeout(10_000),
-    }).catch(() => {})
+      signal: AbortSignal.timeout(10_000) }).catch(() => {})
   } else {
     // Release claim — relabel back to status:ready
     const newLabels = issue.labels.filter((l) => !l.startsWith("status:"))
@@ -248,8 +234,7 @@ async function completeIssue(
       method: "PUT",
       headers,
       body: JSON.stringify({ labels: newLabels }),
-      signal: AbortSignal.timeout(10_000),
-    }).catch(() => {})
+      signal: AbortSignal.timeout(10_000) }).catch(() => {})
   }
 }
 
@@ -289,8 +274,7 @@ async function executeWork(issue: Issue, config: WorkerConfig): Promise<{ output
       stdin: new Blob([prompt]),
       stdout: "pipe",
       stderr: "pipe",
-      env,
-    }
+      env }
   )
 
   const timer = setTimeout(() => proc.kill("SIGTERM"), 30 * 60_000) // 30-minute timeout

@@ -20,8 +20,7 @@ import type {
   SourceState,
   SourceStatus,
   SyncState,
-  TokenStore,
-} from "./healthsync/types";
+  TokenStore } from "./healthsync/types";
 import {
   appendJsonl,
   buildCtx,
@@ -33,8 +32,7 @@ import {
   saveTokens,
   timedFetch,
   withTimeout,
-  writeJson,
-} from "./healthsync/store";
+  writeJson } from "./healthsync/store";
 
 type SourcePull = (ctx: Ctx) => Promise<SourceResult>;
 type SourceModule = { pull: SourcePull };
@@ -106,8 +104,7 @@ function emptyResult(source: SourceName, status: SourceStatus, lastError: string
     records: 0,
     lastError,
     lastSuccess: null,
-    ms: 0,
-  };
+    ms: 0 };
 }
 
 async function modulePull(
@@ -123,8 +120,7 @@ async function modulePull(
     const result = await withTimeout(mod.pull(ctx), 25_000, `${source} pull`);
     return {
       ...result,
-      ms: result.ms || Date.now() - startedAt,
-    };
+      ms: result.ms || Date.now() - startedAt };
   } catch (error) {
     const message = errorMessage(error);
     const isMissingModule =
@@ -136,14 +132,12 @@ async function modulePull(
     if (isMissingModule) {
       return {
         ...emptyResult(source, "unconfigured", "module not yet built"),
-        ms: Date.now() - startedAt,
-      };
+        ms: Date.now() - startedAt };
     }
 
     return {
       ...emptyResult(source, "failed", message),
-      ms: Date.now() - startedAt,
-    };
+      ms: Date.now() - startedAt };
   }
 }
 
@@ -156,8 +150,7 @@ const SOURCES: Record<SourceName, SourcePull> = {
   oura: (ctx: Ctx) => modulePull("oura", () => loadSourceModule("oura"), ctx),
   eightsleep: (ctx: Ctx) => modulePull("eightsleep", () => loadSourceModule("eightsleep"), ctx),
   apple: (ctx: Ctx) => modulePull("apple", () => loadSourceModule("apple"), ctx),
-  function: (ctx: Ctx) => modulePull("function", () => loadSourceModule("function"), ctx),
-};
+  function: (ctx: Ctx) => modulePull("function", () => loadSourceModule("function"), ctx) };
 
 async function isolatedPull(source: SourceName, ctx: Ctx): Promise<SourceResult> {
   const startedAt = Date.now();
@@ -170,8 +163,7 @@ async function isolatedPull(source: SourceName, ctx: Ctx): Promise<SourceResult>
       records: 0,
       lastError: errorMessage(error),
       lastSuccess: null,
-      ms: Date.now() - startedAt,
-    };
+      ms: Date.now() - startedAt };
   }
 }
 
@@ -181,8 +173,7 @@ function mergeState(prev: SyncState, results: SourceResult[]): SyncState {
     const oldState: SourceState = next[result.source] ?? {
       lastSuccess: null,
       lastError: null,
-      lastHash: null,
-    };
+      lastHash: null };
     next[result.source] = {
       lastSuccess: result.status === "ok" ? result.lastSuccess : oldState.lastSuccess,
       lastError: result.lastError,
@@ -193,8 +184,7 @@ function mergeState(prev: SyncState, results: SourceResult[]): SyncState {
         : oldState.consecutiveAuthFailures ?? 0,
       lastAuthAttempt: result.authAttempted === true
         ? new Date().toISOString()
-        : oldState.lastAuthAttempt ?? null,
-    };
+        : oldState.lastAuthAttempt ?? null };
   }
   return next;
 }
@@ -206,8 +196,7 @@ function blankLastNight(): LastNight {
     oura_sleep_score: null,
     oura_readiness_score: null,
     eightsleep_score: null,
-    bed_temp_c: null,
-  };
+    bed_temp_c: null };
 }
 
 async function guardedJson(path: string): Promise<Record<string, unknown> | null> {
@@ -312,8 +301,7 @@ async function writeCurrent(ctx: Ctx, results: SourceResult[]): Promise<CurrentJ
     generated_at: isoNowLA(ctx.now),
     day,
     last_night: await buildLastNight(ctx, day),
-    sources: resultRecord(results, prior === null ? null : nestedRecord(prior, "sources")),
-  };
+    sources: resultRecord(results, prior === null ? null : nestedRecord(prior, "sources")) };
   await writeJson(CURRENT_PATH, current);
   return current;
 }
@@ -334,8 +322,7 @@ async function runPull(args: string[]): Promise<number> {
         records: 0,
         lastError: errorMessage(item.reason),
         lastSuccess: null,
-        ms: 0,
-      };
+        ms: 0 };
     });
   };
   const results = await withTimeout(run(), RUN_TIMEOUT_MS, "health sync run");
@@ -347,8 +334,7 @@ async function runPull(args: string[]): Promise<number> {
     at: isoNowLA(ctx.now),
     command: "pull",
     sources,
-    results,
-  });
+    results });
 
   for (const result of results) {
     log(
@@ -425,8 +411,7 @@ function requiredEnv(ctx: Ctx, name: string): string {
 async function openBrowser(url: string): Promise<void> {
   const proc = Bun.spawn(["open", url], {
     stdout: "ignore",
-    stderr: "ignore",
-  });
+    stderr: "ignore" });
   await proc.exited;
 }
 
@@ -464,17 +449,14 @@ async function exchangeOuraCode(ctx: Ctx, code: string): Promise<TokenStore> {
     code,
     redirect_uri: AUTH_REDIRECT_URI,
     client_id: clientId,
-    client_secret: clientSecret,
-  });
+    client_secret: clientSecret });
   const response = await timedFetch(
     "https://api.ouraring.com/oauth/token",
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-    },
+        "Content-Type": "application/x-www-form-urlencoded" },
+      body },
     FETCH_TIMEOUT_MS,
   );
 
@@ -488,8 +470,7 @@ async function exchangeOuraCode(ctx: Ctx, code: string): Promise<TokenStore> {
   tokens.oura = {
     access_token: tokenString(json, "access_token"),
     refresh_token: tokenString(json, "refresh_token"),
-    expires_at: Math.floor(Date.now() / 1000) + expiresIn,
-  };
+    expires_at: Math.floor(Date.now() / 1000) + expiresIn };
   return tokens;
 }
 
@@ -516,8 +497,7 @@ async function waitForOuraCode(): Promise<string> {
         rejectCode(new Error(`Oura OAuth failed: ${error}`));
         return new Response("Authentication failed. Return to the terminal.", {
           status: 400,
-          headers: { "Content-Type": "text/plain" },
-        });
+          headers: { "Content-Type": "text/plain" } });
       }
 
       const code = url.searchParams.get("code");
@@ -525,17 +505,14 @@ async function waitForOuraCode(): Promise<string> {
         rejectCode(new Error("Oura OAuth callback did not include a code"));
         return new Response("Missing code. Return to the terminal.", {
           status: 400,
-          headers: { "Content-Type": "text/plain" },
-        });
+          headers: { "Content-Type": "text/plain" } });
       }
 
       resolveCode(code);
       return new Response("HealthSync Oura auth complete. Return to the terminal.", {
         status: 200,
-        headers: { "Content-Type": "text/plain" },
-      });
-    },
-  });
+        headers: { "Content-Type": "text/plain" } });
+    } });
 
   try {
     // 5 min: a cold Oura web login (email → password/magic-link → consent) can

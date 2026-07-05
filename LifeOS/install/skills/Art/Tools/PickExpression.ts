@@ -18,7 +18,7 @@
  * directly in the workflow if a more specific expression fits.
  */
 import { existsSync, readdirSync } from "node:fs";
-import { homedir } from "node:os";
+import { } from "node:os";
 import { join } from "node:path";
 import { getConfigRoot } from "../../../hooks/lib/paths";
 

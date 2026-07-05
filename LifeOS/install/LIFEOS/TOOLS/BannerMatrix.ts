@@ -24,7 +24,7 @@ import { paiUserDir } from "./LifeosConfig";
 import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = (getConfigRoot());
+const CLAUDE_DIR = getConfigRoot();
 
 // =============================================================================
 // Terminal Width Detection
@@ -351,8 +351,7 @@ function getStats(): SystemStats {
     hooks: countHooks(),
     workItems: countWorkItems(),
     learnings: countLearnings(),
-    model: "Opus 4.7",
-  };
+    model: "Opus 4.7" };
 }
 
 // =============================================================================

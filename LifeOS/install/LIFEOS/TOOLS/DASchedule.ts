@@ -155,11 +155,9 @@ function addTask(args: Record<string, string>): void {
       channel,
       prompt: actionType === "prompt" ? args.prompt : undefined,
       model: args.model,
-      command: actionType === "script" ? args.command : undefined,
-    },
+      command: actionType === "script" ? args.command : undefined },
     status: "active",
-    fire_count: 0,
-  }
+    fire_count: 0 }
 
   appendTask(task)
   console.log(`Task created: ${task.id}`)

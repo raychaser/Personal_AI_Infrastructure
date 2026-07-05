@@ -29,7 +29,7 @@ import { getConfigRoot } from "../../hooks/lib/paths";
 // Configuration
 // ============================================================================
 
-const CLAUDE_DIR = (getConfigRoot());
+const CLAUDE_DIR = getConfigRoot();
 const MCP_DIR = join(CLAUDE_DIR, "MCPs");
 const ACTIVE_MCP = join(CLAUDE_DIR, ".mcp.json");
 const BANNER_SCRIPT = join(getConfigRoot(), "LIFEOS", "TOOLS", "Banner.ts");

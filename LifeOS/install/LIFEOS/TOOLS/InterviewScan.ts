@@ -283,8 +283,7 @@ function scoreFile(target: RegistryTarget): Target {
     age_days: null,
     threshold_days: 0,
     stale: false,
-    why_incomplete: [],
-  };
+    why_incomplete: [] };
 
   if (!existsSync(target.path)) {
     result.why_incomplete.push("file does not exist");
@@ -352,8 +351,7 @@ function scoreSection(target: RegistryTarget, sectionBody: string, sectionFreshn
     age_days: sectionFreshness?.ageDays ?? null,
     threshold_days: sectionFreshness?.thresholdDays ?? 0,
     stale: sectionFreshness?.stale ?? false,
-    why_incomplete: [],
-  };
+    why_incomplete: [] };
 
   for (const pattern of PLACEHOLDER_PATTERNS) {
     const matches = sectionBody.match(pattern);
@@ -423,8 +421,7 @@ function scoreTarget(target: RegistryTarget): Target {
         age_days: sectionFreshness?.ageDays ?? null,
         threshold_days: sectionFreshness?.thresholdDays ?? 0,
         stale: sectionFreshness?.stale ?? false,
-        why_incomplete: ["section does not exist"],
-      };
+        why_incomplete: ["section does not exist"] };
       const incompleteness = 100 - result.completeness_score;
       // Stale sections get a large bump so overdue reviews naturally rise to the top.
       result.priority = Math.round(PHASE_BOOST[target.phase] + target.leverage * 2 + incompleteness + (result.stale ? 200 : 0));
@@ -441,8 +438,7 @@ const PHASE_LABELS: Record<Phase, string> = {
   2: "PHASE 2 — Ideal State",
   3: "PHASE 3 — Preference sections",
   4: "PHASE 4 — Current state + identity",
-  9: "PHASE 9 — Deferred",
-};
+  9: "PHASE 9 — Deferred" };
 
 // ─── Output formatters ───
 

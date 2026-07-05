@@ -181,7 +181,7 @@ export async function runValidation(state: InstallState, emit?: EngineEventHandl
     });
   }
 
-  const paiDir = state.detection?.paiDir || (getConfigRoot());
+  const paiDir = state.detection?.paiDir || getConfigRoot();
   const configDir = state.detection?.configDir || join(homedir(), ".config", "LifeOS");
   const checks: ValidationCheck[] = [];
 

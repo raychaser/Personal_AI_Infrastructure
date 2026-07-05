@@ -23,7 +23,7 @@ import { homedir } from "node:os";
 import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? homedir();
-const CLAUDE_ROOT = (getConfigRoot());
+const CLAUDE_ROOT = getConfigRoot();
 
 interface MigrationContext {
   claudeRoot: string;

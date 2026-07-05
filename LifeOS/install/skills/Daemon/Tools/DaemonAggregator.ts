@@ -155,7 +155,7 @@ function readWisdom(): string[] {
 
   // Split by double newlines to get individual quotes
   return content
-    .split(/\n{2,}/)
+    .split(/\n{2 }/)
     .map((q) => q.trim())
     .filter((q) => q.length > 10 && !q.startsWith("#"));
 }
@@ -178,8 +178,7 @@ function readRecentIdeas(limit = 10): Array<{ title: string; thesis: string }> {
       const titleMatch = l.match(/"([^"]+)"/);
       return {
         slug: slugMatch?.[1] || "",
-        title: titleMatch?.[1] || "",
-      };
+        title: titleMatch?.[1] || "" };
     })
     .filter((i) => i.slug && i.title);
 
@@ -492,8 +491,7 @@ export function aggregate(): DaemonUpdate {
     projects,
     work_themes: workThemes,
     wisdom: wisdom.slice(0, 5), // Top 5 quotes
-    last_updated: new Date().toISOString(),
-  };
+    last_updated: new Date().toISOString() };
 }
 
 // ─── Output Formatters ───

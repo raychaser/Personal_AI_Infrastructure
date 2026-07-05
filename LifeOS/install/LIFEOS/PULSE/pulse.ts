@@ -15,7 +15,7 @@
  */
 
 import { join } from "path"
-import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { readFileSync, existsSync } from "fs"
 import { parse } from "smol-toml"
@@ -43,7 +43,11 @@ try {
     }
     if (!process.env[key]) process.env[key] = value
   }
-} catch { /* .env not found — rely on process environment */ }
+} catch (e) {
+  // The path was existsSync-confirmed above, so a throw here is a real read
+  // error (EACCES / I-O / delete race), not the benign absent case — surface it.
+  if ((e as { code?: string })?.code !== "ENOENT") console.error("[env] failed to read", envPath + ":", e);
+}
 
 // ── BILLING GUARD (defense-in-depth) ──
 // Strip ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN from the daemon environment
@@ -69,8 +73,7 @@ import {
   dispatch,
   isSentinel,
   spawnScript,
-  spawnClaude,
-} from "./lib"
+  spawnClaude } from "./lib"
 
 import { startHooks, handleHooksRequestAsync, hooksHealth } from "./modules/hooks"
 
@@ -249,8 +252,7 @@ async function loadPulseConfig(): Promise<PulseConfig> {
     hooks: (parsed.hooks as PulseConfig["hooks"]) ?? { enabled: true },
     da: (parsed.da as PulseConfig["da"]) ?? { enabled: false },
     worker: parsed.worker as PulseConfig["worker"],
-    jobs: daemonConfig.jobs,
-  }
+    jobs: daemonConfig.jobs }
 }
 
 // ── Constants ──
@@ -321,9 +323,7 @@ function buildHealthResponse(state: DaemonState, config: PulseConfig): Response 
       lastRun: new Date(s.lastRun).toISOString(),
       agoMs: Date.now() - s.lastRun,
       result: s.lastResult,
-      failures: s.consecutiveFailures,
-    })),
-  }
+      failures: s.consecutiveFailures })) }
 
   // Hooks
   if (config.hooks?.enabled !== false) {
@@ -394,8 +394,7 @@ function buildHealthResponse(state: DaemonState, config: PulseConfig): Response 
     port: config.port,
     startedAt: new Date(state.startedAt).toISOString(),
     uptime: Math.round((Date.now() - state.startedAt) / 1000),
-    subsystems,
-  }, { status: httpStatus })
+    subsystems }, { status: httpStatus })
 }
 
 // ── Main ──
@@ -419,9 +418,7 @@ async function main() {
       telegram: config.telegram?.enabled ?? false,
       imessage: config.imessage?.enabled ?? false,
       syslog: config.syslog?.enabled ?? false,
-      da: config.da?.enabled ?? false,
-    },
-  })
+      da: config.da?.enabled ?? false } })
 
   // Graceful shutdown
   let shuttingDown = false
@@ -444,8 +441,7 @@ async function main() {
   if (dashAtBoot.status === "missing") {
     log("error", "DASHBOARD BUILD MISSING — all dashboard pages will 503 until rebuilt", {
       expected: dashAtBoot.indexPath,
-      fix: `cd ${PULSE_DIR}/Observability && bun install && bun run build`,
-    })
+      fix: `cd ${PULSE_DIR}/Observability && bun install && bun run build` })
   }
 
   // ── Initialize Modules ──
@@ -642,8 +638,7 @@ async function main() {
       }
 
       return new Response("Not found", { status: 404 })
-    },
-  })
+    } })
 
   log("info", "HTTP server listening", { port: server.port })
 
@@ -678,8 +673,7 @@ async function main() {
 
       if ((jobState?.consecutiveFailures ?? 0) >= MAX_FAILURES) {
         log("warn", `Skipping ${job.name}: ${jobState!.consecutiveFailures} consecutive failures`, {
-          lastResult: jobState!.lastResult,
-        })
+          lastResult: jobState!.lastResult })
         continue
       }
 
@@ -703,8 +697,7 @@ async function main() {
           log("info", `${job.name} completed — dispatched to ${targets}`, {
             durationMs,
             subsystem: "cron",
-            outputPreview: output.slice(0, 200),
-          })
+            outputPreview: output.slice(0, 200) })
         } else {
           log("info", `${job.name} completed — nothing to report`, { durationMs, subsystem: "cron" })
         }
@@ -717,8 +710,7 @@ async function main() {
           error: String(err),
           failures,
           subsystem: "cron",
-          durationMs: Date.now() - startMs,
-        })
+          durationMs: Date.now() - startMs })
       }
 
       await writeState(STATE_PATH, state).catch((err) =>

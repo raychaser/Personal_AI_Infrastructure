@@ -157,8 +157,7 @@ function extractRelated(content: string): Array<{ slug: string; type: string }> 
       if (typeMatch && currentSlug) {
         related.push({
           slug: currentSlug,
-          type: typeMatch[1].trim().replace(/['"]/g, ""),
-        });
+          type: typeMatch[1].trim().replace(/['"]/g, "") });
         currentSlug = null;
         continue;
       }
@@ -215,8 +214,7 @@ function buildGraph(): KnowledgeGraph {
         title: fm.title || slug,
         type: fm.type || "unknown",
         tags,
-        path: fullPath,
-      });
+        path: fullPath });
     }
   }
 
@@ -238,8 +236,7 @@ function buildGraph(): KnowledgeGraph {
         from: slug,
         to: target,
         weight: 3,
-        edgeType: "wikilink",
-      };
+        edgeType: "wikilink" };
       edges.push(edge);
       ensureAdj(slug);
       adjacency.get(slug)!.push(edge);
@@ -255,8 +252,7 @@ function buildGraph(): KnowledgeGraph {
         to: rel.slug,
         weight: 5,
         edgeType: "related",
-        label: rel.type,
-      };
+        label: rel.type };
       edges.push(edge);
       ensureAdj(slug);
       adjacency.get(slug)!.push(edge);
@@ -297,15 +293,13 @@ function buildGraph(): KnowledgeGraph {
           to: b,
           weight: 1,
           edgeType: "tag",
-          label: tag,
-        };
+          label: tag };
         const edgeBA: GraphEdge = {
           from: b,
           to: a,
           weight: 1,
           edgeType: "tag",
-          label: tag,
-        };
+          label: tag };
         edges.push(edgeAB, edgeBA);
         ensureAdj(a);
         ensureAdj(b);
@@ -793,11 +787,9 @@ const { values, positionals } = parseArgs({
   args: process.argv.slice(2),
   options: {
     hops: { type: "string" },
-    help: { type: "boolean", short: "h" },
-  },
+    help: { type: "boolean", short: "h" } },
   allowPositionals: true,
-  strict: false,
-});
+  strict: false });
 
 if (values.help) {
   showHelp();

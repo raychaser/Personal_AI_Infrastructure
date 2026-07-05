@@ -22,8 +22,7 @@ import { sanitize, analyzeForInjection } from "../lib/sanitize"
 import {
   getNewMessages,
   getLatestRowId,
-  verifyAccess,
-} from "../lib/messages-db"
+  verifyAccess } from "../lib/messages-db"
 import { sendMessage } from "../lib/imessage-send"
 import { join } from "path"
 import { appendFile, mkdir, rename } from "fs/promises"
@@ -63,7 +62,7 @@ export interface IMessageHealth {
 // ── Module State ──
 
 const HOME = process.env.HOME ?? ""
-const CWD = (getConfigRoot())
+const CWD = getConfigRoot()
 const STATE_DIR = join(getConfigRoot(), "LIFEOS", "PULSE", "state", "imessage")
 const LOGS_DIR = join(getConfigRoot(), "LIFEOS", "PULSE", "logs", "imessage")
 
@@ -92,8 +91,7 @@ function log(level: "info" | "warn" | "error", msg: string, data?: unknown) {
     level,
     mod: "imessage",
     msg,
-    ...(data && typeof data === "object" ? data : data ? { data } : {}),
-  })
+    ...(data && typeof data === "object" ? data : data ? { data } : {}) })
   if (level === "error") {
     console.error(entry)
   } else {
@@ -121,8 +119,7 @@ async function appendChatLog(
     month: "short",
     day: "numeric",
     hour: "2-digit",
-    minute: "2-digit",
-  })
+    minute: "2-digit" })
   const entry = `\n### ${ts}\n**${handle}:** ${userMsg}\n\n**{{DA_NAME}}:** ${botMsg}\n\n---\n`
   await appendFile(chatLogPath, entry).catch(() => {})
 }
@@ -140,8 +137,7 @@ async function processMessage(
   if (injection.riskLevel === "CRITICAL") {
     log("warn", "Blocked CRITICAL injection attempt", {
       handle,
-      patterns: injection.matchedPatterns,
-    })
+      patterns: injection.matchedPatterns })
     return "Message blocked for security reasons."
   }
 
@@ -189,9 +185,7 @@ DO NOT emit ANY of these:
 A belt-and-suspenders egress sanitizer (LIFEOS/PULSE/lib/strip-mode-scaffolding.ts) strips these markers if you emit them — but cleaner to never emit them.
 
 You have ALL LifeOS capabilities — skills, email, calendar, everything.
-When asked to check email, use the _INBOX skill. When asked about calendar, use the _CALENDAR skill.`,
-    },
-  }
+When asked to check email, use the _INBOX skill. When asked about calendar, use the _CALENDAR skill.` } }
 
   if (lastSessionId) {
     sdkOptions.resume = lastSessionId
@@ -242,8 +236,7 @@ When asked to check email, use the _INBOX skill. When asked about calendar, use 
         log("info", "SDK session complete", {
           numTurns: msg.num_turns,
           cost: msg.total_cost_usd,
-          sessionId: lastSessionId,
-        })
+          sessionId: lastSessionId })
       }
     }
   } finally {
@@ -260,8 +253,7 @@ When asked to check email, use the _INBOX skill. When asked about calendar, use 
     log("warn", "egress sanitizer stripped mode scaffolding", {
       beforeLen: before.length,
       afterLen: fullText.length,
-      beforeFirstLine: before.split("\n")[0]?.slice(0, 80),
-    })
+      beforeFirstLine: before.split("\n")[0]?.slice(0, 80) })
   }
 
   return fullText || "Sorry, I wasn't able to generate a response. Try again?"
@@ -280,8 +272,7 @@ async function poll() {
       // Auth check
       if (!allowedHandles.has(msg.handle)) {
         log("warn", "Rejected message from unauthorized handle", {
-          handle: msg.handle,
-        })
+          handle: msg.handle })
         continue
       }
 
@@ -289,8 +280,7 @@ async function poll() {
       log("info", "Message received", {
         handle: msg.handle,
         textLength: msg.text.length,
-        rowid: msg.rowid,
-      })
+        rowid: msg.rowid })
 
       // Sequential processing
       if (processing) {
@@ -312,15 +302,13 @@ async function poll() {
           messagesResponded++
           log("info", "Response sent", {
             durationMs: Date.now() - startTime,
-            responseLength: response.length,
-          })
+            responseLength: response.length })
 
           await conversationStore!.addExchange(msg.text, response)
           await appendChatLog(msg.handle, msg.text, response)
         } else {
           log("error", "Failed to send iMessage reply", {
-            handle: msg.handle,
-          })
+            handle: msg.handle })
         }
       } catch (err) {
         lastError = String(err)
@@ -377,8 +365,7 @@ export async function startIMessage(config: IMessageConfig): Promise<void> {
     lastError = String(err)
     log("error", "Cannot access ~/Library/Messages/chat.db", {
       error: lastError,
-      hint: "Grant Full Disk Access to your terminal in System Settings > Privacy & Security > Full Disk Access",
-    })
+      hint: "Grant Full Disk Access to your terminal in System Settings > Privacy & Security > Full Disk Access" })
     return
   }
 
@@ -427,8 +414,7 @@ export async function startIMessage(config: IMessageConfig): Promise<void> {
     pollIntervalMs,
     maxTurns,
     sdkTimeoutMs,
-    startingRowId: lastRowId,
-  })
+    startingRowId: lastRowId })
 
   // Initial poll
   await poll()
@@ -466,8 +452,7 @@ export async function stopIMessage(): Promise<void> {
   log("info", "iMessage module stopped", {
     uptimeMs: Date.now() - startedAt,
     messagesReceived,
-    messagesResponded,
-  })
+    messagesResponded })
 }
 
 /**
@@ -484,6 +469,5 @@ export function imessageHealth(): IMessageHealth {
     last_row_id: lastRowId,
     allowed_handles: [...allowedHandles],
     poll_interval_ms: pollIntervalMs,
-    ...(lastError ? { last_error: lastError } : {}),
-  }
+    ...(lastError ? { last_error: lastError } : {}) }
 }

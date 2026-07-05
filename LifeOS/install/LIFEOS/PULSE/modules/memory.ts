@@ -25,13 +25,12 @@ import {
   existsSync,
   readFileSync,
   readdirSync,
-  statSync,
-} from "node:fs";
+  statSync } from "node:fs";
 import { join } from "node:path";
 import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const CLAUDE = (getConfigRoot());
+const CLAUDE = getConfigRoot();
 const OBS_DIR = join(CLAUDE, "LIFEOS/MEMORY/OBSERVABILITY");
 
 const REVIEW_STATE = join(OBS_DIR, "review-state.json");
@@ -50,8 +49,7 @@ interface ModuleState {
 
 const state: ModuleState = {
   running: false,
-  startedAt: null,
-};
+  startedAt: null };
 
 export async function start(): Promise<void> {
   state.running = true;
@@ -70,9 +68,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
         ? Math.floor((Date.now() - state.startedAt.getTime()) / 1000)
         : 0,
       review_state_exists: existsSync(REVIEW_STATE),
-      health_log_exists: existsSync(HEALTH_LOG),
-    },
-  };
+      health_log_exists: existsSync(HEALTH_LOG) } };
 }
 
 function safeReadJson(path: string): any | null {
@@ -171,8 +167,7 @@ function recentReviewerRuns(n: number = 10): Array<{
           const itemMatches = [...txt.matchAll(/\[\d+\]\s+OK\s+(\w+):\s+(\S+)/g)];
           itemPaths = itemMatches.map((im) => ({
             type: im[1]!,
-            file: (im[2]!.split("/").pop() || im[2]!),
-          }));
+            file: (im[2]!.split("/").pop() || im[2]!) }));
         } catch {}
       }
       // Convert runId timestamp to ISO
@@ -187,8 +182,7 @@ function recentReviewerRuns(n: number = 10): Array<{
         itemsOk,
         itemsFailed,
         byType,
-        itemPaths,
-      };
+        itemPaths };
     });
   } catch {
     return [];
@@ -200,14 +194,12 @@ function buildSnapshot() {
     turn_count_since_last_review: 0,
     last_review_at: null,
     last_message_at: null,
-    pending_review: false,
-  };
+    pending_review: false };
   const config = safeReadJson(CADENCE_CONFIG) || {
     turn_threshold: 8,
     min_minutes_between: 30,
     idle_threshold: 2,
-    confidence_threshold: 0.7,
-  };
+    confidence_threshold: 0.7 };
   const healthRows = safeReadJsonLines(HEALTH_LOG, 1);
   const health = healthRows.length > 0 ? healthRows[0] : null;
   const firesAll = safeReadJsonLines(FIRES_LOG, 200);
@@ -241,8 +233,7 @@ function buildSnapshot() {
     proposalsRecent: proposals.slice(-5),
     principalMemory: principal,
     daMemory: da,
-    recentRuns: runs,
-  };
+    recentRuns: runs };
 }
 
 export async function handleRequest(req: Request, pathname: string): Promise<Response | null> {
@@ -252,32 +243,28 @@ export async function handleRequest(req: Request, pathname: string): Promise<Res
     const snap = buildSnapshot();
     return new Response(JSON.stringify(snap, null, 2), {
       status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      headers: { "content-type": "application/json" } });
   }
 
   if (pathname === "/api/memory/state") {
     const reviewState = safeReadJson(REVIEW_STATE) || {};
     return new Response(JSON.stringify(reviewState, null, 2), {
       status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      headers: { "content-type": "application/json" } });
   }
 
   if (pathname === "/api/memory/health") {
     const healthRows = safeReadJsonLines(HEALTH_LOG, 1);
     return new Response(JSON.stringify(healthRows[0] || null, null, 2), {
       status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      headers: { "content-type": "application/json" } });
   }
 
   if (pathname === "/api/memory/runs") {
     const runs = recentReviewerRuns(20);
     return new Response(JSON.stringify(runs, null, 2), {
       status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      headers: { "content-type": "application/json" } });
   }
 
   return null;

@@ -21,7 +21,7 @@ import { execSync } from 'child_process';
 import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || '';
-const CLAUDE_DIR = (getConfigRoot());
+const CLAUDE_DIR = getConfigRoot();
 const LIFEOS_DIR = join(CLAUDE_DIR, 'LIFEOS');
 const HOOKS_DIR = join(CLAUDE_DIR, 'hooks');
 
@@ -183,8 +183,7 @@ function findDocs(): string[] {
 function getChangedFiles(): Set<string> {
   try {
     const diff = execSync('git diff --name-only HEAD 2>/dev/null; git diff --cached --name-only 2>/dev/null', {
-      cwd: CLAUDE_DIR, encoding: 'utf-8',
-    });
+      cwd: CLAUDE_DIR, encoding: 'utf-8' });
     return new Set(diff.split('\n').filter(Boolean).map(f => resolve(CLAUDE_DIR, f)));
   } catch {
     return new Set();
@@ -243,8 +242,7 @@ for (const docPath of docsToCheck) {
         doc: relative(CLAUDE_DIR, docPath),
         ref: ref.raw,
         line: ref.line,
-        type: 'missing',
-      });
+        type: 'missing' });
       continue;
     }
 
@@ -258,8 +256,7 @@ for (const docPath of docsToCheck) {
           ref: ref.raw,
           line: ref.line,
           type: 'stale',
-          detail: `ref modified ${daysStale}d after doc`,
-        });
+          detail: `ref modified ${daysStale}d after doc` });
       }
     } catch { /* stat failed, skip freshness check */ }
   }

@@ -7,7 +7,7 @@ import { homedir } from "node:os";
 import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = homedir();
-const LIFEOS_DIR = (getConfigRoot());
+const LIFEOS_DIR = getConfigRoot();
 const STATE_DIR = join(LIFEOS_DIR, "LIFEOS", "MEMORY", "STATE");
 const WORK_DIR = join(LIFEOS_DIR, "LIFEOS", "MEMORY", "WORK");
 // Claude Code names each project dir by its absolute path with "/" and "." mapped to "-",

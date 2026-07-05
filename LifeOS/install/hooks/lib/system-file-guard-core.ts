@@ -12,23 +12,19 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
+import { getConfigRoot, normalizeConfigRoot } from "./paths";
 
-const HOME = process.env.HOME ?? homedir();
-import { normalizeConfigRoot } from "./paths";
-
-// Single canonical normalizer shared with paths.ts — the guard and the tools
-// must derive a byte-identical root or containment prefix-checks fail open.
+// Back-compat alias to the shared canonical normalizer.
 export const normalizeRoot = normalizeConfigRoot;
 
-// Fail CLOSED: guard the normalized env root even when the directory does not
-// exist yet (fresh install into a custom root) — a nonexistent tree has nothing
-// to misclassify, whereas re-pointing the guard at ~/.claude while every tool
-// writes to the env root would silently un-protect the active tree.
-const CLAUDE_ROOT = process.env.CLAUDE_CONFIG_DIR
-  ? normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
-  : join(HOME, ".claude");
+// Resolve the config root through the SAME accessor the tools use — getConfigRoot()
+// applies the full precedence chain (CLAUDE_PLUGIN_ROOT > CLAUDE_CONFIG_DIR > ~/.claude)
+// and normalizes it. Sharing it means the guard and the tools can never derive
+// different roots (a divergence that would silently fail the containment guard open),
+// and the guard protects whatever root the tools operate on — including a not-yet-
+// created custom root — instead of re-pointing at ~/.claude.
+const CLAUDE_ROOT = getConfigRoot();
 const DEFAULT_DENY_LIST_PATH = join(CLAUDE_ROOT, "skills/_LIFEOS/DENY_LIST.txt");
 
 export type GuardClassification = "system" | "user" | "out-of-tree";

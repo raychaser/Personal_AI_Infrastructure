@@ -11,7 +11,7 @@
  */
 
 import { join, resolve } from "path"
-import { getConfigRoot, normalizeConfigRoot ,} from "../../hooks/lib/paths"
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths"
 if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
 import { existsSync, mkdirSync } from "fs"
 
@@ -269,8 +269,7 @@ async function setupLocalHTTPS(): Promise<void> {
       const proc = Bun.spawn(["sudo", "bash", "-c", `echo '127.0.0.1\tpai' >> /etc/hosts`], {
         stdout: "inherit",
         stderr: "inherit",
-        stdin: "inherit",
-      })
+        stdin: "inherit" })
       const code = await proc.exited
       if (code === 0) {
         ok("Added 'pai' to /etc/hosts")
@@ -294,8 +293,7 @@ async function setupLocalHTTPS(): Promise<void> {
   `)
     const brewProc = Bun.spawn(["brew", "install", "mkcert"], {
       stdout: "inherit",
-      stderr: "inherit",
-    })
+      stderr: "inherit" })
     const brewCode = await brewProc.exited
     if (brewCode !== 0) {
       warn("Failed to install mkcert — install manually: brew install mkcert")
@@ -309,8 +307,7 @@ async function setupLocalHTTPS(): Promise<void> {
   console.log("\n  Installing local CA into system trust store...")
   const caProc = Bun.spawn(["mkcert", "-install"], {
     stdout: "inherit",
-    stderr: "inherit",
-  })
+    stderr: "inherit" })
   await caProc.exited
   ok("Local CA installed in system trust store")
 
@@ -325,8 +322,7 @@ async function setupLocalHTTPS(): Promise<void> {
     const certProc = Bun.spawn(["mkcert", "pai", "localhost", "127.0.0.1"], {
       cwd: certsDir,
       stdout: "inherit",
-      stderr: "inherit",
-    })
+      stderr: "inherit" })
     const certCode = await certProc.exited
     if (certCode === 0) {
       ok("TLS certificates generated for: pai, localhost, 127.0.0.1")
@@ -370,8 +366,7 @@ async function installService(): Promise<void> {
   await Bun.write(plistDst, materialized)
   const proc = Bun.spawn(["launchctl", "load", plistDst], {
     stdout: "pipe",
-    stderr: "pipe",
-  })
+    stderr: "pipe" })
   await proc.exited
   ok("launchd service installed")
 }
@@ -433,8 +428,7 @@ ${"═".repeat(50)}`)
     ...identity,
     ...github,
     ...telegram,
-    specialization,
-  })
+    specialization })
 
   await setupLocalHTTPS()
   await installService()

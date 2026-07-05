@@ -106,8 +106,7 @@ async function checkRepo(repo: string, seen: Set<string>): Promise<PRInfo[]> {
     // Check recent PRs (last 10)
     const resp = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&sort=updated&per_page=10`, {
       headers,
-      signal: AbortSignal.timeout(10_000),
-    })
+      signal: AbortSignal.timeout(10_000) })
 
     if (!resp.ok) return newPRs
 
@@ -126,8 +125,7 @@ async function checkRepo(repo: string, seen: Set<string>): Promise<PRInfo[]> {
           number: pr.number,
           title: pr.title,
           user: pr.user.login,
-          action: "opened",
-        })
+          action: "opened" })
       }
     }
   } catch {}
@@ -167,8 +165,7 @@ async function main() {
       if (token) headers.Authorization = `Bearer ${token}`
       const resp = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&sort=updated&per_page=10`, {
         headers,
-        signal: AbortSignal.timeout(10_000),
-      })
+        signal: AbortSignal.timeout(10_000) })
       if (resp.ok) {
         const prs = (await resp.json()) as Array<{ number: number }>
         for (const pr of prs) {
