@@ -21,6 +21,7 @@
 import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
+import { normalizeConfigRoot } from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
@@ -37,8 +38,12 @@ const HARVEST_QUEUE_DIR = path.join(KNOWLEDGE_DIR, "_harvest-queue");
 const ARCHIVE_DIR = path.join(KNOWLEDGE_DIR, "_archive");
 
 // Claude Code names each project dir by the workspace path with [/.] mapped to "-".
-// Derive the slug from the real config root so relocated installs resolve correctly.
-const CONFIG_ROOT = process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude");
+// Derive the slug from the NORMALIZED config root — a raw trailing-slash or
+// ~/$HOME value produces a wrong slug and silently harvests nothing (matches
+// SessionHarvester). See the divergent-normalizer fail-open class this PR closes.
+const CONFIG_ROOT = process.env.CLAUDE_CONFIG_DIR
+  ? normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
+  : path.join(HOME, ".claude");
 const PROJECT_SLUG = CONFIG_ROOT.replace(/[/.]/g, "-");
 const AUTO_MEMORY_DIR = path.join(CONFIG_ROOT, "projects", PROJECT_SLUG, "memory");
 
