@@ -9,7 +9,7 @@
  * already-loaded as a failure (a false negative) would leave the suite green.
  */
 import { describe, expect, test } from "bun:test";
-import { classifyLaunchctlLoad } from "../LIFEOS/PULSE/setup";
+import { classifyLaunchctlLoad, shouldUnloadBeforeReload } from "../LIFEOS/PULSE/setup";
 
 const HINT = "~/.claude/LIFEOS/PULSE/manage.sh status";
 
@@ -44,5 +44,34 @@ describe("setup.ts classifyLaunchctlLoad", () => {
       expect(r.level, `stderr=${stderr}`).toBe("ok");
       expect(r.message).toContain("already loaded");
     }
+  });
+});
+
+/**
+ * Guards the other half of the re-run fix: installService force-unloads a prior
+ * launchd definition before `launchctl load` so a re-run that fixes a bad baked bun
+ * path actually re-loads (legacy `load` is a NO-OP on an already-loaded label). This
+ * decision used to be an inline `plistChanged && priorPlist !== null` with zero
+ * coverage — a refactor that dropped the unload (swallowed-no-op-on-re-run bug
+ * returns) or that re-added the `priorPlist !== null` guard (stale in-memory
+ * definition with a removed plist file never gets unloaded) would ship green.
+ */
+describe("setup.ts shouldUnloadBeforeReload", () => {
+  const PRIOR = "<plist>OLD __BUN_PATH__=/private/tmp/bun-node-abc/bun</plist>";
+  const MATERIALIZED = "<plist>NEW __BUN_PATH__=/Users/x/.bun/bin/bun</plist>";
+
+  test("changed plist with a prior copy on disk → unload (the corrected plist must take effect)", () => {
+    expect(shouldUnloadBeforeReload(PRIOR, MATERIALIZED)).toBe(true);
+  });
+
+  test("unchanged re-run (prior === materialized) → no unload (benign idempotent load)", () => {
+    expect(shouldUnloadBeforeReload(MATERIALIZED, MATERIALIZED)).toBe(false);
+  });
+
+  test("plist file absent (priorPlist null) → unload (drop any stale in-memory definition)", () => {
+    // priorPlist is read from disk, not launchd load state: a removed plist file
+    // can still leave the label bootstrapped in memory. Unloading a not-loaded
+    // service is harmless and its exit is ignored, so we still unload here.
+    expect(shouldUnloadBeforeReload(null, MATERIALIZED)).toBe(true);
   });
 });

@@ -402,6 +402,29 @@ export function classifyLaunchctlLoad(
   }
 }
 
+/**
+ * Decide whether to force a `launchctl unload` before the `launchctl load` in
+ * installService. The legacy `launchctl load` is a NO-OP when the label is already
+ * loaded — it exits non-zero and does NOT pick up new plist contents — so a re-run
+ * that fixes a previously-baked bad bun path would silently keep the OLD definition
+ * running unless the stale one is unloaded first. Unload whenever the materialized
+ * plist differs from what is already on disk.
+ *
+ * This deliberately INCLUDES the priorPlist === null case (the LaunchAgents file is
+ * absent): a prior install may have left the label bootstrapped in memory even
+ * though its plist file was later removed — priorPlist is read from disk, not from
+ * launchd's load state, so it does not see that stale definition. Unloading an
+ * unloaded service is harmless (the caller ignores its exit), so covering the null
+ * case drops any such stale definition and lets `load` re-register the corrected
+ * plist. An unchanged re-run (priorPlist === materialized) skips the unload and stays
+ * a benign idempotent load. Pure so the decision is unit-testable. Mirrors
+ * DeployComponents, which boots out whenever the service is loaded regardless of the
+ * on-disk plist's prior existence.
+ */
+export function shouldUnloadBeforeReload(priorPlist: string | null, materialized: string): boolean {
+  return priorPlist !== materialized
+}
+
 // ── Step 6: Install launchd Service ──
 
 async function installService(): Promise<void> {
@@ -446,14 +469,13 @@ async function installService(): Promise<void> {
   // an ephemeral /private/tmp shim replaced by ~/.bun/bin), that would silently keep
   // the OLD definition running, and Step 7's PID/health probe sees the old instance
   // still up — so the "applied" success is false until reboot or a manual unload.
-  // Mirror DeployComponents: when the materialized plist differs from what is already
-  // on disk (and a prior copy exists), force an unload first so the corrected
-  // definition actually takes effect. An unchanged re-run skips the unload and stays a
-  // benign idempotent load.
+  // Mirror DeployComponents: force an unload whenever the materialized plist differs
+  // from what is on disk (see shouldUnloadBeforeReload — it covers the absent-file
+  // case too) so the corrected definition actually takes effect. An unchanged re-run
+  // skips the unload and stays a benign idempotent load.
   const priorPlist = existsSync(plistDst) ? await Bun.file(plistDst).text() : null
-  const plistChanged = priorPlist !== materialized
   await Bun.write(plistDst, materialized)
-  if (plistChanged && priorPlist !== null) {
+  if (shouldUnloadBeforeReload(priorPlist, materialized)) {
     // Unload any prior definition so `load` below re-reads the corrected plist.
     // Ignore its exit — "not loaded" is a fine state to unload from.
     await Bun.spawn(["launchctl", "unload", plistDst], { stdout: "pipe", stderr: "pipe" }).exited
