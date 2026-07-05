@@ -31,7 +31,8 @@ export function expandPath(path: string): string {
  * Priority:
  *   1. CLAUDE_PLUGIN_ROOT (plugin install) → <root>/PAI
  *   2. LIFEOS_DIR env var (expanded)
- *   3. ~/.claude/LIFEOS  (live default — byte-identical to pre-plugin behavior)
+ *   3. CLAUDE_CONFIG_DIR env (normalized) + /LIFEOS
+ *   4. ~/.claude/LIFEOS  (live default — byte-identical to pre-plugin behavior)
  *
  * The CLAUDE_PLUGIN_ROOT guard MUST precede the LIFEOS_DIR check: in a packed
  * plugin, bin/pai exports LIFEOS_DIR equal to CLAUDE_PLUGIN_ROOT (the flattened

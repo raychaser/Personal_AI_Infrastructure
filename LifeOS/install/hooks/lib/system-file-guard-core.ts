@@ -11,7 +11,7 @@
  */
 
 import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
 
@@ -21,6 +21,9 @@ const HOME = process.env.HOME ?? homedir();
 export function normalizeRoot(p: string): string {
   let out = p.trim();
   if (out === "~" || out.startsWith("~/")) out = join(HOME, out.slice(1));
+  // resolve() collapses ".." segments and doubled separators and absolutizes
+  // relative roots — a non-canonical root must never fail the guard open.
+  out = resolve(out);
   while (out.length > 1 && out.endsWith("/")) out = out.slice(0, -1);
   return out;
 }

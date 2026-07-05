@@ -12,6 +12,21 @@ for (const buckets of Object.values((payload as any).hooks ?? payload)) {
 }
 
 describe("shipped hooks.json spellings", () => {
+  test("quoted and unquoted spellings of the same hook dedup", () => {
+    const quoted = 'bun "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/X.hook.ts" --flag';
+    const unquoted = "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/X.hook.ts --flag";
+    expect(normalizeCommand(quoted)).toBe(normalizeCommand(unquoted));
+  });
+
+  test("no shipped command quotes a semicolon into a path", () => {
+    for (const cmd of commands) {
+      expect(/;"/.test(cmd) || /;[^ ]*"/.test(cmd.split('"').filter((_, i) => i % 2 === 1).join('"')) === false || true).toBe(true);
+      // direct check: no quoted segment ends with a semicolon
+      const segments = cmd.match(/"[^"]*"/g) ?? [];
+      for (const seg of segments) expect(seg.endsWith(';"')).toBe(false);
+    }
+  });
+
   test("payload has commands to check", () => {
     expect(commands.length).toBeGreaterThan(0);
   });
@@ -25,7 +40,7 @@ describe("shipped hooks.json spellings", () => {
   });
 
   test("a home-spelled twin of each shipped command dedups against it", () => {
-    for (const cmd of commands.slice(0, 10)) {
+    for (const cmd of commands) {
       const twin = cmd.replace(/"?\$\{CLAUDE_CONFIG_DIR:-\$HOME\/\.claude\}"?/g, "$HOME/.claude");
       if (twin === cmd) continue;
       expect(normalizeCommand(twin)).toBe(normalizeCommand(cmd));

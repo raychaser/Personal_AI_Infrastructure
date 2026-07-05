@@ -113,6 +113,12 @@ export function detectTool(name: string, versionCmd: string): ToolInfo {
  * Hermes (~/.hermes) → Cursor (~/.cursor) → OpenClaw (~/.openclaw) → unknown.
  */
 export function detectHarness(home: string): HarnessInfo {
+  // Explicit env override wins outright — even if the directory does not exist
+  // yet (fresh install into a custom root). Doc'd order: explicit env first.
+  if (process.env.CLAUDE_CONFIG_DIR) {
+    const explicitRoot = process.env.CLAUDE_CONFIG_DIR;
+    return { name: "claude-code", configRoot: explicitRoot, skillsDir: join(explicitRoot, "skills") };
+  }
   const candidates: Array<{ name: Harness; root: string; skills: string }> = [
     { name: "claude-code", root: process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"), skills: "skills" },
     { name: "hermes", root: join(home, ".hermes"), skills: "skills" },
@@ -543,6 +549,8 @@ type HooksMap = Record<string, MatcherGroup[]>;
  * `${LIFEOS_DIR}/x`, `$CLAUDE_PROJECT_DIR/x`, or `~/.claude/x` dedupes to one.
  */
 export function normalizeCommand(cmd: string): string {
+  // Quote-blind: "bun \"<root>/X\"" and "bun <root>/X" are the same hook.
+  cmd = cmd.replace(/"/g, "");
   return cmd
     .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|\$\{CLAUDE_CONFIG_DIR(?::-(?:[^{}]|\$\{[^}]*\})*)?\}|\$CLAUDE_CONFIG_DIR|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
     .replace(/\s+/g, " ")

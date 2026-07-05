@@ -45,7 +45,7 @@ case "$1" in
         echo "ERROR: plist template not found at $PLIST_SRC" >&2; exit 1
       fi
       if [ ! -f "$PLIST_DST" ] || [ "$PLIST_SRC" -nt "$PLIST_DST" ]; then
-        # Substitute __HOME__ + __BUN_PATH__ placeholders (public template);
+        # Substitute __CONFIG_ROOT__, __HOME__/.claude, __HOME__ + __BUN_PATH__ placeholders (public template);
         # no-op on plists that already have literal paths.
         sed -e "s|__CONFIG_ROOT__|$CLAUDE_HOME|g" -e "s|__HOME__/.claude|$CLAUDE_HOME|g" -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$PLIST_SRC" > "$PLIST_DST"
       fi
@@ -125,7 +125,7 @@ case "$1" in
       systemctl --user stop "$PLIST_NAME" 2>/dev/null || true
       pkill -9 -f "bun.*pulse.ts" 2>/dev/null || true
       sleep 1
-      # Substitute __HOME__ + __BUN_PATH__ placeholders (public template);
+      # Substitute __CONFIG_ROOT__, __HOME__/.claude, __HOME__ + __BUN_PATH__ placeholders (public template);
       # no-op on service files that already have literal paths.
       sed -e "s|__CONFIG_ROOT__|$CLAUDE_HOME|g" -e "s|__HOME__/.claude|$CLAUDE_HOME|g" -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$SERVICE_SRC" > "$SERVICE_DST"
       # Ensure user services survive logout/reboot (no-op if already enabled)
@@ -143,7 +143,7 @@ case "$1" in
       pkill -9 -f "bun.*pulse.ts" 2>/dev/null || true
       sleep 1
 
-      # Substitute __HOME__ + __BUN_PATH__ placeholders (public template);
+      # Substitute __CONFIG_ROOT__, __HOME__/.claude, __HOME__ + __BUN_PATH__ placeholders (public template);
       # no-op on plists that already have literal paths.
       sed -e "s|__CONFIG_ROOT__|$CLAUDE_HOME|g" -e "s|__HOME__/.claude|$CLAUDE_HOME|g" -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$PLIST_SRC" > "$PLIST_DST"
       launchctl load "$PLIST_DST"
