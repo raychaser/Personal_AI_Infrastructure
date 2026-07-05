@@ -112,16 +112,22 @@ export function detectTool(name: string, versionCmd: string): ToolInfo {
  * Order: explicit env (CLAUDE_CONFIG_DIR) → Claude Code (~/.claude) →
  * Hermes (~/.hermes) → Cursor (~/.cursor) → OpenClaw (~/.openclaw) → unknown.
  */
+function normalizeConfigRoot(raw: string, home: string): string {
+  let o = raw.trim()
+    .replace(/^~(?=\/|$)/, home)
+    .replace(/^\$\{HOME\}(?=\/|$)/, home)
+    .replace(/^\$HOME(?=\/|$)/, home);
+  o = resolve(o);
+  while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1);
+  return o;
+}
+
 export function detectHarness(home: string): HarnessInfo {
   // Explicit env override wins outright — even if the directory does not exist
   // yet (fresh install into a custom root). Doc'd order: explicit env first.
   if (process.env.CLAUDE_CONFIG_DIR) {
     // Normalize before the value gets baked into settings paths and plists.
-    let explicitRoot = process.env.CLAUDE_CONFIG_DIR.trim()
-      .replace(/^~(?=\/|$)/, home)
-      .replace(/^\$\{HOME\}(?=\/|$)/, home)
-      .replace(/^\$HOME(?=\/|$)/, home);
-    explicitRoot = resolve(explicitRoot);
+    const explicitRoot = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR, home);
     console.error(`[detect] config root: ${explicitRoot} (from CLAUDE_CONFIG_DIR)`);
     return { name: "claude-code", configRoot: explicitRoot, skillsDir: join(explicitRoot, "skills") };
   }

@@ -11,7 +11,7 @@
  */
 
 import { readFileSync, existsSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
 
@@ -53,7 +53,7 @@ export interface GuardDecision {
  * Classify a target file path. SYSTEM files are everything under CLAUDE_ROOT
  * that does NOT live in a containment zone AND is not pattern-allowlisted.
  * USER files are anything inside a containment zone OR pattern-allowlisted.
- * Out-of-tree files (outside ~/.claude) are never blocked.
+ * Out-of-tree files (outside the config root: CLAUDE_CONFIG_DIR, default ~/.claude) are never blocked.
  */
 export function classifyTarget(
   absolutePath: string,

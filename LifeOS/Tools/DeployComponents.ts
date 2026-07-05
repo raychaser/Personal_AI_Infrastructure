@@ -34,7 +34,7 @@
 
 import { execFileSync } from "node:child_process";
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { copyMissing, detectDevTree } from "./InstallEngine";
 
 // Enhancement components are the à-la-carte half of setup. The "LifeOS Core"
@@ -379,12 +379,22 @@ function deploy(component: Component, ctx: Ctx): ComponentResult {
 
 // ── main ─────────────────────────────────────────────────────────────
 
+function normalizeConfigRoot(raw: string, home: string): string {
+  let o = raw.trim()
+    .replace(/^~(?=\/|$)/, home)
+    .replace(/^\$\{HOME\}(?=\/|$)/, home)
+    .replace(/^\$HOME(?=\/|$)/, home);
+  o = resolve(o);
+  while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1);
+  return o;
+}
+
 function main(): void {
   const a = process.argv.slice(2);
   const home = process.env.HOME || "";
   const rawConfigRoot = arg(a, "--config-root") || process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
   // Normalize before the value is baked into plists/launchd env (no shell there).
-  const configRoot = (() => { let o = rawConfigRoot.trim().replace(/^~(?=\/|$)/, home).replace(/^\$\{HOME\}(?=\/|$)/, home).replace(/^\$HOME(?=\/|$)/, home); o = resolve(o); while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1); return o; })();
+  const configRoot = normalizeConfigRoot(rawConfigRoot, home);
   const skillRoot = arg(a, "--skill-root") || join(import.meta.dir, "..");
   const apply = a.includes("--apply");
   const allowDev = a.includes("--allow-dev");

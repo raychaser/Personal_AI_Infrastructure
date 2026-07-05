@@ -28,13 +28,11 @@ export function normalizeConfigRoot(p: string): string {
   return out;
 }
 
-// Normalize the env var ONCE at module load: every downstream consumer —
-// including the ~100 raw `process.env.CLAUDE_CONFIG_DIR ||` call sites that
-// never import this module's helpers — then sees the canonical form for the
-// lifetime of any process that loads this library.
-if (process.env.CLAUDE_CONFIG_DIR) {
-  process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR);
-}
+// NOTE: this normalizer is a shared helper — every consumer that resolves the
+// config root (guard, tools, daemons) should call normalizeConfigRoot() rather
+// than reading process.env.CLAUDE_CONFIG_DIR raw. It is NOT applied by a global
+// env mutation (that is process-local and would not reach separately-spawned
+// tool processes); each consumer imports and calls it.
 
 /**
  * Expand shell variables in a path string
