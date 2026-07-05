@@ -12,7 +12,7 @@
 
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
-import { homedir } from "os";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 interface AgentContext {
   agentType: string;
@@ -25,7 +25,7 @@ export class AgentContextLoader {
   private agentsDir: string;
 
   constructor() {
-    this.claudeHome = join(homedir(), ".claude");
+    this.claudeHome = getConfigRoot();
     this.agentsDir = join(this.claudeHome, "Skills", "Agents");
   }
 
@@ -50,8 +50,7 @@ export class AgentContextLoader {
     return {
       agentType,
       contextContent,
-      model,
-    };
+      model };
   }
 
   /**
@@ -88,8 +87,7 @@ ${taskDescription}`;
 
     return {
       prompt: enrichedPrompt,
-      model: context.model,
-    };
+      model: context.model };
   }
 }
 

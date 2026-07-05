@@ -27,9 +27,10 @@
 import { readFileSync, statSync, existsSync, readdirSync, realpathSync } from 'fs';
 import { join, resolve, dirname, relative, extname, sep } from 'path';
 import { execSync } from 'child_process';
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || '';
-const CLAUDE_DIR = join(HOME, '.claude');
+const CLAUDE_DIR = getConfigRoot();
 const LIFEOS_DIR = join(CLAUDE_DIR, 'LIFEOS');
 
 // ── Arg parsing (manual, zero deps) ──
@@ -476,8 +477,7 @@ function extractRefs(content: string, referringFile: string): RefHit[] {
         line: lineNum,
         referringFile,
         resolved,
-        exists,
-      });
+        exists });
     }
   }
   return refs;
@@ -568,8 +568,7 @@ for (const [file, refs] of fileRefs) {
         line: r.line,
         ref: r.raw,
         resolved: r.resolved,
-        label: r.label,
-      });
+        label: r.label });
       continue;
     }
     if (includeStale) {
@@ -586,8 +585,7 @@ for (const [file, refs] of fileRefs) {
               ref: r.raw,
               resolved: r.resolved,
               detail: `ref modified ${daysStale}d after doc`,
-              label: r.label,
-            });
+              label: r.label });
           }
         }
       } catch {
@@ -612,8 +610,7 @@ if (includeOrphans) {
         file: rel,
         line: null,
         ref: null,
-        resolved: file,
-      });
+        resolved: file });
     }
   }
 }
@@ -637,9 +634,7 @@ const summary = {
   summary: {
     missing: missing.length,
     stale: stale.length,
-    orphan: orphan.length,
-  },
-};
+    orphan: orphan.length } };
 
 if (jsonOutput) {
   console.log(JSON.stringify(summary, null, 2));

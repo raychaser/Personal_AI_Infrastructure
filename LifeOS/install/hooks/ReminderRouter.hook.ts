@@ -22,9 +22,10 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { createHash } from "crypto";
 import { join, dirname } from "path";
 import { loadWorkConfig } from "./lib/work-config";
+import { getConfigRoot } from "./lib/paths";
 
 const HOME = process.env.HOME || "";
-const STATE_PATH = join(HOME, ".claude", "LIFEOS", "MEMORY", "STATE", "reminder-router-seen.json");
+const STATE_PATH = join(getConfigRoot(), "LIFEOS", "MEMORY", "STATE", "reminder-router-seen.json");
 
 interface HookInput {
   session_id?: string;
@@ -65,8 +66,7 @@ function detectIntent(prompt: string): RouteMatch | null {
       return {
         kind: t.kind,
         imperative: m[1].trim(),
-        remainder: (m[2] || "").trim(),
-      };
+        remainder: (m[2] || "").trim() };
     }
   }
   return null;

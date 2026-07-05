@@ -19,9 +19,10 @@ import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { paiUserDir } from "./LifeosConfig";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = join(HOME, ".claude");
+const CLAUDE_DIR = getConfigRoot();
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Terminal Width Detection
@@ -146,8 +147,7 @@ const BOX = {
   blockTop: "▀",
   blockBottom: "▄",
   blockLeft: "▌",
-  blockRight: "▐",
-};
+  blockRight: "▐" };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Isometric LifeOS Cube - Classic ASCII Art
@@ -396,8 +396,7 @@ function getStats(): SystemStats {
     hooks: countHooks(),
     workItems: countWorkItems(),
     learnings: countLearnings(),
-    model: "Opus 4.5",
-  };
+    model: "Opus 4.5" };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

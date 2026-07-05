@@ -14,11 +14,12 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 declare const Bun: { spawn: (cmd: string[], opts?: any) => any };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(HOME, ".claude", "LIFEOS", "TOOLS", "com.lifeos.codexupdate.plist.template");
+const TEMPLATE_PATH = join(getConfigRoot(), "LIFEOS", "TOOLS", "com.lifeos.codexupdate.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.codexupdate.plist");
 const LABEL = "com.lifeos.codexupdate";
@@ -57,6 +58,7 @@ async function install(): Promise<void> {
   console.log(`[InstallCodexUpdate] detected bun at ${bunPath}`);
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   const materialized = template
+    .replace(/\{\{HOME\}\}\/\.claude/g, getConfigRoot())
     .replace(/\{\{HOME\}\}/g, HOME)
     .replace(/\{\{BUN\}\}/g, bunPath)
     .replace(/\{\{BUN_DIR\}\}/g, bunDir);

@@ -28,9 +28,10 @@
 
 import { existsSync, statSync, readdirSync, readFileSync } from "fs"
 import { join } from "path"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const USER_DIR = join(LIFEOS_DIR, "USER")
 const TELOS_DIR = join(USER_DIR, "TELOS")
 
@@ -82,14 +83,14 @@ const REGISTRY: Record<string, SourceSpec[]> = {
     { name: "KNOWLEDGE/", path: join(LIFEOS_DIR, "MEMORY", "KNOWLEDGE"), expand: true },
   ],
   hooks: [
-    { name: "hooks/", path: join(HOME, ".claude", "hooks"), expand: true },
-    { name: "settings.json", path: join(HOME, ".claude", "settings.json") },
+    { name: "hooks/", path: join(getConfigRoot(), "hooks"), expand: true },
+    { name: "settings.json", path: join(getConfigRoot(), "settings.json") },
   ],
   skills: [
-    { name: "skills/", path: join(HOME, ".claude", "skills"), expand: true },
+    { name: "skills/", path: join(getConfigRoot(), "skills"), expand: true },
   ],
   agents: [
-    { name: "agents/", path: join(HOME, ".claude", "agents"), expand: true },
+    { name: "agents/", path: join(getConfigRoot(), "agents"), expand: true },
   ],
   docs: [
     { name: "DOCUMENTATION/", path: join(LIFEOS_DIR, "DOCUMENTATION"), expand: true },
@@ -106,8 +107,7 @@ const REGISTRY: Record<string, SourceSpec[]> = {
   assistant: [
     { name: "DA_IDENTITY.md", path: join(USER_DIR, "DIGITAL_ASSISTANT", "DA_IDENTITY.md") },
     { name: "PRINCIPAL_IDENTITY.md", path: join(USER_DIR, "PRINCIPAL", "PRINCIPAL_IDENTITY.md") },
-  ],
-}
+  ] }
 
 // ── Module state ──
 
@@ -122,8 +122,7 @@ interface ModuleState {
 const state: ModuleState = {
   running: false,
   startedAt: null,
-  cache: new Map(),
-}
+  cache: new Map() }
 
 const CACHE_TTL_MS = 60_000
 
@@ -232,8 +231,7 @@ function computeTabFreshness(tabId: string): FreshnessPayload {
       label: "no data sources registered",
       daysOld: null,
       tier: "unknown",
-      perFile: [],
-    }
+      perFile: [] }
   }
   const resolved = specs.flatMap((s) => resolveSpec(s))
   const perFile: FreshnessFilePayload[] = []
@@ -251,8 +249,7 @@ function computeTabFreshness(tabId: string): FreshnessPayload {
     perFile.push({
       name: r.name,
       date: isoDate(effective),
-      source: fmDate ? "content" : "mtime",
-    })
+      source: fmDate ? "content" : "mtime" })
     if (!mostRecent || effective > mostRecent) mostRecent = effective
   }
   const daysOld = mostRecent
@@ -266,8 +263,7 @@ function computeTabFreshness(tabId: string): FreshnessPayload {
     label,
     daysOld,
     tier,
-    perFile,
-  }
+    perFile }
 }
 
 // ── Lifecycle ──
@@ -297,9 +293,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
     details: {
       uptime_s: state.startedAt ? Math.floor((Date.now() - state.startedAt.getTime()) / 1000) : 0,
       tabs_registered: Object.keys(REGISTRY).length,
-      cache_entries: state.cache.size,
-    },
-  }
+      cache_entries: state.cache.size } }
 }
 
 // ── HTTP handler ──
@@ -315,8 +309,7 @@ export async function handleRequest(req: Request, pathname: string): Promise<Res
       label: "missing ?tab= query parameter",
       daysOld: null,
       tier: "unknown",
-      perFile: [],
-    }, { status: 200 })
+      perFile: [] }, { status: 200 })
   }
   // 60s in-process cache
   const now = Date.now()

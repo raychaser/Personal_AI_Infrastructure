@@ -1,3 +1,4 @@
+import { getConfigRoot } from "../../../hooks/lib/paths";
 import { createHash } from "node:crypto";
 import { appendFileSync, chmodSync, mkdirSync, renameSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -6,14 +7,13 @@ import type {
   DayFile,
   SourceName,
   SyncState,
-  TokenStore,
-} from "./types";
+  TokenStore } from "./types";
 
 const HOME = process.env.HOME || "";
-const ENV_PATH = join(HOME, ".claude", ".env");
-const STATE_DIR = join(HOME, ".claude", "LIFEOS", "MEMORY", "STATE");
-const DATA_DIR = join(HOME, ".claude", "LIFEOS", "USER", "HEALTH", "DATA");
-const OBS_DIR = join(HOME, ".claude", "LIFEOS", "MEMORY", "OBSERVABILITY");
+const ENV_PATH = join(getConfigRoot(), ".env");
+const STATE_DIR = join(getConfigRoot(), "LIFEOS", "MEMORY", "STATE");
+const DATA_DIR = join(getConfigRoot(), "LIFEOS", "USER", "HEALTH", "DATA");
+const OBS_DIR = join(getConfigRoot(), "LIFEOS", "MEMORY", "OBSERVABILITY");
 const TOKENS_PATH = join(STATE_DIR, "healthsync-tokens.json");
 const STATE_PATH = join(STATE_DIR, "healthsync-state.json");
 
@@ -45,8 +45,7 @@ export function dayKeyLA(epochMs: number): string {
     timeZone: "America/Los_Angeles",
     year: "numeric",
     month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(epochMs));
+    day: "2-digit" }).formatToParts(new Date(epochMs));
 
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
@@ -71,8 +70,7 @@ export function isoNowLA(d: Date): string {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
+    hour12: false }).formatToParts(d);
 
   const getPart = (type: string): string => {
     const value = parts.find((part) => part.type === type)?.value;
@@ -196,8 +194,7 @@ export async function writeDayFile(
     schema: 1,
     source,
     fetched_at: isoNowLA(ctx.now),
-    metrics,
-  };
+    metrics };
   await writeJson(join(ctx.dataDir, source, `${dayKey}.json`), dayFile);
 }
 
@@ -218,8 +215,7 @@ export async function buildCtx(): Promise<Ctx> {
     dataDir: DATA_DIR,
     obsDir: OBS_DIR,
     tokensPath: TOKENS_PATH,
-    statePath: STATE_PATH,
-  };
+    statePath: STATE_PATH };
 }
 
 const AUTH_COOLDOWN_MS = 6 * 60 * 60 * 1000;
@@ -278,8 +274,7 @@ export async function timedFetch(
   try {
     return await fetch(url, {
       ...init,
-      signal: controller.signal,
-    });
+      signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }

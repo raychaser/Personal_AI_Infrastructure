@@ -28,9 +28,9 @@ import {
   logProposalEvent,
   logProposalReply,
   type ProposalRow,
-  type ProposalReply,
-} from "../lib/telegram-proposals"
+  type ProposalReply } from "../lib/telegram-proposals"
 import { stripModeScaffolding, hasModeScaffolding } from "../lib/strip-mode-scaffolding"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // BILLING: Strip ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN before any SDK
 // query() call. Bun auto-loads ~/.claude/.env into this process; if either key
@@ -63,9 +63,9 @@ export interface TelegramConfig {
 // ── Constants ──
 
 const HOME = process.env.HOME ?? ""
-const CWD = join(HOME, ".claude")
-const STATE_DIR = join(HOME, ".claude", "LIFEOS", "PULSE", "state", "telegram")
-const LOGS_DIR = join(HOME, ".claude", "LIFEOS", "PULSE", "logs", "telegram")
+const CWD = getConfigRoot()
+const STATE_DIR = join(getConfigRoot(), "LIFEOS", "PULSE", "state", "telegram")
+const LOGS_DIR = join(getConfigRoot(), "LIFEOS", "PULSE", "logs", "telegram")
 const STALE_ACK_CACHE_DIR = join(STATE_DIR, "ack-cache")
 const MAX_TELEGRAM_LENGTH = 4096
 const CURSOR = " ▌"
@@ -76,7 +76,7 @@ const IDLE_TIMEOUT_MS = 60 * 60 * 1000          // 1 hour — gap of silence tha
 const INFERENCE_HARD_BUDGET_MS = 10_000         // outer race cap on summarize; measured Sonnet subprocess cost is 4-6s, this gives slack without losing the voice trailing the text by too much
 const MIN_FALLBACK_WORDS = 6                    // a fallback summary shorter than this is presumed too thin to be worth voicing
 const MEANINGFUL_REPLY_WORDS = 25               // when a reply is at least this long, a too-short fallback is a regression — skip voice rather than ship a "0:00" stub
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 
 // Voice ID for outbound voice summaries. Read at module import from
 // LifeosConfig — `[da.voices.main] voice_id` in LIFEOS/USER/CONFIG/LIFEOS_CONFIG.toml.
@@ -136,8 +136,7 @@ function log(level: "info" | "warn" | "error", msg: string, data?: unknown) {
     level,
     component: "telegram",
     msg,
-    ...(data ? { data } : {}),
-  })
+    ...(data ? { data } : {}) })
   console.log(entry)
 }
 
@@ -147,8 +146,7 @@ async function appendChatLog(userMsg: string, botMsg: string) {
   const chatLogPath = join(LOGS_DIR, "chat-log.md")
   const ts = new Date().toLocaleString("en-US", {
     timeZone: "America/Los_Angeles",
-    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-  })
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
   const entry = `\n### ${ts}\n**{{PRINCIPAL_NAME}}:** ${userMsg}\n\n**{{DA_NAME}}:** ${botMsg}\n\n---\n`
   await appendFile(chatLogPath, entry).catch(() => {})
 }
@@ -273,8 +271,7 @@ export async function buildLifeosContextBlock(query?: string): Promise<string> {
   const today = new Date().toLocaleString("en-US", {
     timeZone: "America/Los_Angeles",
     weekday: "long", year: "numeric", month: "long", day: "numeric",
-    hour: "numeric", minute: "2-digit",
-  })
+    hour: "numeric", minute: "2-digit" })
 
   // Per-turn relevant-memory retrieval (F6). Only runs when a query is given —
   // typically the latest user message in the active Telegram exchange. Pure
@@ -477,8 +474,7 @@ export async function summarizeForVoice(replyText: string): Promise<VoiceSummary
         systemPrompt,
         userPrompt: replyText,
         level: "medium",  // Sonnet
-        timeout: 20_000,
-      }),
+        timeout: 20_000 }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error(`inference exceeded ${INFERENCE_HARD_BUDGET_MS}ms outer budget`)), INFERENCE_HARD_BUDGET_MS),
       ),
@@ -508,8 +504,7 @@ function tidySummary(raw: string): string {
   const words = s.split(/\s+/)
   if (words.length > MAX_VOICE_SUMMARY_WORDS) {
     log("warn", "summarizeForVoice: output exceeded word cap, truncating", {
-      wordCount: words.length, cap: MAX_VOICE_SUMMARY_WORDS,
-    })
+      wordCount: words.length, cap: MAX_VOICE_SUMMARY_WORDS })
     s = words.slice(0, MAX_VOICE_SUMMARY_WORDS).join(" ").replace(/[,;:\s]+$/, "") + "…"
   }
   return s
@@ -536,14 +531,11 @@ export async function synthesizeKaiVoice(text: string): Promise<Buffer> {
     headers: {
       "Content-Type": "application/json",
       "xi-api-key": ELEVENLABS_API_KEY,
-      "Accept": "audio/ogg",
-    },
+      "Accept": "audio/ogg" },
     body: JSON.stringify({
       text: spokenText,
       model_id: "eleven_turbo_v2_5",
-      voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0, speed: 1.0, use_speaker_boost: true },
-    }),
-  })
+      voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0, speed: 1.0, use_speaker_boost: true } }) })
   if (!res.ok) {
     const body = await res.text().catch(() => "<unreadable>")
     throw new Error(`ElevenLabs ${res.status}: ${body.slice(0, 200)}`)
@@ -606,8 +598,7 @@ export function sendVoiceSummary(
           fallbackWords: summaryWords,
           replyWords: wordCount,
           summarizeLatencyMs,
-          chatId,
-        })
+          chatId })
         return
       }
 
@@ -629,13 +620,11 @@ export function sendVoiceSummary(
         synthLatencyMs,
         sendLatencyMs,
         totalLatencyMs: lastVoiceSendMs,
-        chatId,
-      })
+        chatId })
     } catch (err) {
       log("warn", "voice summary pipeline failed", {
         error: String(err).slice(0, 300),
-        chatId,
-      })
+        chatId })
     }
   })()
 }
@@ -703,8 +692,7 @@ export async function startTelegram(config: TelegramConfig): Promise<void> {
   log("info", "Voice summary pipeline ready", {
     voice_id: DA_VOICE_ID,
     summarizer_model: "sonnet",
-    elevenlabs_key_present: ELEVENLABS_API_KEY !== "",
-  })
+    elevenlabs_key_present: ELEVENLABS_API_KEY !== "" })
 
   // Create bot
   activeConfig = config
@@ -790,8 +778,7 @@ export async function startTelegram(config: TelegramConfig): Promise<void> {
       log("info", "thread boundary — fresh session", {
         idleMs: now - lastMessageAt!,
         prevSessionId,
-        newThreadStartedAt: now,
-      })
+        newThreadStartedAt: now })
       lastSessionId = undefined
       threadStartedAt = now
     }
@@ -888,9 +875,7 @@ A belt-and-suspenders egress sanitizer (LIFEOS/PULSE/lib/strip-mode-scaffolding.
 ### What NOT to do
 - **NEVER, under any circumstance, call \`curl http://localhost:31337/notify\` or hit port 31337 or any /notify endpoint.** {{PRINCIPAL_NAME}} is reading your reply on his phone via Telegram. The Pulse /notify endpoint plays audio out of his laptop speaker. He will not hear it. The voice you produce here is delivered by the Telegram \`sendVoice\` API as a voice-message bubble in the chat — that pipeline runs AFTER your reply ships and you do not invoke it. If you find yourself reaching for Bash to curl /notify, stop. The voice has already been arranged.
 - Do not narrate the LifeOS CONTEXT block above. It's for you, not {{PRINCIPAL_NAME}} — he wrote half of it.
-- Do not invent project names, people, dates. If unsure, check the context block or the files directly.`,
-        },
-      }
+- Do not invent project names, people, dates. If unsure, check the context block or the files directly.` } }
 
       // Resume previous session for context continuity
       if (lastSessionId) {
@@ -944,8 +929,7 @@ A belt-and-suspenders egress sanitizer (LIFEOS/PULSE/lib/strip-mode-scaffolding.
               durationMs: Date.now() - startTime,
               numTurns: msg.num_turns,
               cost: msg.total_cost_usd,
-              sessionId: lastSessionId,
-            })
+              sessionId: lastSessionId })
           }
 
           // Live edit updates in Telegram
@@ -984,8 +968,7 @@ A belt-and-suspenders egress sanitizer (LIFEOS/PULSE/lib/strip-mode-scaffolding.
         log("warn", "egress sanitizer stripped mode scaffolding", {
           beforeLen: before.length,
           afterLen: fullText.length,
-          beforeFirstLine: before.split("\n")[0]?.slice(0, 80),
-        })
+          beforeFirstLine: before.split("\n")[0]?.slice(0, 80) })
       }
 
       // Final clean message
@@ -1056,8 +1039,7 @@ A belt-and-suspenders egress sanitizer (LIFEOS/PULSE/lib/strip-mode-scaffolding.
   await bot.start({
     onStart: (info) => {
       log("info", `Bot started: @${info.username}`, { botId: info.id })
-    },
-  })
+    } })
 }
 
 /**
@@ -1093,8 +1075,7 @@ export function telegramHealth(): {
       messages_received: 0,
       messages_responded: 0,
       processing: false,
-      voice_summary,
-    }
+      voice_summary }
   }
 
   return {
@@ -1104,6 +1085,5 @@ export function telegramHealth(): {
     messages_responded: messagesResponded,
     processing,
     last_session_id: lastSessionId,
-    voice_summary,
-  }
+    voice_summary }
 }

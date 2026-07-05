@@ -10,10 +10,11 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { dirname, join } from "path"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
-const LEGACY_STATE_FILE = join(HOME, ".claude", "LIFEOS", "PULSE", "state", "github-seen.json")
-const STATE_FILE = join(HOME, ".claude", "LIFEOS", "PULSE", "state", "github-seen.jsonl")
+const LEGACY_STATE_FILE = join(getConfigRoot(), "LIFEOS", "PULSE", "state", "github-seen.json")
+const STATE_FILE = join(getConfigRoot(), "LIFEOS", "PULSE", "state", "github-seen.jsonl")
 // Repos to monitor for new issues / activity. Override via LIFEOS_PULSE_REPOS
 // env var (comma-separated "owner/name" pairs). Empty default keeps fresh
 // installs from polling repos the user hasn't opted into.
@@ -105,8 +106,7 @@ async function checkRepo(repo: string, seen: Set<string>): Promise<PRInfo[]> {
     // Check recent PRs (last 10)
     const resp = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&sort=updated&per_page=10`, {
       headers,
-      signal: AbortSignal.timeout(10_000),
-    })
+      signal: AbortSignal.timeout(10_000) })
 
     if (!resp.ok) return newPRs
 
@@ -125,8 +125,7 @@ async function checkRepo(repo: string, seen: Set<string>): Promise<PRInfo[]> {
           number: pr.number,
           title: pr.title,
           user: pr.user.login,
-          action: "opened",
-        })
+          action: "opened" })
       }
     }
   } catch {}
@@ -166,8 +165,7 @@ async function main() {
       if (token) headers.Authorization = `Bearer ${token}`
       const resp = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&sort=updated&per_page=10`, {
         headers,
-        signal: AbortSignal.timeout(10_000),
-      })
+        signal: AbortSignal.timeout(10_000) })
       if (resp.ok) {
         const prs = (await resp.json()) as Array<{ number: number }>
         for (const pr of prs) {

@@ -13,11 +13,12 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 declare const Bun: { spawn: (cmd: string[], opts?: any) => any };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(HOME, ".claude", "LIFEOS", "TOOLS", "com.lifeos.blogdiscovery.plist.template");
+const TEMPLATE_PATH = join(getConfigRoot(), "LIFEOS", "TOOLS", "com.lifeos.blogdiscovery.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.blogdiscovery.plist");
 const LABEL = "com.lifeos.blogdiscovery";
@@ -44,6 +45,7 @@ async function install(): Promise<void> {
   const bunPath = await detectBun(); const bunDir = bunPath.replace(/\/bun$/, "");
   console.log(`[InstallBlogDiscovery] detected bun at ${bunPath}`);
   const materialized = readFileSync(TEMPLATE_PATH, "utf-8")
+    .replace(/\{\{HOME\}\}\/\.claude/g, getConfigRoot())
     .replace(/\{\{HOME\}\}/g, HOME).replace(/\{\{BUN\}\}/g, bunPath).replace(/\{\{BUN_DIR\}\}/g, bunDir);
   if (!existsSync(LAUNCH_AGENTS_DIR)) mkdirSync(LAUNCH_AGENTS_DIR, { recursive: true });
   const u = await uid();

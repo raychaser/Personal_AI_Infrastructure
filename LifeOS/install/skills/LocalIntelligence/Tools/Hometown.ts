@@ -18,7 +18,8 @@
 
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { homedir } from "node:os"
+import { } from "node:os"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 export interface Hometown {
   city: string
@@ -42,9 +43,7 @@ export class NoHometownError extends Error {
   }
 }
 
-const IDENTITY_DEFAULT = join(
-  homedir(),
-  ".claude",
+const IDENTITY_DEFAULT = join(getConfigRoot(),
   "LIFEOS",
   "USER",
   "PRINCIPAL",
@@ -70,8 +69,7 @@ const STATE_NAME_TO_CODE: Record<string, string> = {
   tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT",
   virginia: "VA", washington: "WA", "west virginia": "WV",
   wisconsin: "WI", wyoming: "WY",
-  "district of columbia": "DC",
-}
+  "district of columbia": "DC" }
 
 const STATE_CODES = new Set(Object.values(STATE_NAME_TO_CODE))
 
@@ -126,8 +124,7 @@ export async function readHometown(
     zip,
     county,
     citySlug: slugify(city),
-    stateSlug: slugify(stateName ?? stateRaw ?? state),
-  }
+    stateSlug: slugify(stateName ?? stateRaw ?? state) }
 }
 
 // CLI entry — `bun run Hometown.ts` prints JSON.

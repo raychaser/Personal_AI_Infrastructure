@@ -12,9 +12,10 @@
 
 import { join } from "path"
 import { existsSync, readFileSync } from "fs"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const MEMORY_DIR = join(LIFEOS_DIR, "MEMORY")
 const SESSION_COSTS_PATH = join(MEMORY_DIR, "OBSERVABILITY", "session-costs.jsonl")
 const TOOL_FAILURES_PATH = join(MEMORY_DIR, "OBSERVABILITY", "tool-failures.jsonl")
@@ -38,8 +39,7 @@ export function performanceHealth(): Record<string, unknown> {
     enabled: config.enabled,
     startedAt: moduleStartedAt,
     hasCostData: existsSync(SESSION_COSTS_PATH),
-    hasFailureData: existsSync(TOOL_FAILURES_PATH),
-  }
+    hasFailureData: existsSync(TOOL_FAILURES_PATH) }
 }
 
 // ── JSONL Reader ──
@@ -118,8 +118,7 @@ function handleCostApi(url: URL): Response {
       costTotal: s.costTotal,
       totalTokens: s.totalTokens,
       firstTimestamp: s.firstTimestamp,
-      lastTimestamp: s.lastTimestamp,
-    }))
+      lastTimestamp: s.lastTimestamp }))
 
   return Response.json({
     days,
@@ -131,21 +130,18 @@ function handleCostApi(url: URL): Response {
       input: Math.round(totalInput * 100) / 100,
       output: Math.round(totalOutput * 100) / 100,
       cacheWrite: Math.round(totalCacheWrite * 100) / 100,
-      cacheRead: Math.round(totalCacheRead * 100) / 100,
-    },
+      cacheRead: Math.round(totalCacheRead * 100) / 100 },
     byModel: Object.entries(modelCosts)
       .sort(([, a], [, b]) => b.cost - a.cost)
       .map(([model, data]) => ({
         model,
         cost: Math.round(data.cost * 100) / 100,
         sessions: data.sessions,
-        tokens: data.tokens,
-      })),
+        tokens: data.tokens })),
     dailyCosts: Object.entries(dailyCosts)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([day, cost]) => ({ day, cost: Math.round(cost * 100) / 100 })),
-    topSessions,
-  })
+    topSessions })
 }
 
 // ── Failures API ──
@@ -178,8 +174,7 @@ function handleFailuresApi(): Response {
       tool,
       failures: fails,
       calls: total,
-      failureRate: total > 0 ? Math.round((fails / total) * 10000) / 100 : 0,
-    }
+      failureRate: total > 0 ? Math.round((fails / total) * 10000) / 100 : 0 }
   }).sort((a, b) => b.failures - a.failures)
 
   const totalFailures = failures.length
@@ -207,16 +202,14 @@ function handleFailuresApi(): Response {
       total: (dailyTotal[day] ?? 0) + (dailyFailures[day] ?? 0),
       rate: ((dailyTotal[day] ?? 0) + (dailyFailures[day] ?? 0)) > 0
         ? Math.round(((dailyFailures[day] ?? 0) / ((dailyTotal[day] ?? 0) + (dailyFailures[day] ?? 0))) * 10000) / 100
-        : 0,
-    }))
+        : 0 }))
 
   return Response.json({
     totalFailures,
     totalCalls,
     overallRate,
     byTool: toolStats.slice(0, 20),
-    trend,
-  })
+    trend })
 }
 
 // ── Summary API ──
@@ -246,8 +239,7 @@ function handleSummaryApi(): Response {
       for (const f of failures) counts[f.tool_name || "unknown"] = (counts[f.tool_name || "unknown"] ?? 0) + 1
       const top = Object.entries(counts).sort(([, a], [, b]) => b - a)[0]
       return top ? { tool: top[0], failures: top[1] } : null
-    })(),
-  })
+    })() })
 }
 
 // ── Request Router ──
@@ -278,7 +270,7 @@ async function handleAnthropicCostApi(): Promise<Response> {
   const { readFileSync, existsSync } = await import("fs")
   const { join } = await import("path")
   const home = process.env.HOME ?? ""
-  const obsDir = join(home, ".claude", "LIFEOS", "MEMORY", "OBSERVABILITY")
+  const obsDir = join(getConfigRoot(), "LIFEOS", "MEMORY", "OBSERVABILITY")
   const ledgerPath = join(obsDir, "anthropic-cost.jsonl")
   const sitesPath = join(obsDir, "anthropic-call-sites.json")
 
@@ -327,6 +319,5 @@ async function handleAnthropicCostApi(): Promise<Response> {
     history: last24h,
     total_entries: history.length,
     sites,
-    baseline_updated: baselineUpdated,
-  })
+    baseline_updated: baselineUpdated })
 }

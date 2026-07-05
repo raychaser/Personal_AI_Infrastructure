@@ -22,9 +22,10 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync, appendFileSync } from "fs";
 import { join, basename, dirname, extname } from "path";
 import { randomUUID } from "crypto";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const QUEUE_FILE = join(LIFEOS_DIR, "MEMORY", "MIGRATION", "migration-proposals.jsonl");
 
 type Target =
@@ -219,8 +220,7 @@ function classify(body: string): { target: Target; confidence: number; reasons: 
     target: top[0] as Target,
     confidence,
     reasons: top[1].reasons.slice(0, 3),
-    alternatives: entries.slice(1, 4).map(([t]) => t as Target),
-  };
+    alternatives: entries.slice(1, 4).map(([t]) => t as Target) };
 }
 
 // ─── Main ───
@@ -256,8 +256,7 @@ function main(): void {
         classification_confidence: confidence,
         classification_reasons: reasons,
         alternatives,
-        status: "pending",
-      });
+        status: "pending" });
     }
   }
 

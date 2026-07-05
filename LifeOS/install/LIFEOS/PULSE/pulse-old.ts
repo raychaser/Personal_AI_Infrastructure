@@ -8,11 +8,15 @@
  */
 
 import { join } from "path"
-import { readFileSync } from "fs"
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths"
+if (process.env.CLAUDE_CONFIG_DIR) process.env.CLAUDE_CONFIG_DIR = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
+import { readFileSync, existsSync } from "fs"
 
 // ── Load .env before anything else ──
 
-const envPath = join(process.env.HOME ?? "~", ".claude", ".env")
+const envPathCandidates = [join(getConfigRoot(), ".env"), join(process.env.HOME ?? "~", ".claude", ".env")]
+const envPath = envPathCandidates.find((p) => existsSync(p)) ?? envPathCandidates[0]
+if (envPath !== envPathCandidates[0]) console.error(`[env] .env not found at ${envPathCandidates[0]} — using legacy ${envPath}`)
 try {
   const envContent = readFileSync(envPath, "utf-8")
   for (const line of envContent.split("\n")) {
@@ -28,7 +32,11 @@ try {
     }
     if (!process.env[key]) process.env[key] = value
   }
-} catch { /* .env not found — rely on process environment */ }
+} catch (e) {
+  // The path was existsSync-confirmed above, so a throw here is a real read
+  // error (EACCES / I-O / delete race), not the benign absent case — surface it.
+  if ((e as { code?: string })?.code !== "ENOENT") console.error("[env] failed to read", envPath + ":", e);
+}
 
 import {
   type DaemonState,
@@ -41,12 +49,11 @@ import {
   dispatch,
   isSentinel,
   spawnScript,
-  spawnClaude,
-} from "./lib"
+  spawnClaude } from "./lib"
 
 // ── Constants ──
 
-const PULSE_DIR = join(process.env.HOME ?? "~", ".claude", "LIFEOS", "PULSE")
+const PULSE_DIR = join(getConfigRoot(), "LIFEOS", "PULSE")
 const STATE_PATH = join(PULSE_DIR, "state", "state.json")
 const PID_PATH = join(PULSE_DIR, "state", "pulse.pid")
 const HOOK_PORT = parseInt(process.env.HOOK_SERVER_PORT || "8686", 10)
@@ -59,8 +66,7 @@ const MIN_SLEEP_MS = 1_000
 const hookStats = {
   requests: 0,
   skillGuard: { total: 0, blocked: 0, passed: 0 },
-  agentGuard: { total: 0, warned: 0, passed: 0 },
-}
+  agentGuard: { total: 0, warned: 0, passed: 0 } }
 
 const BLOCKED_SKILLS = ["keybindings-help"]
 const FAST_AGENT_TYPES = ["Explore"]
@@ -77,9 +83,7 @@ function handleSkillGuard(body: { tool_input?: { skill?: string } }): Response {
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",
-        permissionDecisionReason: `BLOCKED: "${skillName}" is a known false-positive skill triggered by position bias. The user did NOT ask about keybindings. Continue with the ACTUAL task the user requested.`,
-      },
-    })
+        permissionDecisionReason: `BLOCKED: "${skillName}" is a known false-positive skill triggered by position bias. The user did NOT ask about keybindings. Continue with the ACTUAL task the user requested.` } })
   }
 
   hookStats.skillGuard.passed++
@@ -109,9 +113,7 @@ function handleAgentGuard(body: {
       hookEventName: "PreToolUse",
       permissionDecision: "allow",
       permissionDecisionReason: "Foreground agent warning",
-      additionalContext: `WARNING: Foreground agent "${ti.description || ti.subagent_type || "unknown"}" — consider run_in_background: true`,
-    },
-  })
+      additionalContext: `WARNING: Foreground agent "${ti.description || ti.subagent_type || "unknown"}" — consider run_in_background: true` } })
 }
 
 // ── Compute next due time ──
@@ -146,8 +148,7 @@ async function main() {
   log("info", "LifeOS Pulse started", {
     pid: process.pid,
     jobs: enabledJobs.length,
-    jobNames: enabledJobs.map((j) => j.name),
-  })
+    jobNames: enabledJobs.map((j) => j.name) })
 
   // Graceful shutdown
   let shuttingDown = false
@@ -180,10 +181,8 @@ async function main() {
             lastRun: new Date(s.lastRun).toISOString(),
             agoMs: Date.now() - s.lastRun,
             result: s.lastResult,
-            failures: s.consecutiveFailures,
-          })),
-          hooks: hookStats,
-        })
+            failures: s.consecutiveFailures })),
+          hooks: hookStats })
       }
 
       if (req.method !== "POST") return new Response("Method not allowed", { status: 405 })
@@ -204,8 +203,7 @@ async function main() {
           return new Response("", { status: 200 }) // Fail open
         }
       })()
-    },
-  })
+    } })
 
   log("info", "Hook server listening", { port: hookServer.port })
 
@@ -227,8 +225,7 @@ async function main() {
       // Circuit breaker: skip if too many consecutive failures
       if ((jobState?.consecutiveFailures ?? 0) >= MAX_FAILURES) {
         log("warn", `Skipping ${job.name}: ${jobState!.consecutiveFailures} consecutive failures`, {
-          lastResult: jobState!.lastResult,
-        })
+          lastResult: jobState!.lastResult })
         continue
       }
 
@@ -252,8 +249,7 @@ async function main() {
           const targets = Array.isArray(job.output) ? job.output.join(", ") : job.output
           log("info", `${job.name} completed — dispatched to ${targets}`, {
             durationMs,
-            outputPreview: output.slice(0, 200),
-          })
+            outputPreview: output.slice(0, 200) })
         } else {
           log("info", `${job.name} completed — nothing to report`, { durationMs })
         }
@@ -265,8 +261,7 @@ async function main() {
         log("error", `${job.name} failed`, {
           error: String(err),
           failures,
-          durationMs: Date.now() - startMs,
-        })
+          durationMs: Date.now() - startMs })
       }
 
       // Persist state after each job

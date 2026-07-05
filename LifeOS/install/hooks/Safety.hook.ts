@@ -30,6 +30,7 @@
  * No subprocess spawns. No network. No imports from skills/. Pure file I/O.
  */
 
+import { getConfigRoot } from "./lib/paths";
 import {
   appendFileSync,
   existsSync,
@@ -58,7 +59,7 @@ const LIFEOS_DIR = process.env.LIFEOS_DIR
       /^\$\{?HOME\}?(?=\/|$)/,
       HOME,
     )
-  : join(HOME, ".claude", "LIFEOS");
+  : join(getConfigRoot(), "LIFEOS");
 const STATE_DIR = join(LIFEOS_DIR, "MEMORY", "STATE");
 const OBS_DIR = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY");
 const CACHE_PATH = join(STATE_DIR, "permission-cache.json");

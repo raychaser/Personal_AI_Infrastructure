@@ -23,9 +23,10 @@ import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { loadWorkConfig } from "../../hooks/lib/work-config";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const OBS_DIR = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY");
 const OBS_LOG = join(OBS_DIR, "commitment-digest.jsonl");
 const PULSE_NOTIFY = "http://localhost:31337/notify";
@@ -163,8 +164,7 @@ async function main() {
     due_this_week: [],
     future: [],
     notified: false,
-    errors: [],
-  };
+    errors: [] };
 
   if (!cfg.enabled || !cfg.repo) {
     digest.errors.push(`work_config_disabled: ${cfg.reason || "unknown"}`);
@@ -197,8 +197,7 @@ async function main() {
       due,
       beneficiary: parseBeneficiaryFromBody(issue.body || ""),
       daysUntilDue,
-      bucket: bucket(daysUntilDue),
-    };
+      bucket: bucket(daysUntilDue) };
     if (c.bucket === "overdue") digest.overdue.push(c);
     else if (c.bucket === "due_today") digest.due_today.push(c);
     else if (c.bucket === "due_this_week") digest.due_this_week.push(c);

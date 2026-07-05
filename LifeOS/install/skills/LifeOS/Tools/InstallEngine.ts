@@ -112,7 +112,25 @@ export function detectTool(name: string, versionCmd: string): ToolInfo {
  * Order: explicit env (CLAUDE_CONFIG_DIR) → Claude Code (~/.claude) →
  * Hermes (~/.hermes) → Cursor (~/.cursor) → OpenClaw (~/.openclaw) → unknown.
  */
+export function normalizeConfigRoot(raw: string, home: string): string {
+  let o = raw.trim()
+    .replace(/^~(?=\/|$)/, home)
+    .replace(/^\$\{HOME\}(?=\/|$)/, home)
+    .replace(/^\$HOME(?=\/|$)/, home);
+  o = resolve(o);
+  while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1);
+  return o;
+}
+
 export function detectHarness(home: string): HarnessInfo {
+  // Explicit env override wins outright — even if the directory does not exist
+  // yet (fresh install into a custom root). Doc'd order: explicit env first.
+  if (process.env.CLAUDE_CONFIG_DIR) {
+    // Normalize before the value gets baked into settings paths and plists.
+    const explicitRoot = normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR, home);
+    console.error(`[detect] config root: ${explicitRoot} (from CLAUDE_CONFIG_DIR)`);
+    return { name: "claude-code", configRoot: explicitRoot, skillsDir: join(explicitRoot, "skills") };
+  }
   const candidates: Array<{ name: Harness; root: string; skills: string }> = [
     { name: "claude-code", root: process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"), skills: "skills" },
     { name: "hermes", root: join(home, ".hermes"), skills: "skills" },
@@ -125,7 +143,8 @@ export function detectHarness(home: string): HarnessInfo {
     }
   }
   // Default assumption when nothing is present yet (a clean machine pre-bootstrap).
-  return { name: "claude-code", configRoot: join(home, ".claude"), skillsDir: join(home, ".claude", "skills") };
+  const fallbackRoot = process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  return { name: "claude-code", configRoot: fallbackRoot, skillsDir: join(fallbackRoot, "skills") };
 }
 
 /**
@@ -539,11 +558,13 @@ type HooksMap = Record<string, MatcherGroup[]>;
 /**
  * Normalize a hook command for dedup: collapse the harness/PAI path-var forms to
  * a single canonical token and squeeze whitespace, so the same hook expressed as
- * `${LIFEOS_DIR}/x`, `$LIFEOS_DIR/x`, or `~/.claude/x` dedupes to one.
+ * `${LIFEOS_DIR}/x`, `$CLAUDE_PROJECT_DIR/x`, or `~/.claude/x` dedupes to one.
  */
-function normalizeCommand(cmd: string): string {
+export function normalizeCommand(cmd: string): string {
+  // Quote-blind: "bun \"<root>/X\"" and "bun <root>/X" are the same hook.
+  cmd = cmd.replace(/"/g, "");
   return cmd
-    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
+    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|\$\{CLAUDE_CONFIG_DIR(?::-(?:[^{}]|\$\{[^}]*\})*)?\}|\$CLAUDE_CONFIG_DIR|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
     .replace(/\s+/g, " ")
     .trim();
 }

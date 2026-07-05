@@ -22,7 +22,7 @@ import { spawn } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { inference } from './Inference';
-import { getIdentity } from '../../../.claude/hooks/lib/identity';
+import { getIdentity } from '../../hooks/lib/identity';
 
 // ============================================================================
 // Types
@@ -108,7 +108,8 @@ interface UpdateData {
 // Constants
 // ============================================================================
 
-const LIFEOS_DIR = process.env.HOME + '/.claude/LIFEOS';
+import { getLifeosDir } from '../../hooks/lib/paths';
+const LIFEOS_DIR = getLifeosDir();
 const CREATE_UPDATE_SCRIPT = join(LIFEOS_DIR, 'skills/_LIFEOS/Tools/CreateUpdate.ts');
 
 // Words that indicate generic/bad titles - reject these
@@ -203,7 +204,7 @@ function buildContextSummary(messages: TranscriptMessage[]): string {
     // Clean up system reminders and keep it concise
     const cleaned = msg.content
       .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
-      .replace(/\n{3,}/g, '\n\n')
+      .replace(/\n{3 }/g, '\n\n')
       .trim();
     if (cleaned) {
       parts.push(`${prefix} ${cleaned.slice(0, 1500)}`);
@@ -657,8 +658,7 @@ Return ONLY the JSON object, no other text.`;
       userPrompt: prompt,
       level: 'medium',  // Sonnet: rich multi-field narrative extraction; haiku produces the generic text the prompt explicitly bans (task-intelligence review P2)
       expectJson: true,
-      timeout: 30000,
-    });
+      timeout: 30000 });
 
     if (!result.success) {
       console.error('[IntegrityMaintenance] Inference failed:', result.error);
@@ -720,10 +720,8 @@ async function generateVerboseNarrative(
         future_bullets: aiNarrative.future_bullets,
         verification_steps: aiNarrative.verification_steps,
         verification_commands: [`bun ~/.claude/skills/_LIFEOS/Tools/UpdateSearch.ts recent 5`],
-        confidence: 'high',
-      },
-      aiTitle: aiNarrative.title,
-    };
+        confidence: 'high' },
+      aiTitle: aiNarrative.title };
   }
 
   // Fallback to basic inference (when AI fails or no transcript)
@@ -750,9 +748,7 @@ async function generateVerboseNarrative(
       future_bullets: ['Changes are active for future sessions'],
       verification_steps: ['Changes applied via automatic detection'],
       verification_commands: [`bun ~/.claude/skills/_LIFEOS/Tools/UpdateSearch.ts recent 5`],
-      confidence: 'medium',
-    },
-  };
+      confidence: 'medium' } };
 }
 
 // ============================================================================
@@ -776,8 +772,7 @@ function checkReferences(changes: FileChange[]): IntegrityResult {
   return {
     references_found: totalFound,
     references_updated: 0,
-    locations_checked: locations,
-  };
+    locations_checked: locations };
 }
 
 // ============================================================================
@@ -794,8 +789,7 @@ async function sendVoiceNotification(message: string): Promise<void> {
       await fetch('http://localhost:31337/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, play: true }),
-      });
+        body: JSON.stringify({ message, play: true }) });
       return;
     }
 
@@ -818,10 +812,7 @@ async function sendVoiceNotification(message: string): Promise<void> {
           directness: personality.directness,
           precision: personality.precision,
           curiosity: personality.curiosity,
-          playfulness: personality.playfulness,
-        },
-      }),
-    });
+          playfulness: personality.playfulness } }) });
   } catch {
     // Voice server might not be running - silent fail
   }
@@ -851,8 +842,7 @@ async function createUpdateEntry(data: UpdateData): Promise<void> {
 
   // Call CreateUpdate.ts with --stdin
   const child = spawn('bun', [CREATE_UPDATE_SCRIPT, '--stdin'], {
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
+    stdio: ['pipe', 'inherit', 'inherit'] });
 
   child.stdin?.write(JSON.stringify(input));
   child.stdin?.end();
@@ -956,11 +946,9 @@ async function main(): Promise<void> {
       problem: verboseNarrative.story_problem || 'System files required updates',
       solution: verboseNarrative.story_resolution || 'Applied necessary modifications',
       verification: verboseNarrative.verification_steps?.join('. ') || 'Automatic integrity check completed',
-      confidence: verboseNarrative.confidence || 'medium',
-    },
+      confidence: verboseNarrative.confidence || 'medium' },
     // New verbose narrative is the preferred format
-    verbose_narrative: verboseNarrative,
-  };
+    verbose_narrative: verboseNarrative };
 
   await createUpdateEntry(updateData);
 

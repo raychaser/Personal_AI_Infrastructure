@@ -11,8 +11,8 @@ set -o pipefail
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-LIFEOS_DIR="${LIFEOS_DIR:-$HOME/.claude/LIFEOS}"
-CLAUDE_HOME="$HOME/.claude"
+CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+LIFEOS_DIR="${LIFEOS_DIR:-$CLAUDE_HOME/LIFEOS}"
 SETTINGS_FILE="$CLAUDE_HOME/settings.json"
 RATINGS_FILE="$LIFEOS_DIR/MEMORY/LEARNING/SIGNALS/ratings.jsonl"
 MODEL_CACHE="$LIFEOS_DIR/MEMORY/STATE/model-cache.txt"
@@ -55,7 +55,7 @@ USER_TZ="${USER_TZ:-UTC}"
 LIFEOS_VERSION=""
 for _pai_v_path in \
     "$LIFEOS_DIR/VERSION" \
-    "$HOME/.claude/LIFEOS/VERSION" \
+    "$CLAUDE_HOME/LIFEOS/VERSION" \
     "/Users/$(id -un 2>/dev/null)/.claude/LIFEOS/VERSION" \
     "$(eval echo ~"$(id -un 2>/dev/null)")/.claude/LIFEOS/VERSION"; do
     if [ -n "$_pai_v_path" ] && [ -f "$_pai_v_path" ]; then
@@ -71,7 +71,7 @@ LIFEOS_VERSION="${LIFEOS_VERSION:-—}"
 ALGO_VERSION=""
 for _algo_path in \
     "$LIFEOS_DIR/ALGORITHM/LATEST" \
-    "$HOME/.claude/LIFEOS/ALGORITHM/LATEST" \
+    "$CLAUDE_HOME/LIFEOS/ALGORITHM/LATEST" \
     "/Users/$(id -un 2>/dev/null)/.claude/LIFEOS/ALGORITHM/LATEST" \
     "$(eval echo ~"$(id -un 2>/dev/null)")/.claude/LIFEOS/ALGORITHM/LATEST"; do
     if [ -n "$_algo_path" ] && [ -f "$_algo_path" ]; then
@@ -85,7 +85,7 @@ done
         "$(date '+%H:%M:%S')" "$ALGO_VERSION" "${HOME:-UNSET}" "${LIFEOS_DIR:-UNSET}" "${USER:-UNSET}"
     for _algo_path in \
         "$LIFEOS_DIR/ALGORITHM/LATEST" \
-        "$HOME/.claude/LIFEOS/ALGORITHM/LATEST" \
+        "$CLAUDE_HOME/LIFEOS/ALGORITHM/LATEST" \
         "/Users/$(id -un 2>/dev/null)/.claude/LIFEOS/ALGORITHM/LATEST"; do
         printf ' %s=%s' "$_algo_path" "$([ -f "$_algo_path" ] && echo OK || echo MISS)"
     done
@@ -111,10 +111,10 @@ LOCATION_CACHE_TTL=3600
 WEATHER_CACHE_TTL=900
 USAGE_CACHE_TTL=900      # 15 min: /api/oauth/usage has aggressive per-token rate limits (~5 req before 429)
 
-# Source .env for API keys. Canonical location is $HOME/.claude/.env (which is
-# typically a symlink to $HOME/.config/LIFEOS/.env). The historical $HOME/.claude/LIFEOS/.env
+# Source .env for API keys. Canonical location is $CLAUDE_HOME/.env (which is
+# typically a symlink to $HOME/.config/LIFEOS/.env). The historical $CLAUDE_HOME/LIFEOS/.env
 # path is wrong and has been removed everywhere else — do not reintroduce it.
-[ -f "$HOME/.claude/.env" ] && source "$HOME/.claude/.env"
+[ -f "$CLAUDE_HOME/.env" ] && source "$CLAUDE_HOME/.env"
 
 # Cross-platform file mtime (seconds since epoch). Detect stat flavor once;
 # probing both variants on every mtime check is expensive on macOS.
@@ -291,7 +291,7 @@ if [ "$context_pct" = "0" ] && [ "$total_input" -eq 0 ] 2>/dev/null; then
         done < <(jq -r '.loadAtStartup.files[]? // empty' "$SETTINGS_FILE" 2>/dev/null)
 
         # Project memory files (CC native memory at ~/.claude/projects/*/memory/)
-        for _f in "$HOME"/.claude/projects/*/memory/MEMORY.md; do
+        for _f in "$CLAUDE_HOME"/projects/*/memory/MEMORY.md; do
             [ -f "$_f" ] && _est=$((_est + $(wc -c < "$_f") * 10 / 35))
         done
 
@@ -694,7 +694,7 @@ if [ "$MODE" != "nano" ]; then
 
     # Hook count flows through GetCounts.ts — same source banner uses. --single hooks
     # short-circuits all other walks (~20ms). Don't reintroduce inline jq here.
-    _hooks_cnt=$(bun "$HOME/.claude/LIFEOS/TOOLS/GetCounts.ts" --single hooks 2>/dev/null || echo 0)
+    _hooks_cnt=$(bun "$CLAUDE_HOME/LIFEOS/TOOLS/GetCounts.ts" --single hooks 2>/dev/null || echo 0)
 
     _ratings_cnt=0
     [ -f "$RATINGS_FILE" ] && _ratings_cnt=$(wc -l < "$RATINGS_FILE" 2>/dev/null | tr -d ' ')
@@ -747,7 +747,7 @@ USAGEEOF
             if [ "$(uname -s)" = "Darwin" ]; then
                 cred_json=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
             else
-                cred_json=$(cat "${HOME}/.claude/.credentials.json" 2>/dev/null)
+                cred_json=$(cat "${CLAUDE_HOME}/.credentials.json" 2>/dev/null)
             fi
             token=$(echo "$cred_json" | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
 

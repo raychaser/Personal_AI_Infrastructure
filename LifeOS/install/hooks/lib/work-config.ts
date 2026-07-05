@@ -26,11 +26,12 @@
  */
 import { existsSync, readFileSync, writeFileSync, chmodSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "./paths";
 
 declare const Bun: { spawnSync: (cmd: string[], opts?: any) => any };
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const REPO_JSON_PATH = join(LIFEOS_DIR, "USER", "WORK", "work_repo.json");
 const COLUMNS_YAML_PATH = join(LIFEOS_DIR, "USER", "WORK", "config.yaml");
 
@@ -98,8 +99,7 @@ export function loadWorkConfig(): WorkConfig {
     captureSweep,
     projectProperty,
     reason,
-    reasonCode: code,
-  });
+    reasonCode: code });
 
   if (!existsSync(REPO_JSON_PATH)) {
     return disabled(
@@ -151,9 +151,7 @@ export function loadWorkConfig(): WorkConfig {
             visibility: result.visibility ?? "PRIVATE",
             ttl_hours: ttlHours,
             verification_command: parsed.privacy.verification_command ??
-              `gh repo view ${parsed.repo} --json visibility,isPrivate`,
-          },
-        };
+              `gh repo view ${parsed.repo} --json visibility,isPrivate` } };
         writeFileSync(REPO_JSON_PATH, JSON.stringify(updated, null, 2) + "\n");
         chmodSync(REPO_JSON_PATH, 0o600);
         parsed = updated;
@@ -191,9 +189,7 @@ export function loadWorkConfig(): WorkConfig {
       verified_at: parsed.privacy.verified_at ?? "",
       visibility: parsed.privacy.visibility ?? "unknown",
       ageHours,
-      revalidatedThisLoad,
-    },
-  };
+      revalidatedThisLoad } };
 }
 
 // ── gh re-verification ──────────────────────────────────────────────────────
@@ -222,8 +218,7 @@ function revalidatePrivate(repo: string): RevalidateResult {
     return {
       ok: true,
       isPrivate: data.isPrivate === true,
-      visibility: typeof data.visibility === "string" ? data.visibility : "unknown",
-    };
+      visibility: typeof data.visibility === "string" ? data.visibility : "unknown" };
   } catch (err) {
     return { ok: false, reason: `gh spawn failed: ${String(err)}` };
   }

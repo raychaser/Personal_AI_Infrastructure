@@ -34,7 +34,7 @@
 
 import { execFileSync } from "node:child_process";
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { copyMissing, detectDevTree } from "./InstallEngine";
 
 // Enhancement components are the à-la-carte half of setup. The "LifeOS Core"
@@ -156,7 +156,11 @@ function deployPulse(ctx: Ctx): ComponentResult {
     ensurePresent("PULSE", ctx);
     const plistSrc = join(pulseDir, "com.lifeos.pulse.plist");
     if (!existsSync(plistSrc)) throw new Error(`plist template missing at ${plistSrc}`);
-    const materialized = readFileSync(plistSrc, "utf-8").replaceAll("__HOME__", ctx.home);
+    const cfgRoot = ctx.configRoot;
+    const materialized = readFileSync(plistSrc, "utf-8")
+      .replaceAll("__HOME__/.claude", cfgRoot)
+      .replaceAll("__CONFIG_ROOT__", cfgRoot)
+      .replaceAll("__HOME__", ctx.home);
     const u = uid();
     const sameOnDisk = existsSync(plistDst) && readFileSync(plistDst, "utf-8") === materialized;
     const alreadyLoaded = launchctl(["print", `gui/${u}/com.lifeos.pulse`]).ok;
@@ -375,10 +379,22 @@ function deploy(component: Component, ctx: Ctx): ComponentResult {
 
 // ── main ─────────────────────────────────────────────────────────────
 
+export function normalizeConfigRoot(raw: string, home: string): string {
+  let o = raw.trim()
+    .replace(/^~(?=\/|$)/, home)
+    .replace(/^\$\{HOME\}(?=\/|$)/, home)
+    .replace(/^\$HOME(?=\/|$)/, home);
+  o = resolve(o);
+  while (o.length > 1 && o.endsWith("/")) o = o.slice(0, -1);
+  return o;
+}
+
 function main(): void {
   const a = process.argv.slice(2);
   const home = process.env.HOME || "";
-  const configRoot = arg(a, "--config-root") || process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  const rawConfigRoot = arg(a, "--config-root") || process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  // Normalize before the value is baked into plists/launchd env (no shell there).
+  const configRoot = normalizeConfigRoot(rawConfigRoot, home);
   const skillRoot = arg(a, "--skill-root") || join(import.meta.dir, "..");
   const apply = a.includes("--apply");
   const allowDev = a.includes("--allow-dev");
@@ -418,8 +434,7 @@ function main(): void {
     installRoot: join(skillRoot, "install"),
     home,
     launchAgents: join(home, "Library", "LaunchAgents"),
-    apply,
-  };
+    apply };
 
   const results = selected.map((c) => deploy(c, ctx));
   // A blocked component (prereq absent, nothing written) is a FAILURE, not a
@@ -434,9 +449,9 @@ function main(): void {
     payloadRoot: ctx.payloadRoot,
     selected,
     results,
-    note: apply ? undefined : "dry-run — re-run with --apply --components <csv> after the user opts in",
-  }, null, 2));
+    note: apply ? undefined : "dry-run — re-run with --apply --components <csv> after the user opts in" }, null, 2));
   process.exit(ok ? 0 : 1);
 }
 
-main();
+
+if (import.meta.main) main();

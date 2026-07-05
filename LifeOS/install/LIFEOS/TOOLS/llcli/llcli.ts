@@ -11,7 +11,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // ============================================================================
 // Types
@@ -46,14 +46,13 @@ interface Config {
 const DEFAULTS = {
   timezone: 'America/Los_Angeles',
   baseUrl: 'https://api.limitless.ai/v1',
-  limit: 20,
-};
+  limit: 20 };
 
 /**
  * Load configuration from environment
  */
 function loadConfig(): Config {
-  const envPath = process.env.LIFEOS_CONFIG_DIR ? join(process.env.LIFEOS_CONFIG_DIR, '.env') : join(homedir(), '.claude', '.env');
+  const envPath = process.env.LIFEOS_CONFIG_DIR ? join(process.env.LIFEOS_CONFIG_DIR, '.env') : join(getConfigRoot(), '.env');
 
   try {
     const envContent = readFileSync(envPath, 'utf-8');
@@ -71,8 +70,7 @@ function loadConfig(): Config {
     return {
       apiKey,
       timezone: DEFAULTS.timezone,
-      baseUrl: DEFAULTS.baseUrl,
-    };
+      baseUrl: DEFAULTS.baseUrl };
   } catch (error) {
     console.error(`Error: Cannot read ~/.claude/.env file`);
     console.error('Make sure LIMITLESS_API_KEY is set in ~/.claude/.env');
@@ -97,9 +95,7 @@ async function fetchLifelogs(
   try {
     const response = await fetch(url, {
       headers: {
-        'X-API-Key': config.apiKey,
-      },
-    });
+        'X-API-Key': config.apiKey } });
 
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -126,8 +122,7 @@ async function fetchToday(limit: number = DEFAULTS.limit): Promise<void> {
   const params = {
     date: today,
     timezone: config.timezone,
-    limit: limit.toString(),
-  };
+    limit: limit.toString() };
 
   const data = await fetchLifelogs(config, params);
   console.log(JSON.stringify(data, null, 2));
@@ -148,8 +143,7 @@ async function fetchDate(date: string, limit: number = DEFAULTS.limit): Promise<
   const params = {
     date,
     timezone: config.timezone,
-    limit: limit.toString(),
-  };
+    limit: limit.toString() };
 
   const data = await fetchLifelogs(config, params);
   console.log(JSON.stringify(data, null, 2));
@@ -169,8 +163,7 @@ async function fetchSearch(keyword: string, limit: number = DEFAULTS.limit): Pro
   const params = {
     search: keyword,
     timezone: config.timezone,
-    limit: limit.toString(),
-  };
+    limit: limit.toString() };
 
   const data = await fetchLifelogs(config, params);
   console.log(JSON.stringify(data, null, 2));

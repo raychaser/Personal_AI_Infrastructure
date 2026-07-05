@@ -10,7 +10,29 @@
  */
 
 import { homedir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
+
+/**
+ * THE canonical config-root normalizer: trim, expand ~/$HOME/${HOME}, resolve()
+ * (collapses '..' and doubled separators, absolutizes), strip trailing slashes.
+ * Guard, tools, and daemons must all derive a byte-identical root — divergent
+ * normalizers were a recurring fail-open class (see system-file-guard-core).
+ */
+export function normalizeConfigRoot(p: string): string {
+  let out = p.trim()
+    .replace(/^~(?=\/|$)/, homedir())
+    .replace(/^\$\{HOME\}(?=\/|$)/, homedir())
+    .replace(/^\$HOME(?=\/|$)/, homedir());
+  out = resolve(out);
+  while (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
+  return out;
+}
+
+// NOTE: this normalizer is a shared helper — every consumer that resolves the
+// config root (guard, tools, daemons) should call normalizeConfigRoot() rather
+// than reading process.env.CLAUDE_CONFIG_DIR raw. It is NOT applied by a global
+// env mutation (that is process-local and would not reach separately-spawned
+// tool processes); each consumer imports and calls it.
 
 /**
  * Expand shell variables in a path string
@@ -31,7 +53,8 @@ export function expandPath(path: string): string {
  * Priority:
  *   1. CLAUDE_PLUGIN_ROOT (plugin install) → <root>/PAI
  *   2. LIFEOS_DIR env var (expanded)
- *   3. ~/.claude/LIFEOS  (live default — byte-identical to pre-plugin behavior)
+ *   3. CLAUDE_CONFIG_DIR env (normalized) + /LIFEOS
+ *   4. ~/.claude/LIFEOS  (live default — byte-identical to pre-plugin behavior)
  *
  * The CLAUDE_PLUGIN_ROOT guard MUST precede the LIFEOS_DIR check: in a packed
  * plugin, bin/pai exports LIFEOS_DIR equal to CLAUDE_PLUGIN_ROOT (the flattened
@@ -51,25 +74,39 @@ export function getLifeosDir(): string {
     return expandPath(envLifeosDir);
   }
 
-  return join(homedir(), '.claude', 'LIFEOS');
+  return join(getClaudeDir(), 'LIFEOS');
 }
 
 /**
- * Get the Claude Code home directory.
+ * THE single config-root accessor. Every hook, tool, and daemon should call this
+ * instead of inlining `process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude')`
+ * — that pattern (previously duplicated at ~110 sites) let a non-canonical env
+ * value resolve to a different root in different places, a silent fail-open class.
  *
- * Plugin install: CLAUDE_PLUGIN_ROOT is the flattened plugin root that plays the
- * live ~/.claude role (skills/ and hooks/ sit directly under it, matching live
- * .claude/skills and .claude/hooks). Live default: ~/.claude — byte-identical to
- * pre-plugin behavior, since CLAUDE_PLUGIN_ROOT is unset on a normal install.
+ * Precedence: CLAUDE_PLUGIN_ROOT (flattened plugin root) > CLAUDE_CONFIG_DIR
+ * (normalized) > ~/.claude. Byte-identical to pre-CLAUDE_CONFIG_DIR behavior when
+ * neither env var is set.
  */
-export function getClaudeDir(): string {
+export function getConfigRoot(): string {
   const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 
   if (pluginRoot) {
     return expandPath(pluginRoot);
   }
 
+  const configDir = process.env.CLAUDE_CONFIG_DIR;
+  if (configDir) {
+    return normalizeConfigRoot(configDir);
+  }
   return join(homedir(), '.claude');
+}
+
+/**
+ * Back-compat alias for {@link getConfigRoot}. The config root IS the Claude
+ * home directory; existing callers use this name.
+ */
+export function getClaudeDir(): string {
+  return getConfigRoot();
 }
 
 /**

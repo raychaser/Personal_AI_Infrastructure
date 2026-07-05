@@ -15,15 +15,14 @@
 import { createSocket, type Socket } from "dgram"
 import { appendFileSync, mkdirSync, existsSync, statSync, readFileSync } from "fs"
 import { dirname, join } from "path"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
 const MODULE_NAME = "syslog"
 const DEFAULT_PORT = 5514
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB rotation threshold
 
-const LOG_PATH = join(
-  HOME,
-  ".claude",
+const LOG_PATH = join(getConfigRoot(),
   "LIFEOS",
   "MEMORY",
   "OBSERVABILITY",
@@ -67,8 +66,7 @@ const state: ModuleState = {
   messagesReceived: 0,
   lastMessageAt: null,
   lastSender: null,
-  parseFailures: 0,
-}
+  parseFailures: 0 }
 
 const parseRfc3164 = (raw: string): ParsedMessage | null => {
   // <PRI>TIMESTAMP HOST TAG: MSG
@@ -86,8 +84,7 @@ const parseRfc3164 = (raw: string): ParsedMessage | null => {
     tag: m[4]?.trim(),
     msg: m[5]?.trim() ?? "",
     raw,
-    format: "rfc3164",
-  }
+    format: "rfc3164" }
 }
 
 const parseCef = (raw: string): ParsedMessage | null => {
@@ -111,8 +108,7 @@ const parseCef = (raw: string): ParsedMessage | null => {
     tag: `${parts[1]}/${parts[2]}`,
     msg: parts[5] ?? "",
     raw,
-    format: "cef",
-  }
+    format: "cef" }
 }
 
 const parse = (raw: string): ParsedMessage => {
@@ -127,8 +123,7 @@ const parse = (raw: string): ParsedMessage => {
     facility: 0,
     msg: raw.trim(),
     raw,
-    format: "unknown",
-  }
+    format: "unknown" }
 }
 
 const rotateIfNeeded = (): void => {
@@ -205,9 +200,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
       last_message_at: state.lastMessageAt?.toISOString() ?? null,
       last_sender: state.lastSender,
       log_file: LOG_PATH,
-      log_file_exists: existsSync(LOG_PATH),
-    },
-  }
+      log_file_exists: existsSync(LOG_PATH) } }
 }
 
 const tailFile = (n: number): string[] => {

@@ -17,9 +17,10 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const TELOS_DIR = join(LIFEOS_DIR, "USER", "TELOS");
 const IDEAL_DIR = join(TELOS_DIR, "IDEAL_STATE");
 const STATE_FILE = join(LIFEOS_DIR, "USER", "TELOS", "CURRENT_STATE", "interview-state.json");
@@ -90,8 +91,7 @@ const DIMENSION_PROMPTS: Record<string, string[]> = {
     "Wind-down and day-close — when, what shape?",
     "Weekly shape: Monday through Sunday — any day-of-week anchors?",
     "Yearly anchors: conferences, retreats, family travel, off-grid time?",
-  ],
-};
+  ] };
 
 const PREFERENCE_PROMPTS: Record<string, string[]> = {
   BANDS: [
@@ -155,8 +155,7 @@ const PREFERENCE_PROMPTS: Record<string, string[]> = {
     "City council topics to always flag — development, regulation, budget, what else?",
     "State-level legislation — which topic areas (AI, privacy, security)?",
     "Any specific streets or intersections you want active road-work alerts for?",
-  ],
-};
+  ] };
 
 function loadState(): InterviewState {
   if (!existsSync(STATE_FILE)) {
@@ -164,8 +163,7 @@ function loadState(): InterviewState {
       started: new Date().toISOString(),
       last_session: new Date().toISOString(),
       dimensions: Object.fromEntries(DIMENSIONS.map((d) => [d, { status: "pending" }])),
-      preference_files: Object.fromEntries(PREFERENCE_FILES.map((f) => [f, { status: "pending" }])),
-    };
+      preference_files: Object.fromEntries(PREFERENCE_FILES.map((f) => [f, { status: "pending" }])) };
     writeFileSync(STATE_FILE, JSON.stringify(fresh, null, 2));
     return fresh;
   }

@@ -12,9 +12,10 @@
 
 import { join } from "node:path"
 import { mkdirSync, writeFileSync, appendFileSync, readFileSync, existsSync } from "node:fs"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
-const CACHE_DIR = join(HOME, ".claude", "LIFEOS", "MEMORY", "_AIRGRADIENT")
+const CACHE_DIR = join(getConfigRoot(), "LIFEOS", "MEMORY", "_AIRGRADIENT")
 const LATEST = join(CACHE_DIR, "latest.json")
 const HISTORY = join(CACHE_DIR, "history.jsonl")
 
@@ -23,7 +24,7 @@ const API_BASE = "https://api.airgradient.com/public/api/v1"
 // Bun auto-loads .env from CWD only; Pulse cron runs from LIFEOS/PULSE/, so the
 // symlink at ~/.claude/.env isn't picked up. Read it directly if env is empty.
 function loadTokenFromDotenv(): string | null {
-  const envPath = join(HOME, ".claude", ".env")
+  const envPath = join(getConfigRoot(), ".env")
   if (!existsSync(envPath)) return null
   try {
     const raw = readFileSync(envPath, "utf8")
@@ -90,8 +91,7 @@ async function main() {
   const payload = {
     fetched_at: now,
     count: monitors.length,
-    monitors,
-  }
+    monitors }
   writeFileSync(LATEST, JSON.stringify(payload, null, 2))
 
   // Append one line per monitor to history (for sparkline / trend UI later)
@@ -105,8 +105,7 @@ async function main() {
     rhum: m.rhum_corrected ?? m.rhum,
     tvoc: m.tvocIndex,
     nox: m.noxIndex,
-    ts_reading: m.timestamp,
-  }))
+    ts_reading: m.timestamp }))
   appendFileSync(HISTORY, rows.map((r) => JSON.stringify(r)).join("\n") + "\n")
 
   console.log("NO_ACTION")

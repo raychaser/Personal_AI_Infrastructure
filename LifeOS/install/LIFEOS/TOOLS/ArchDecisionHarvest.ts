@@ -18,13 +18,14 @@ import { spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const HOME = process.env.HOME || os.homedir();
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const DEFAULT_WORK_DIR = path.join(LIFEOS_DIR, "MEMORY", "WORK");
 const DEFAULT_ARCH_DOC = path.join(LIFEOS_DIR, "DOCUMENTATION", "LifeosSystemArchitecture.md");
 const ARCH_DECISIONS_HEADING = "## Architecture Decisions";

@@ -12,9 +12,10 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { parse as parseYaml } from "yaml";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = join(HOME, ".claude");
+const CLAUDE_DIR = getConfigRoot();
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Terminal Width Detection
@@ -87,8 +88,7 @@ const SPARK = ["\u2581", "\u2582", "\u2583", "\u2584", "\u2585", "\u2586", "\u25
 // Box drawing
 const BOX = {
   tl: "\u256d", tr: "\u256e", bl: "\u2570", br: "\u256f",
-  h: "\u2500", v: "\u2502", dh: "\u2550",
-};
+  h: "\u2500", v: "\u2502", dh: "\u2550" };
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 // LifeOS Logo \u2014 ascending-staircase mark (current state \u2192 ideal state)
@@ -242,8 +242,7 @@ function getStats(): SystemStats {
     arch,
     ccVersion,
     paiVersion,
-    algorithmVersion,
-  };
+    algorithmVersion };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -306,8 +305,7 @@ function createNavyBanner(stats: SystemStats, width: number): string {
     iceBlue: rgb(176, 196, 222),
     periwinkle: rgb(140, 160, 220),
     // URL - subtle dark teal (visible but muted)
-    darkTeal: rgb(55, 100, 105),
-  };
+    darkTeal: rgb(55, 100, 105) };
 
   const logo = lifeosLogoFull(); // LifeOS ascending-staircase mark (20 wide \u00d7 10 tall)
   const LOGO_WIDTH = 20;
@@ -418,8 +416,7 @@ function createElectricBanner(stats: SystemStats, width: number): string {
     plasma: rgb(0, 150, 255),
     glow: rgb(100, 200, 255),
     midBase: rgb(20, 40, 80),
-    active: rgb(0, 255, 136),
-  };
+    active: rgb(0, 255, 136) };
 
   // LifeOS logo \u2014 ascending-staircase mark
   const logo = lifeosLogoSmall();
@@ -479,8 +476,7 @@ function createTealBanner(stats: SystemStats, width: number): string {
     turquoise: rgb(64, 224, 208),
     paleAqua: rgb(175, 238, 238),
     midSea: rgb(20, 50, 60),
-    active: rgb(50, 205, 50),
-  };
+    active: rgb(50, 205, 50) };
 
   const WAVE = ["\u2248", "\u223c", "\u2307", "\u2312"];
   const wavePattern = (length: number): string => {
@@ -549,8 +545,7 @@ function createIceBanner(stats: SystemStats, width: number): string {
     pureWhite: rgb(255, 255, 255),
     glacierBlue: rgb(135, 206, 235),
     slateBlue: rgb(106, 135, 165),
-    active: rgb(100, 200, 150),
-  };
+    active: rgb(100, 200, 150) };
 
   const CRYSTAL = ["\u2727", "\u2728", "\u2729", "\u272a", "\u00b7", "\u2022"];
   const crystalPattern = (length: number): string => {
@@ -621,8 +616,7 @@ function getNavyColors() {
     iceBlue: rgb(176, 196, 222),
     periwinkle: rgb(140, 160, 220),
     skyBlue: rgb(135, 206, 235),
-    royalBlue: rgb(65, 105, 225),
-  };
+    royalBlue: rgb(65, 105, 225) };
 }
 
 // Small logo (8x5) for compact layouts \u2014 LifeOS ascending-staircase mark

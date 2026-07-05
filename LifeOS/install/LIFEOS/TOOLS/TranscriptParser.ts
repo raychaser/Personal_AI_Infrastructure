@@ -17,7 +17,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { getIdentity } from '../../../.claude/hooks/lib/identity';
+import { getIdentity } from '../../hooks/lib/identity';
 
 const DA_IDENTITY = getIdentity();
 
@@ -275,8 +275,7 @@ export function extractStructuredSections(text: string): StructuredResponse {
     results: /✅\s*RESULTS:\s*(.+?)(?:\n|$)/i,
     status: /📊\s*STATUS:\s*(.+?)(?:\n|$)/i,
     next: /➡️\s*NEXT:\s*(.+?)(?:\n|$)/i,
-    completed: new RegExp(`(?:🗣️\\s*${DA_IDENTITY.name}:|🎯\\s*COMPLETED:)\\s*(.+?)(?:\\n|$)`, 'i'),
-  };
+    completed: new RegExp(`(?:🗣️\\s*${DA_IDENTITY.name}:|🎯\\s*COMPLETED:)\\s*(.+?)(?:\\n|$)`, 'i') };
 
   for (const [key, pattern] of Object.entries(patterns)) {
     const match = text.match(pattern);
@@ -364,8 +363,7 @@ export function parseTranscript(transcriptPath: string): ParsedTranscript {
       voiceCompletion: extractVoiceCompletion(currentResponseText),
       plainCompletion: extractCompletionPlain(currentResponseText),
       structured: extractStructuredSections(currentResponseText),
-      responseState: detectResponseState(lastMessage, raw),
-    };
+      responseState: detectResponseState(lastMessage, raw) };
   } catch (error) {
     console.error('[TranscriptParser] Error parsing transcript:', error);
     return {
@@ -375,8 +373,7 @@ export function parseTranscript(transcriptPath: string): ParsedTranscript {
       voiceCompletion: '',
       plainCompletion: '',
       structured: {},
-      responseState: 'completed',
-    };
+      responseState: 'completed' };
   }
 }
 

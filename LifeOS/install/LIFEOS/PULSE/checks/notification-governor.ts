@@ -31,9 +31,10 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from "fs";
 import { join, dirname } from "path";
 import { createHash } from "crypto";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const STATE_FILE = join(LIFEOS_DIR, "PULSE", "state", "notification-governor.json");
 const LOG_FILE = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY", "notification-governor.jsonl");
 const NOTIFY_URL = "http://localhost:31337/notify";
@@ -139,8 +140,7 @@ async function dispatch(channel: Channel, message: string): Promise<boolean> {
       const res = await fetch(NOTIFY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, voice_id: VOICE_ID, voice_enabled: true }),
-      });
+        body: JSON.stringify({ message, voice_id: VOICE_ID, voice_enabled: true }) });
       return res.ok;
     } catch {
       return false;
@@ -200,8 +200,7 @@ async function cmdNotify(args: string[]): Promise<number> {
     channel,
     source,
     fingerprint: fingerprint(message, source),
-    priority,
-  });
+    priority });
   saveState(state);
   logDecision({ action: "dispatch", channel, source, priority, message });
   console.log(`✅ Dispatched via ${channel}`);
@@ -241,8 +240,7 @@ function cmdReportFalseAlert(source: string): void {
     state.sourceSuppressions[source] = {
       until,
       reason: `2 false alerts in 7 days`,
-      falseAlertTimestamps: recent,
-    };
+      falseAlertTimestamps: recent };
     console.log(`⛔ Source ${source} auto-suppressed until ${until}`);
   } else {
     console.log(`⚠️  False alert logged for ${source} (${recent.length}/2 in 7d)`);

@@ -19,9 +19,10 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { readTelosFreshness, sectionSlug, type SectionFreshness } from "./TelosFreshness";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const USER_DIR = join(LIFEOS_DIR, "USER");
 const TELOS_DIR = join(USER_DIR, "TELOS");
 const TELOS_PATH = join(TELOS_DIR, "TELOS.md");
@@ -84,7 +85,7 @@ const REGISTRY: RegistryTarget[] = [
     prompts: ["Main DA voice — pick from ElevenLabs library, or stick with default Rachel (21m00Tcm4TlvDq8ikWAM)?",
               "Algorithm voice (used for phase transitions) — default Adam (pNInz6obpgDQGcFmaJgB) is fine?",
               "Want voice notifications on by default? (default: yes)"] },
-  { phase: 0, path: join(HOME, ".claude", ".env"), name: ".env/credentials", category: "setup", leverage: 10,
+  { phase: 0, path: join(getConfigRoot(), ".env"), name: ".env/credentials", category: "setup", leverage: 10,
     prompts: ["ANTHROPIC_API_KEY — required for inference. Paste here (will write to .env, won't echo back)?",
               "ELEVENLABS_API_KEY — required for voice notifications. Skip if you don't want voice.",
               "GH_TOKEN — optional, only if you want the work pipeline. Skip if not using GitHub issues.",
@@ -282,8 +283,7 @@ function scoreFile(target: RegistryTarget): Target {
     age_days: null,
     threshold_days: 0,
     stale: false,
-    why_incomplete: [],
-  };
+    why_incomplete: [] };
 
   if (!existsSync(target.path)) {
     result.why_incomplete.push("file does not exist");
@@ -351,8 +351,7 @@ function scoreSection(target: RegistryTarget, sectionBody: string, sectionFreshn
     age_days: sectionFreshness?.ageDays ?? null,
     threshold_days: sectionFreshness?.thresholdDays ?? 0,
     stale: sectionFreshness?.stale ?? false,
-    why_incomplete: [],
-  };
+    why_incomplete: [] };
 
   for (const pattern of PLACEHOLDER_PATTERNS) {
     const matches = sectionBody.match(pattern);
@@ -422,8 +421,7 @@ function scoreTarget(target: RegistryTarget): Target {
         age_days: sectionFreshness?.ageDays ?? null,
         threshold_days: sectionFreshness?.thresholdDays ?? 0,
         stale: sectionFreshness?.stale ?? false,
-        why_incomplete: ["section does not exist"],
-      };
+        why_incomplete: ["section does not exist"] };
       const incompleteness = 100 - result.completeness_score;
       // Stale sections get a large bump so overdue reviews naturally rise to the top.
       result.priority = Math.round(PHASE_BOOST[target.phase] + target.leverage * 2 + incompleteness + (result.stale ? 200 : 0));
@@ -440,8 +438,7 @@ const PHASE_LABELS: Record<Phase, string> = {
   2: "PHASE 2 — Ideal State",
   3: "PHASE 3 — Preference sections",
   4: "PHASE 4 — Current state + identity",
-  9: "PHASE 9 — Deferred",
-};
+  9: "PHASE 9 — Deferred" };
 
 // ─── Output formatters ───
 

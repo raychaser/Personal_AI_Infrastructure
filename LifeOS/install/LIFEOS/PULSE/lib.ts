@@ -10,6 +10,7 @@ import { join } from "path"
 import { existsSync } from "fs"
 import { rename } from "fs/promises"
 import { modelForEffort } from "../TOOLS/models.ts"
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 // ── Types ──
 
@@ -48,9 +49,7 @@ export interface DaemonConfig {
 // written here is automatically stripped from shadow releases. That's the
 // structural privacy lever — no separate scrub policy needed.
 
-export const USER_CRON_PATH = join(
-  process.env.HOME ?? "~",
-  ".claude", "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
+export const USER_CRON_PATH = join(getConfigRoot(), "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
 )
 
 export interface JobState {
@@ -92,8 +91,7 @@ function jobsFromToml(raw: string, source: JobSource): Job[] {
     model: (j.model as string) ?? modelForEffort('medium'),
     output: (j.output ?? "log") as OutputTarget | OutputTarget[],
     enabled: (j.enabled as boolean) ?? true,
-    _source: source,
-  }))
+    _source: source }))
 }
 
 export async function loadConfig(daemonDir: string): Promise<DaemonConfig> {
@@ -236,8 +234,7 @@ async function dispatchSingle(output: string, target: OutputTarget, jobName: str
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: output.slice(0, 500) }),
-          signal: AbortSignal.timeout(timeout),
-        })
+          signal: AbortSignal.timeout(timeout) })
         break
 
       case "telegram": {
@@ -251,8 +248,7 @@ async function dispatchSingle(output: string, target: OutputTarget, jobName: str
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chat_id: chatId, text: output.slice(0, 4096), parse_mode: "Markdown" }),
-          signal: AbortSignal.timeout(timeout),
-        })
+          signal: AbortSignal.timeout(timeout) })
         break
       }
 
@@ -267,8 +263,7 @@ async function dispatchSingle(output: string, target: OutputTarget, jobName: str
         const proc = Bun.spawn([gwsPath, "gmail", "+send", "--to", recipient, "--subject", subject, "--body", output.slice(0, 50_000)], {
           stdout: "pipe",
           stderr: "pipe",
-          env: process.env,
-        })
+          env: process.env })
         const timer = setTimeout(() => proc.kill("SIGTERM"), 30_000)
         await proc.exited
         clearTimeout(timer)
@@ -285,8 +280,7 @@ async function dispatchSingle(output: string, target: OutputTarget, jobName: str
           method: "POST",
           headers: { Title: `LifeOS: ${jobName}`, Priority: "3" },
           body: output.slice(0, 4096),
-          signal: AbortSignal.timeout(timeout),
-        })
+          signal: AbortSignal.timeout(timeout) })
         break
       }
 
@@ -319,9 +313,8 @@ export async function spawnScript(command: string, timeoutMs = 60_000): Promise<
   const proc = Bun.spawn([BASH_PATH, "-c", command], {
     stdout: "pipe",
     stderr: "pipe",
-    cwd: join(process.env.HOME ?? "~", ".claude", "LIFEOS", "PULSE"),
-    env: { ...process.env },
-  })
+    cwd: join(getConfigRoot(), "LIFEOS", "PULSE"),
+    env: { ...process.env } })
 
   const timer = setTimeout(() => proc.kill("SIGTERM"), timeoutMs)
   const output = await new Response(proc.stdout).text()
@@ -369,8 +362,7 @@ export async function spawnClaude(prompt: string, opts: { model: string; timeout
     stdin: new Blob([prompt]),
     stdout: "pipe",
     stderr: "pipe",
-    env,
-  })
+    env })
 
   const timeoutMs = opts.timeoutMs ?? 300_000
   const timer = setTimeout(() => proc.kill("SIGTERM"), timeoutMs)

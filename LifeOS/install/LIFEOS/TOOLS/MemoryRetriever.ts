@@ -35,13 +35,14 @@ import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import { spawnSync } from "child_process";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const KNOWLEDGE_DIR = path.join(LIFEOS_DIR, "MEMORY", "KNOWLEDGE");
 const DOMAINS = ["People", "Companies", "Ideas", "Research"];
 
@@ -392,8 +393,8 @@ function formatResults(
 // dual-tier prefetch, no graph traversal on hot path).
 
 const MEMORY_FILES: ReadonlyArray<{ path: string; title: string }> = [
-  { path: path.join(HOME, ".claude", "LIFEOS", "USER", "PRINCIPAL", "PRINCIPAL_MEMORY.md"), title: "Principal Memory" },
-  { path: path.join(HOME, ".claude", "LIFEOS", "USER", "DIGITAL_ASSISTANT", "DA_MEMORY.md"), title: "DA Memory" },
+  { path: path.join(getConfigRoot(), "LIFEOS", "USER", "PRINCIPAL", "PRINCIPAL_MEMORY.md"), title: "Principal Memory" },
+  { path: path.join(getConfigRoot(), "LIFEOS", "USER", "DIGITAL_ASSISTANT", "DA_MEMORY.md"), title: "DA Memory" },
 ];
 
 const RELEVANT_CACHE_TTL_MS = 60_000;
@@ -456,11 +457,9 @@ function loadMemoryFiles(): KnowledgeNote[] {
         frontmatter: {
           ...frontmatter,
           title,
-          type: "memory",
-        },
+          type: "memory" },
         body: cleaned,
-        wordCount,
-      });
+        wordCount });
     } catch {
       // Skip unreadable
     }
@@ -572,7 +571,7 @@ function formatRelevantBlock(results: RelevantResultItem[]): string {
     lines.push(`### [${r.type} · ${r.score.toFixed(1)}] ${r.title}`);
     lines.push(`<!-- ${shortPath} -->`);
     // Trim noisy whitespace and limit to roughly the excerpt budget
-    const excerpt = r.excerpt.replace(/\n{3,}/g, "\n\n").trim();
+    const excerpt = r.excerpt.replace(/\n{3 }/g, "\n\n").trim();
     lines.push(excerpt);
   }
   return lines.join("\n");
@@ -630,11 +629,9 @@ async function main(): Promise<void> {
       top: { type: "string", short: "t" },
       raw: { type: "boolean", short: "r", default: false },
       budget: { type: "string", short: "b" },
-      help: { type: "boolean", short: "h", default: false },
-    },
+      help: { type: "boolean", short: "h", default: false } },
     allowPositionals: true,
-    strict: true,
-  });
+    strict: true });
 
   if (values.help) {
     printHelp();

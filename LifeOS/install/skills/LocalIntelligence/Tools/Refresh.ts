@@ -9,7 +9,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
-import { homedir } from "node:os"
+import { } from "node:os"
 
 import { readHometown, NoHometownError } from "./Hometown.ts"
 import type { Digest, FetchResult, Fetcher, Hometown, SectionKey } from "./Types.ts"
@@ -21,8 +21,9 @@ import { fetchElections } from "./FetchElections.ts"
 import { fetchArrests } from "./FetchArrests.ts"
 import { fetchNews } from "./FetchNews.ts"
 import { fetchCrime } from "./FetchCrime.ts"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
-const DATA_DIR = join(homedir(), ".claude", "LIFEOS", "MEMORY", "DATA", "LocalIntelligence")
+const DATA_DIR = join(getConfigRoot(), "LIFEOS", "MEMORY", "DATA", "LocalIntelligence")
 
 const fetchers: Record<SectionKey, Fetcher> = {
   construction: fetchConstruction,
@@ -32,8 +33,7 @@ const fetchers: Record<SectionKey, Fetcher> = {
   legislation: fetchLegislation,
   elections: fetchElections,
   arrests: fetchArrests,
-  news: fetchNews,
-}
+  news: fetchNews }
 
 function todayDateString(): string {
   return new Date().toISOString().slice(0, 10)
@@ -85,8 +85,7 @@ export async function refresh(home: Hometown): Promise<Digest> {
       generated_at: new Date().toISOString(),
       sources_used: sourcesUsed,
       sources_failed: sourcesFailed,
-      errors,
-    },
+      errors },
     construction: sections.construction!,
     crime: sections.crime!,
     business: sections.business!,
@@ -94,8 +93,7 @@ export async function refresh(home: Hometown): Promise<Digest> {
     legislation: sections.legislation!,
     elections: sections.elections!,
     arrests: sections.arrests!,
-    news: sections.news!,
-  }
+    news: sections.news! }
 
   return digest
 }
@@ -127,8 +125,7 @@ if (import.meta.main) {
         .filter((v): v is FetchResult => typeof v === "object" && v !== null && "items" in v)
         .reduce((acc, r) => acc + r.items.length, 0),
       datedPath,
-      latestPath,
-    }
+      latestPath }
     console.log(JSON.stringify(summary, null, 2))
   } catch (err) {
     if (err instanceof NoHometownError) {

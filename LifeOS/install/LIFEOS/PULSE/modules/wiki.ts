@@ -29,22 +29,22 @@ import {
   readdirSync,
   statSync,
   watch,
-  writeFileSync,
-} from "fs"
+  writeFileSync } from "fs"
 import MiniSearch from "minisearch"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // Path Construction
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const DOCUMENTATION_DIR = join(LIFEOS_DIR, "DOCUMENTATION")
 const KNOWLEDGE_DIR = join(LIFEOS_DIR, "MEMORY", "KNOWLEDGE")
 const BOOKMARKS_DIR = join(LIFEOS_DIR, "MEMORY", "BOOKMARKS")
 const BOOKMARKS_CSV = join(BOOKMARKS_DIR, "bookmarks.csv")
 const ALGORITHM_DIR = join(LIFEOS_DIR, "ALGORITHM")
-const SKILLS_DIR = join(HOME, ".claude", "skills")
-const HOOKS_DIR = join(HOME, ".claude", "hooks")
-const SETTINGS_PATH = join(HOME, ".claude", "settings.json")
+const SKILLS_DIR = join(getConfigRoot(), "skills")
+const HOOKS_DIR = join(getConfigRoot(), "hooks")
+const SETTINGS_PATH = join(getConfigRoot(), "settings.json")
 const ARBOL_WORKERS_DIR = join(LIFEOS_DIR, "USER", "CUSTOMIZATIONS", "ARBOL", "Workers")
 
 const SYSTEM_PROMPT_PATH = join(LIFEOS_DIR, "LIFEOS_SYSTEM_PROMPT.md")
@@ -115,8 +115,7 @@ let lastIndexedAt: string | null = null
 
 const naturalCollator = new Intl.Collator(undefined, {
   numeric: true,
-  sensitivity: "base",
-})
+  sensitivity: "base" })
 
 // Filesystem Helpers
 
@@ -181,8 +180,7 @@ function systemDocMetadata(filePath: string): { slug: string; group: string } | 
     const filename = basename(filePath)
     return {
       slug: `Algorithm__${stripMarkdownExtension(filename)}`,
-      group: "Algorithm",
-    }
+      group: "Algorithm" }
   }
 
   return null
@@ -325,8 +323,7 @@ function indexFile(filePath: string, options: IndexOptions): WikiPage | null {
       author: typeof fm.author === "string" ? fm.author : undefined,
       source: typeof fm.source === "string" ? fm.source : undefined,
       sourceUrl: typeof fm.source_url === "string" ? fm.source_url : undefined,
-      postDate: typeof fm.post_date === "string" ? fm.post_date : undefined,
-    }
+      postDate: typeof fm.post_date === "string" ? fm.post_date : undefined }
   } catch {
     return null
   }
@@ -469,8 +466,7 @@ function indexBookmarks(): void {
         tags,
         created,
         cover: get("cover"),
-        favorite: get("favorite") === "true",
-      }
+        favorite: get("favorite") === "true" }
 
       const slug = `bm-${id}`
       bookmarkData.set(slug, bookmark)
@@ -498,8 +494,7 @@ function indexBookmarks(): void {
         wordCount: contentText.split(/\s+/).filter(Boolean).length,
         wikilinks: [],
         filePath: "",
-        group: folder || "Unsorted",
-      })
+        group: folder || "Unsorted" })
     }
   } catch {
     // Bookmarks are optional; a malformed export should not break the wiki.
@@ -515,8 +510,7 @@ function indexSystemDoc(filePath: string): void {
   const page = indexFile(filePath, {
     category: "system-doc",
     slug: metadata.slug,
-    group: metadata.group,
-  })
+    group: metadata.group })
 
   if (page) pageIndex.set(page.slug, page)
 }
@@ -551,8 +545,7 @@ function indexKnowledgeArchive(): void {
     People: "person",
     Companies: "company",
     Ideas: "idea",
-    Blogs: "blog",
-  }
+    Blogs: "blog" }
 
   for (const domain of KNOWLEDGE_DOMAINS) {
     const domainDir = join(KNOWLEDGE_DIR, domain)
@@ -605,8 +598,7 @@ function rebuildBacklinks(): void {
       backlinkIndex.get(targetSlug)!.push({
         slug: page.slug,
         title: page.title,
-        category: page.category,
-      })
+        category: page.category })
     }
   }
 }
@@ -620,9 +612,7 @@ function rebuildSearchIndex(): void {
     searchOptions: {
       boost: { title: 3, tagsText: 2 },
       fuzzy: 0.2,
-      prefix: true,
-    },
-  })
+      prefix: true } })
 
   const docs: Array<{
     id: string
@@ -669,8 +659,7 @@ function rebuildSearchIndex(): void {
       author: page.author,
       source: page.source,
       sourceUrl: page.sourceUrl,
-      postDate: page.postDate,
-    })
+      postDate: page.postDate })
   }
 
   searchIndex.addAll(docs)
@@ -759,8 +748,7 @@ function treeLeaf(page: WikiPage): TreeNode {
   return {
     label: page.title,
     slug: page.slug,
-    category: page.category,
-  }
+    category: page.category }
 }
 
 function sortedPages(pages: WikiPage[]): WikiPage[] {
@@ -789,8 +777,7 @@ function buildTree(): TreeNode[] {
   const systemNode: TreeNode = {
     label: "Documentation",
     children: [],
-    count: systemDocs.length,
-  }
+    count: systemDocs.length }
 
   const groups: Record<string, WikiPage[]> = {}
   for (const page of systemDocs) {
@@ -804,23 +791,20 @@ function buildTree(): TreeNode[] {
     systemNode.children!.push({
       label: groupName,
       count: pages.length,
-      children: sortedPages(pages).map(treeLeaf),
-    })
+      children: sortedPages(pages).map(treeLeaf) })
   }
 
   tree.push(systemNode)
 
   const knowledgeNode: TreeNode = {
     label: "Knowledge Archive",
-    children: [],
-  }
+    children: [] }
 
   const domainMap: Record<string, { category: string; label: string }> = {
     People: { category: "person", label: "People" },
     Companies: { category: "company", label: "Companies" },
     Ideas: { category: "idea", label: "Ideas" },
-    Blogs: { category: "blog", label: "Blogs" },
-  }
+    Blogs: { category: "blog", label: "Blogs" } }
 
   let knowledgeTotal = 0
   for (const { category, label } of Object.values(domainMap)) {
@@ -829,8 +813,7 @@ function buildTree(): TreeNode[] {
     knowledgeNode.children!.push({
       label,
       count: pages.length,
-      children: sortedPages(pages).map(treeLeaf),
-    })
+      children: sortedPages(pages).map(treeLeaf) })
   }
 
   knowledgeNode.count = knowledgeTotal
@@ -844,8 +827,7 @@ function buildTree(): TreeNode[] {
     const bookmarksNode: TreeNode = {
       label: "Bookmarks",
       children: [],
-      count: bookmarks.length,
-    }
+      count: bookmarks.length }
 
     const folderMap: Map<string, WikiPage[]> = new Map()
     for (const page of bookmarks) {
@@ -866,8 +848,7 @@ function buildTree(): TreeNode[] {
             label:
               page.title.length > 60 ? `${page.title.slice(0, 57)}...` : page.title,
             slug: page.slug,
-            category: page.category,
-          })
+            category: page.category })
         }
         return
       }
@@ -921,8 +902,7 @@ function getStats(): Record<string, number> {
     totalCompanies: pages.filter((page) => page.category === "company").length,
     totalIdeas: pages.filter((page) => page.category === "idea").length,
     totalBlogs: pages.filter((page) => page.category === "blog").length,
-    totalBookmarks: pages.filter((page) => page.category === "bookmark").length,
-  }
+    totalBookmarks: pages.filter((page) => page.category === "bookmark").length }
 }
 
 // Route Helpers
@@ -930,8 +910,7 @@ function getStats(): Record<string, number> {
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" },
-  })
+    headers: { "Content-Type": "application/json" } })
 }
 
 function notFound(message: string): Response {
@@ -953,8 +932,7 @@ function handleIndex(): Response {
     tree: buildTree(),
     recentChanges: getRecentChanges(),
     stats: getStats(),
-    lastIndexedAt,
-  })
+    lastIndexedAt })
 }
 
 function handleDoc(slug: string): Response {
@@ -992,8 +970,7 @@ function handleDoc(slug: string): Response {
       postDate: page.postDate,
       related,
       backlinks: backlinkIndex.get(slug) ?? [],
-      wikilinks: page.wikilinks,
-    })
+      wikilinks: page.wikilinks })
   }
 
   return jsonResponse({
@@ -1005,8 +982,7 @@ function handleDoc(slug: string): Response {
     lastModified: page.lastModified,
     group: page.group,
     backlinks: backlinkIndex.get(slug) ?? [],
-    wikilinks: page.wikilinks,
-  })
+    wikilinks: page.wikilinks })
 }
 
 function handleKnowledgeNote(domain: string, slug: string): Response {
@@ -1018,8 +994,7 @@ function handleKnowledgeNote(domain: string, slug: string): Response {
     person: "person",
     company: "company",
     idea: "idea",
-    blog: "blog",
-  }
+    blog: "blog" }
 
   const category = validDomains[domain.toLowerCase()]
   if (!category) return notFound(`Invalid knowledge domain "${domain}"`)
@@ -1054,8 +1029,7 @@ function handleKnowledgeNote(domain: string, slug: string): Response {
     postDate: page.postDate,
     related,
     backlinks: backlinkIndex.get(slug) ?? [],
-    wikilinks: page.wikilinks,
-  })
+    wikilinks: page.wikilinks })
 }
 
 function handleBookmark(id: string): Response {
@@ -1078,8 +1052,7 @@ function handleBookmark(id: string): Response {
     cover: bookmark.cover,
     favorite: bookmark.favorite,
     wordCount: page?.wordCount ?? 0,
-    lastModified: bookmark.created,
-  })
+    lastModified: bookmark.created })
 }
 
 function buildExcerpt(page: WikiPage, query: string): string {
@@ -1137,10 +1110,8 @@ function handleSearch(query: string, limit = 20): Response {
         author: page?.author,
         source: page?.source,
         sourceUrl: page?.sourceUrl,
-        postDate: page?.postDate,
-      }
-    }),
-  })
+        postDate: page?.postDate }
+    }) })
 }
 
 function handleBacklinks(slug: string): Response {
@@ -1165,8 +1136,7 @@ function handleGraph(): Response {
       title: page.title,
       category: page.category,
       quality: page.quality,
-      backlinkCount: backlinkIndex.get(slug)?.length ?? 0,
-    })
+      backlinkCount: backlinkIndex.get(slug)?.length ?? 0 })
 
     for (const target of page.wikilinks) {
       if (!pageIndex.has(target)) continue
@@ -1206,8 +1176,7 @@ export function wikiHealth(): Record<string, unknown> {
     startedAt: moduleStartedAt,
     lastIndexedAt,
     totalPages: pageIndex.size,
-    watchersActive: watchers.length,
-  }
+    watchersActive: watchers.length }
 }
 
 // Skills Handlers
@@ -1240,8 +1209,7 @@ function handleSkillsList(): Response {
         description: String(fm.description || ""),
         effort: String(fm.effort || "standard"),
         hasWorkflows: existsSync(join(skillDir, "Workflows")),
-        lastModified: statSync(skillMd).mtime.toISOString(),
-      })
+        lastModified: statSync(skillMd).mtime.toISOString() })
     } catch {
       continue
     }
@@ -1268,8 +1236,7 @@ function handleSkillDetail(name: string): Response {
     content,
     filePath: skillMd,
     lastModified: stat.mtime.toISOString(),
-    wordCount: countWords(content),
-  })
+    wordCount: countWords(content) })
 }
 
 async function handleSkillUpdate(name: string, req: Request): Promise<Response> {
@@ -1350,8 +1317,7 @@ function handleHookDetail(name: string): Response {
     content,
     filePath: hookPath,
     lastModified: stat.mtime.toISOString(),
-    size: stat.size,
-  })
+    size: stat.size })
 }
 
 // Arbol Handlers
@@ -1377,8 +1343,7 @@ function handleArbolList(): Response {
       total: 0,
       actions: 0,
       pipelines: 0,
-      flows: 0,
-    })
+      flows: 0 })
   }
 
   for (const name of readdirSync(ARBOL_WORKERS_DIR).sort(naturalCollator.compare)) {
@@ -1400,8 +1365,7 @@ function handleArbolList(): Response {
         name,
         type: getWorkerType(name),
         cfName,
-        lastModified: statSync(workerDir).mtime.toISOString(),
-      })
+        lastModified: statSync(workerDir).mtime.toISOString() })
     } catch {
       continue
     }
@@ -1414,8 +1378,7 @@ function handleArbolList(): Response {
     total: workers.length,
     actions: workers.filter((worker) => worker.type === "action").length,
     pipelines: workers.filter((worker) => worker.type === "pipeline").length,
-    flows: workers.filter((worker) => worker.type === "flow").length,
-  })
+    flows: workers.filter((worker) => worker.type === "flow").length })
 }
 
 function handleArbolDetail(name: string): Response {
@@ -1446,8 +1409,7 @@ function handleArbolDetail(name: string): Response {
     type: getWorkerType(name),
     wrangler: wranglerContent,
     source: srcContent,
-    lastModified: statSync(workerDir).mtime.toISOString(),
-  })
+    lastModified: statSync(workerDir).mtime.toISOString() })
 }
 
 // Request Router

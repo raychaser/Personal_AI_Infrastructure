@@ -18,11 +18,12 @@
 import { readFileSync, existsSync, writeFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import { filterContent, filterDaemonData, loadSecurityOverrides } from "./SecurityFilter.ts";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 // ─── Path Resolution ───
 
 const HOME = process.env.HOME || process.env.USERPROFILE || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const USER_DIR = join(LIFEOS_DIR, "USER");
 const MEMORY_DIR = join(LIFEOS_DIR, "MEMORY");
 const TELOS_DIR = join(USER_DIR, "TELOS");
@@ -154,7 +155,7 @@ function readWisdom(): string[] {
 
   // Split by double newlines to get individual quotes
   return content
-    .split(/\n{2,}/)
+    .split(/\n{2 }/)
     .map((q) => q.trim())
     .filter((q) => q.length > 10 && !q.startsWith("#"));
 }
@@ -177,8 +178,7 @@ function readRecentIdeas(limit = 10): Array<{ title: string; thesis: string }> {
       const titleMatch = l.match(/"([^"]+)"/);
       return {
         slug: slugMatch?.[1] || "",
-        title: titleMatch?.[1] || "",
-      };
+        title: titleMatch?.[1] || "" };
     })
     .filter((i) => i.slug && i.title);
 
@@ -369,7 +369,7 @@ function readExistingDaemon(): Record<string, unknown> {
   const daemonPath = join(USER_DAEMON_DIR, "daemon.md");
   if (!existsSync(daemonPath)) {
     // Fall back to old location
-    const oldPath = join(HOME, ".claude", "skills", "_DAEMON", "Mcp", "daemon.md");
+    const oldPath = join(getConfigRoot(), "skills", "_DAEMON", "Mcp", "daemon.md");
     if (!existsSync(oldPath)) return {};
     return parseDaemonMd(readFileSync(oldPath, "utf-8"));
   }
@@ -491,8 +491,7 @@ export function aggregate(): DaemonUpdate {
     projects,
     work_themes: workThemes,
     wisdom: wisdom.slice(0, 5), // Top 5 quotes
-    last_updated: new Date().toISOString(),
-  };
+    last_updated: new Date().toISOString() };
 }
 
 // ─── Output Formatters ───

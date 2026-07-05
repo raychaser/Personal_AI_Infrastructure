@@ -12,9 +12,10 @@
 
 import { join } from "path"
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from "fs"
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "~"
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
 const TASKS_DIR = join(LIFEOS_DIR, "PULSE", "state", "da")
 const TASKS_PATH = join(TASKS_DIR, "scheduled-tasks.jsonl")
 
@@ -154,11 +155,9 @@ function addTask(args: Record<string, string>): void {
       channel,
       prompt: actionType === "prompt" ? args.prompt : undefined,
       model: args.model,
-      command: actionType === "script" ? args.command : undefined,
-    },
+      command: actionType === "script" ? args.command : undefined },
     status: "active",
-    fire_count: 0,
-  }
+    fire_count: 0 }
 
   appendTask(task)
   console.log(`Task created: ${task.id}`)

@@ -30,6 +30,8 @@
   <string>{{HOME}}/.claude</string>
   <key>EnvironmentVariables</key>
   <dict>
+    <key>CLAUDE_CONFIG_DIR</key>
+    <string>{{HOME}}/.claude</string>
     <key>PATH</key>
     <string>{{BUN_DIR}}:{{HOME}}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     <key>HOME</key>

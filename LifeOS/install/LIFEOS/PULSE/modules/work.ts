@@ -24,9 +24,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from "fs";
 import { join } from "path";
 import { loadWorkConfig, type WorkConfig } from "../../../hooks/lib/work-config";
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const PULSE_STATE_DIR = join(LIFEOS_DIR, "PULSE", "state");
 const CACHE_PATH = join(PULSE_STATE_DIR, "work-cache.json");
 const MODULE = "work";
@@ -70,8 +71,7 @@ const state: ModuleState = {
   startedAt: null,
   lastFetch: null,
   pollHandle: null,
-  config: null,
-};
+  config: null };
 
 // ── Column derivation ───────────────────────────────────────────────────────
 
@@ -93,8 +93,7 @@ const LEGACY_STATUS_ALIASES: Record<string, string> = {
   "blocked": "Blocked",
   "needs-human": "In-Review",
   "in-review": "In-Review",
-  "complete": "Complete",
-};
+  "complete": "Complete" };
 
 // Source detection — derives where the issue came from based on labels.
 // Used by the kanban card badge.
@@ -145,7 +144,7 @@ function extractSlug(title: string): string | undefined {
 // issues; the workload is bounded and the files are small.
 function extractPrincipalGoal(slug: string | undefined): string | undefined {
   if (!slug) return undefined;
-  const isaPath = join(HOME, ".claude", "LIFEOS", "MEMORY", "WORK", slug, "ISA.md");
+  const isaPath = join(getConfigRoot(), "LIFEOS", "MEMORY", "WORK", slug, "ISA.md");
   if (!existsSync(isaPath)) return undefined;
   try {
     const content = readFileSync(isaPath, "utf-8");
@@ -209,8 +208,7 @@ async function fetchIssues(repo: string): Promise<IssueRecord[] | null> {
       column: deriveColumn({ labels, state: i.state }, cfg.kanbanColumns),
       slug,
       source: issueSource(labels),
-      principal_stated_goal: extractPrincipalGoal(slug),
-    };
+      principal_stated_goal: extractPrincipalGoal(slug) };
   });
 }
 
@@ -240,8 +238,7 @@ async function refresh(): Promise<{ ok: boolean; reason?: string }> {
   writeCache({
     fetchedAt: state.lastFetch.toISOString(),
     repo: state.config.repo,
-    issues,
-  });
+    issues });
   return { ok: true };
 }
 
@@ -294,9 +291,7 @@ export function health(): { status: string; details?: Record<string, unknown> } 
         : 0,
       last_fetch: state.lastFetch?.toISOString() ?? null,
       poll_interval_seconds: cfg?.pollIntervalSeconds ?? null,
-      cache_path: CACHE_PATH,
-    },
-  };
+      cache_path: CACHE_PATH } };
 }
 
 // ── HTTP surface ────────────────────────────────────────────────────────────
@@ -314,8 +309,7 @@ function setupTemplate(reason: string): Response {
       "Restart Pulse so this module re-reads work_repo.json: `bun ~/.claude/LIFEOS/PULSE/manage.sh restart`.",
       "Run an Algorithm session — ULWorkSync.hook.ts will open the first issue at SessionEnd.",
     ],
-    docs: "skills/_ULWORK/SKILL.md (search 'Capture flow')",
-  };
+    docs: "skills/_ULWORK/SKILL.md (search 'Capture flow')" };
   return Response.json(body);
 }
 
@@ -331,8 +325,7 @@ function buildResponseFromCache(): Response {
       items: [],
       lastFetch: null,
       stale: true,
-      stale_reason: "no cache yet — first poll pending",
-    });
+      stale_reason: "no cache yet — first poll pending" });
   }
 
   const cacheAgeMs = Date.now() - statSync(CACHE_PATH).mtimeMs;
@@ -353,8 +346,7 @@ function buildResponseFromCache(): Response {
     items: cache.issues,
     lastFetch: cache.fetchedAt,
     stale,
-    stale_reason: stale ? "gh fetch stale (offline or rate-limited?)" : undefined,
-  });
+    stale_reason: stale ? "gh fetch stale (offline or rate-limited?)" : undefined });
 }
 
 export async function handleRequest(req: Request, pathname: string): Promise<Response | null> {
@@ -380,8 +372,7 @@ export async function handleRequest(req: Request, pathname: string): Promise<Res
 
   if (req.method === "GET" && (sub === "/ui" || sub === "/view")) {
     return new Response(renderKanbanHTML(), {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+      headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 
   return Response.json({ error: "Not found" }, { status: 404 });

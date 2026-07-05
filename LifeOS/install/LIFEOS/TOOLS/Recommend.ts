@@ -16,9 +16,10 @@
 
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const TELOS_DIR = join(LIFEOS_DIR, "USER", "TELOS");
 const CURRENT_DIR = join(TELOS_DIR, "CURRENT_STATE");
 
@@ -92,8 +93,7 @@ function loadCandidates(category: Category): Candidate[] {
           days_since: visit?.visited ? daysSince(visit.visited) : undefined,
           rating: p.rating ? Number(p.rating) : undefined,
           source_file: "TELOS/RESTAURANTS.md",
-          confidence: 0.8,
-        };
+          confidence: 0.8 };
       });
   }
   if (category === "movie") {
@@ -110,8 +110,7 @@ function loadCandidates(category: Category): Candidate[] {
         days_since: seen?.watched ? daysSince(seen.watched) : undefined,
         rating: p.rating ? Number(p.rating) : undefined,
         source_file: "TELOS/MOVIES.md",
-        confidence: 0.75,
-      };
+        confidence: 0.75 };
     });
   }
   // book
@@ -121,8 +120,7 @@ function loadCandidates(category: Category): Candidate[] {
     attrs: p,
     rating: p.rating ? Number(p.rating) : undefined,
     source_file: "TELOS/BOOKS.md",
-    confidence: 0.7,
-  }));
+    confidence: 0.7 }));
 }
 
 function rank(candidates: Candidate[], opts: {
@@ -151,8 +149,7 @@ function rank(candidates: Candidate[], opts: {
   const withConfidence = filtered.map((c) => ({
     ...c,
     confidence: filtered.length === 0 ? 0 : Math.max(0.3, c.confidence - (opts.cuisine ? 0.05 : 0) - (opts.notVisitedDays != null ? 0.05 : 0)),
-    confidence_note: filtered.length < 3 ? "Narrow candidate pool — low confidence" : undefined,
-  }));
+    confidence_note: filtered.length < 3 ? "Narrow candidate pool — low confidence" : undefined }));
 
   return withConfidence.sort((a, b) => {
     const ra = a.rating || 5;
@@ -188,8 +185,7 @@ const opts = {
   cuisine: cuisineIdx !== -1 ? args[cuisineIdx + 1] : undefined,
   genre: genreIdx !== -1 ? args[genreIdx + 1] : undefined,
   theme: themeIdx !== -1 ? args[themeIdx + 1] : undefined,
-  notVisitedDays: parseRecencyDays(args[notVisitedIdx + 1] || args[notWatchedIdx + 1]),
-};
+  notVisitedDays: parseRecencyDays(args[notVisitedIdx + 1] || args[notWatchedIdx + 1]) };
 
 const candidates = loadCandidates(category);
 const ranked = rank(candidates, opts);

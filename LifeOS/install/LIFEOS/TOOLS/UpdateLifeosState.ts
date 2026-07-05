@@ -28,9 +28,10 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const IDEAL_DIR = join(LIFEOS_DIR, "USER", "TELOS", "IDEAL_STATE");
 const CURRENT_DIR = join(LIFEOS_DIR, "USER", "TELOS", "CURRENT_STATE");
 const STATE_FILE = join(LIFEOS_DIR, "USER", "TELOS", "LIFEOS_STATE.json");
@@ -82,8 +83,7 @@ function computeFromCurrent(file: string): DimensionState | null {
     pct,
     tbd_count: missing,
     last_updated: readFrontmatterDate(content),
-    source_file: `CURRENT_STATE/${file}`,
-  };
+    source_file: `CURRENT_STATE/${file}` };
 }
 
 function computeFromIdeal(file: string): DimensionState {
@@ -98,8 +98,7 @@ function computeFromIdeal(file: string): DimensionState {
     pct,
     tbd_count,
     last_updated: readFrontmatterDate(content),
-    source_file: `IDEAL_STATE/${file}`,
-  };
+    source_file: `IDEAL_STATE/${file}` };
 }
 
 function computeState(file: string): DimensionState {
@@ -113,8 +112,7 @@ function build(): LifeosState {
   }
   return {
     generated_at: new Date().toISOString(),
-    dimensions,
-  };
+    dimensions };
 }
 
 function main(): void {

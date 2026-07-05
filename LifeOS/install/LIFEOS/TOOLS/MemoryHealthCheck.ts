@@ -23,9 +23,10 @@
 
 import { existsSync, readFileSync, appendFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const CLAUDE = join(HOME, ".claude");
+const CLAUDE = getConfigRoot();
 const HOOKS_DIR = join(CLAUDE, "hooks");
 const TOOLS_DIR = join(CLAUDE, "LIFEOS/TOOLS");
 const OBS_DIR = join(CLAUDE, "LIFEOS/MEMORY/OBSERVABILITY");
@@ -169,8 +170,7 @@ if (!existsSync(REVIEW_STATE)) {
     add("state-readable", "ok", "review-state.json readable.", {
       turn_count: state.turn_count_since_last_review,
       last_review_at: state.last_review_at,
-      pending_review: state.pending_review,
-    });
+      pending_review: state.pending_review });
   } catch (err) {
     add("state-corrupt", "critical", `review-state.json corrupt: ${(err as Error).message}`);
   }
@@ -255,8 +255,7 @@ const report = {
   overall,
   counts: { critical: criticals.length, warn: warns.length, ok: oks.length },
   findings: findings.filter(f => f.severity !== "ok"),
-  ok_summary: oks.map(o => o.id),
-};
+  ok_summary: oks.map(o => o.id) };
 
 // Append to observability log
 try {

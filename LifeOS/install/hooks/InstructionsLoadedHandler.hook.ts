@@ -24,25 +24,23 @@
 
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
+import { getConfigRoot } from "./lib/paths";
 
 // ========================================
 // Configuration
 // ========================================
 
-const HOME = homedir();
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, '.claude', 'LIFEOS');
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), 'LIFEOS');
 const STATE_DIR = join(LIFEOS_DIR, 'MEMORY', 'STATE');
 const HASHES_FILE = join(STATE_DIR, 'instruction-hashes.json');
 const INTEGRITY_LOG = join(STATE_DIR, 'instruction-integrity.jsonl');
 
 /** Critical LifeOS instruction files to monitor */
 const CRITICAL_FILES: Record<string, string> = {
-  'CLAUDE.md': join(HOME, '.claude', 'CLAUDE.md'),
+  'CLAUDE.md': join(getConfigRoot(), 'CLAUDE.md'),
   'SYSTEM-PROMPT': join(LIFEOS_DIR, 'LIFEOS_SYSTEM_PROMPT.md'),
   'DA_IDENTITY': join(LIFEOS_DIR, 'USER', 'DA_IDENTITY.md'),
-  'PRINCIPAL_IDENTITY': join(LIFEOS_DIR, 'USER', 'PRINCIPAL_IDENTITY.md'),
-};
+  'PRINCIPAL_IDENTITY': join(LIFEOS_DIR, 'USER', 'PRINCIPAL_IDENTITY.md') };
 
 // ========================================
 // Types
@@ -104,8 +102,7 @@ async function saveHashes(hashes: Record<string, string>): Promise<void> {
   const data: StoredHashes = {
     created: stored?.created || now,
     updated: now,
-    hashes,
-  };
+    hashes };
   await Bun.write(HASHES_FILE, JSON.stringify(data, null, 2) + '\n');
 }
 
@@ -173,8 +170,7 @@ async function main(): Promise<void> {
       event: 'baseline_created',
       file: '*',
       path: HASHES_FILE,
-      message: `Baseline created with ${Object.keys(currentHashes).length} files`,
-    });
+      message: `Baseline created with ${Object.keys(currentHashes).length} files` });
     process.exit(0);
     return;
   }
@@ -194,8 +190,7 @@ async function main(): Promise<void> {
         file: label,
         path,
         old_hash: oldHash,
-        message: `WARNING: Critical file missing — was previously tracked`,
-      });
+        message: `WARNING: Critical file missing — was previously tracked` });
       changed = true;
     } else if (oldHash && newHash && oldHash !== newHash) {
       // Hash changed
@@ -205,8 +200,7 @@ async function main(): Promise<void> {
         file: label,
         path,
         old_hash: oldHash,
-        new_hash: newHash,
-      });
+        new_hash: newHash });
       changed = true;
     }
     // New file appearing (no oldHash, has newHash) — just add to baseline silently

@@ -31,9 +31,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? "";
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS");
 const OBS_DIR = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY");
 const LEDGER_PATH = join(OBS_DIR, "anthropic-cost.jsonl");
 const CALL_SITES_PATH = join(OBS_DIR, "anthropic-call-sites.json");
@@ -80,8 +81,7 @@ function readSubscriptionUsage(): { five_hour_pct: number | null; seven_day_pct:
     const data = JSON.parse(raw);
     return {
       five_hour_pct: data?.five_hour?.utilization ?? null,
-      seven_day_pct: data?.seven_day?.utilization ?? null,
-    };
+      seven_day_pct: data?.seven_day?.utilization ?? null };
   } catch {
     return { five_hour_pct: null, seven_day_pct: null };
   }
@@ -102,8 +102,7 @@ async function fetchApiSpend(): Promise<{ month_used_usd: number | null; source:
       `https://api.anthropic.com/v1/organizations/cost_report?starting_at=${startOfMonth}`,
       {
         headers: { "x-api-key": adminKey, "anthropic-version": "2023-06-01" },
-        signal: AbortSignal.timeout(5000),
-      }
+        signal: AbortSignal.timeout(5000) }
     );
     if (!resp.ok) return { month_used_usd: null, source: "unavailable" };
     const data = await resp.json() as any;
@@ -129,11 +128,11 @@ async function fetchApiSpend(): Promise<{ month_used_usd: number | null; source:
 
 // Paths we scan (source-of-truth for LifeOS-local billing risk)
 const SCAN_ROOTS = [
-  join(HOME, ".claude", "LIFEOS", "PULSE"),
-  join(HOME, ".claude", "LIFEOS", "TOOLS"),
-  join(HOME, ".claude", "LIFEOS", "USER"),
-  join(HOME, ".claude", "skills"),
-  join(HOME, ".claude", "hooks"),
+  join(getConfigRoot(), "LIFEOS", "PULSE"),
+  join(getConfigRoot(), "LIFEOS", "TOOLS"),
+  join(getConfigRoot(), "LIFEOS", "USER"),
+  join(getConfigRoot(), "skills"),
+  join(getConfigRoot(), "hooks"),
 ];
 
 // Paths to exclude from scan
@@ -167,8 +166,7 @@ const LEGIT_HINTS: Record<string, string> = {
   "Daemon/Tools/SecurityFilter.ts": "content redaction filter — regex only, no API call",
   "skills/Evals/": "opt-in API billing, gated by EVALS_ALLOW_API_BILLING=1",
   "LIFEOS/TOOLS/Inference.ts": "canonical inference tool — deletes ANTHROPIC_API_KEY before spawn",
-  "LIFEOS/PULSE/setup.ts": "provisioning script — placeholder comment only",
-};
+  "LIFEOS/PULSE/setup.ts": "provisioning script — placeholder comment only" };
 
 // Cache per-file guard check so repeated classify calls don't re-read
 const guardCache: Map<string, boolean> = new Map();
@@ -229,8 +227,7 @@ function scanCallSites(): CallSite[] {
             line: lineNum,
             match: matched.trim().slice(0, 120),
             classification,
-            reason: note,
-          });
+            reason: note });
         }
       } catch {
         // rg returns non-zero when no matches — ignore
@@ -303,10 +300,8 @@ async function takeSnapshot(): Promise<{ snapshot: CostSnapshot; sites: CallSite
       subscription,
       api_spend,
       call_sites: { total: sites.length, bypass, legit, new_since_baseline: newSites },
-      alerts,
-    },
-    sites,
-  };
+      alerts },
+    sites };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -319,8 +314,7 @@ async function voiceAlert(message: string): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, voice_enabled: true }),
-      signal: AbortSignal.timeout(3000),
-    });
+      signal: AbortSignal.timeout(3000) });
   } catch {
     // Pulse may be down — log to stderr instead
     console.error(`[CostTracker] alert (voice unavailable): ${message}`);

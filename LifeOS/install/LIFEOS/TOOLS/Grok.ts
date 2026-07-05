@@ -38,19 +38,18 @@
  */
 
 import { readFileSync } from 'fs'
-import { homedir } from 'os'
 import { join } from 'path'
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const colors = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
-  red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m',
-}
+  red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m' }
 
 // Load environment — mirrors LIFEOS/TOOLS/YouTubeApi.ts convention
 function loadEnv(): Record<string, string> {
   const envPath = process.env.LIFEOS_CONFIG_DIR
     ? join(process.env.LIFEOS_CONFIG_DIR, '.env')
-    : join(homedir(), '.claude', '.env')
+    : join(getConfigRoot(), '.env')
   const env: Record<string, string> = {}
   try {
     const content = readFileSync(envPath, 'utf-8')
@@ -98,8 +97,7 @@ async function grok(query: string, opts: ReturnType<typeof parseArgs>['opts']): 
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+    body: JSON.stringify(body) })
 
   const data = await res.json() as any
   if (!res.ok || data.error) {

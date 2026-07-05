@@ -22,13 +22,16 @@
 import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
-import { getLearningCategory, isLearningCapture } from "../../../.claude/hooks/lib/learning-utils";
+import { getLearningCategory, isLearningCapture } from "../../hooks/lib/learning-utils";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const CLAUDE_DIR = path.join(process.env.HOME!, ".claude");
+import { normalizeConfigRoot } from "../../hooks/lib/paths";
+const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR
+  ? normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
+  : path.join(process.env.HOME!, ".claude");
 // Derive the project slug dynamically from CLAUDE_DIR (works on macOS and Linux)
 // macOS: ${HOME}/.claude → ${HARNESS_USER_DIR}
 // Linux: ${HOME}/.claude → ${HARNESS_USER_DIR}
@@ -107,8 +110,7 @@ const MINING_PATTERN_MAP: Record<MemoryType, RegExp[]> = {
   decision: DECISION_PATTERNS,
   preference: PREFERENCE_PATTERNS,
   milestone: MILESTONE_PATTERNS,
-  problem: PROBLEM_PATTERNS,
-};
+  problem: PROBLEM_PATTERNS };
 
 // ============================================================================
 // Types
@@ -350,8 +352,7 @@ function mineMemories(sessionPath: string): MinedMemory[] {
           context: textContent.slice(0, 300),
           confidence,
           sourcePattern: firstMatchedPattern,
-          sourceLine: lineIdx + 1,
-        });
+          sourceLine: lineIdx + 1 });
       }
     } catch {
       // Skip malformed lines
@@ -414,8 +415,7 @@ function writeToQueue(mem: MinedMemory): string {
     confidence: mem.confidence,
     sourcePattern: mem.sourcePattern,
     sourcePath: mem.sessionId,
-    minedAt: now.toISOString(),
-  };
+    minedAt: now.toISOString() };
 
   fs.writeFileSync(filepath, JSON.stringify(candidate, null, 2));
   return filepath;
@@ -502,9 +502,7 @@ const { values } = parseArgs({
     "projects-dir": { type: "string" },
     "dry-run": { type: "boolean" },
     mine: { type: "boolean", short: "m" },
-    help: { type: "boolean", short: "h" },
-  },
-});
+    help: { type: "boolean", short: "h" } } });
 
 if (values.help) {
   console.log(`

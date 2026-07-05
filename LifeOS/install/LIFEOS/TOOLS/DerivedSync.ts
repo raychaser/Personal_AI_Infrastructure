@@ -14,9 +14,9 @@ import {
   readdirSync,
   rmSync,
   statSync,
-  writeFileSync,
-} from "node:fs";
+  writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 type SpawnReadable = ReadableStream<Uint8Array> | null;
 type SpawnProcess = {
@@ -76,7 +76,7 @@ type RunSummary = {
 };
 
 const HOME = process.env.HOME || "";
-const CLAUDE_DIR = join(HOME, ".claude");
+const CLAUDE_DIR = getConfigRoot();
 const LIFEOS_DIR = join(CLAUDE_DIR, "LIFEOS");
 const USER_DIR = join(LIFEOS_DIR, "USER");
 const TOOLS_DIR = join(LIFEOS_DIR, "TOOLS");
@@ -230,8 +230,7 @@ function plannedActions(changed: string[]): PlannedAction[] {
       kind: "telos-summary",
       cmd: ["bun", join(TOOLS_DIR, "GenerateTelosSummary.ts")],
       timeoutMs: DEFAULT_TIMEOUT_MS,
-      triggeredBy: telosSources,
-    });
+      triggeredBy: telosSources });
   }
 
   if (stateSources.length > 0) {
@@ -239,8 +238,7 @@ function plannedActions(changed: string[]): PlannedAction[] {
       kind: "pai-state",
       cmd: ["bun", join(TOOLS_DIR, "UpdateLifeosState.ts")],
       timeoutMs: DEFAULT_TIMEOUT_MS,
-      triggeredBy: stateSources,
-    });
+      triggeredBy: stateSources });
   }
 
   if (changed.length > 0) {
@@ -249,8 +247,7 @@ function plannedActions(changed: string[]): PlannedAction[] {
         kind: "data-plane-page",
         cmd: ["bun", ADAPTER_CLI, id],
         timeoutMs: SWEEP_TIMEOUT_MS,
-        triggeredBy: changed,
-      });
+        triggeredBy: changed });
     }
   }
 

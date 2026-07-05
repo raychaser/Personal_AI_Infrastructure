@@ -27,9 +27,10 @@ import louvain from "graphology-communities-louvain";
 import pagerank from "graphology-metrics/centrality/pagerank";
 import * as fs from "fs";
 import * as path from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const MEMORY = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY, "WORK");
@@ -157,9 +158,7 @@ function ingest(): Raw[] {
         node: {
           id: slug, silo: "knowledge", type: fm.type || domain.toLowerCase(),
           title: fm.title || slug, path: fp, tags: parseTags(fm),
-          updated: fm.last_updated || fm.updated || fm.created || null,
-        }, content,
-      });
+          updated: fm.last_updated || fm.updated || fm.created || null }, content });
     }
   }
 
@@ -178,9 +177,7 @@ function ingest(): Raw[] {
         node: {
           id, silo: "work", type: "isa",
           title: fm.task || fm.title || entry, path: file, tags: parseTags(fm),
-          updated: fm.updated || fm.started || null,
-        }, content,
-      });
+          updated: fm.updated || fm.started || null }, content });
     }
   }
 
@@ -199,7 +196,7 @@ const STOP = new Set(("a an and are as at be by for from has have in into is it 
   "not but all any can will should would they them then than over under about across into out up down").split(" "));
 
 function tokenize(text: string): Set<string> {
-  const toks = (text.toLowerCase().match(/[a-z0-9][a-z0-9-]{2,}/g) || [])
+  const toks = (text.toLowerCase().match(/[a-z0-9][a-z0-9-]{2 }/g) || [])
     .map((t: string) => t.replace(/^-+|-+$/g, ""))
     .filter((t: string) => t.length >= 3 && !STOP.has(t) && !/^\d+$/.test(t));
   return new Set(toks);
@@ -389,8 +386,7 @@ function computePatterns(graph: Graph) {
       name: topTags.length ? topTags.join(" · ") : (graph.getNodeAttribute(sorted[0], "title") as string),
       siloMix: members.reduce((acc: Record<string, number>, m: string) => {
         const s = graph.getNodeAttribute(m, "silo") as string; acc[s] = (acc[s] || 0) + 1; return acc;
-      }, {}),
-    };
+      }, {}) };
   }).sort((a, b) => b.size - a.size);
 
   const allNodes = graph.nodes();
@@ -436,8 +432,7 @@ function emit(graph: Graph, edges: MemEdge[], p: ReturnType<typeof computePatter
 
   const nodes = graph.mapNodes((n, attr) => ({
     id: n, silo: attr.silo, type: attr.type, title: attr.title,
-    community: attr.community, pagerank: attr.pagerank, degree: graph.degree(n), tags: attr.tags,
-  }));
+    community: attr.community, pagerank: attr.pagerank, degree: graph.degree(n), tags: attr.tags }));
   fs.writeFileSync(path.join(OUT_DIR, "graph.json"),
     JSON.stringify({ generated: new Date().toISOString(), nodeCount: graph.order, edgeCount: graph.size, nodes, edges }, null, 0));
 

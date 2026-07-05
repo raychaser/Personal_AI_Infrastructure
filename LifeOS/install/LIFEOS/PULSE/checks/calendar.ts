@@ -10,6 +10,7 @@
 
 import { readFileSync } from "fs"
 import { join } from "path"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
 const LOOKAHEAD_MS = 30 * 60 * 1000
@@ -17,7 +18,7 @@ const LOOKAHEAD_MS = 30 * 60 * 1000
 function loadEnv(): Record<string, string> {
   const env: Record<string, string> = {}
   try {
-    const content = readFileSync(join(HOME, ".claude", ".env"), "utf-8")
+    const content = readFileSync(join(getConfigRoot(), ".env"), "utf-8")
     for (const line of content.split("\n")) {
       const match = line.match(/^([^#=]+)=(.*)$/)
       if (match) {
@@ -39,9 +40,7 @@ async function getAccessToken(env: Record<string, string>): Promise<string> {
       client_id: env.GMAIL_CLIENT_ID,
       client_secret: env.GMAIL_CLIENT_SECRET,
       refresh_token: env.GOOGLE_CALENDAR_REFRESH_TOKEN,
-      grant_type: "refresh_token",
-    }),
-  })
+      grant_type: "refresh_token" }) })
   const data = (await resp.json()) as { access_token?: string }
   if (!data.access_token) throw new Error("Token refresh failed")
   return data.access_token
@@ -62,8 +61,7 @@ async function main() {
     const later = new Date(Date.now() + LOOKAHEAD_MS).toISOString()
 
     const calListResp = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+      headers: { Authorization: `Bearer ${token}` } })
     const calList = (await calListResp.json()) as { items?: Array<{ id: string }> }
     const calIds = (calList.items || []).map((c) => c.id)
     if (calIds.length === 0) calIds.push("primary")

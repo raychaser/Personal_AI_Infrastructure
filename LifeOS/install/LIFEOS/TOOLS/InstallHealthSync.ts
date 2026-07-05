@@ -9,6 +9,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 type SpawnProcess = {
   exited: Promise<number>;
@@ -30,7 +31,7 @@ type LaunchctlResult = {
 };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(HOME, ".claude", "LIFEOS", "TOOLS", "com.lifeos.healthsync.plist.template");
+const TEMPLATE_PATH = join(getConfigRoot(), "LIFEOS", "TOOLS", "com.lifeos.healthsync.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.healthsync.plist");
 const LABEL = "com.lifeos.healthsync";
@@ -86,6 +87,7 @@ async function install(): Promise<void> {
   console.log(`[InstallHealthSync] detected bun at ${bunPath}`);
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   const materialized = template
+    .replace(/\{\{HOME\}\}\/\.claude/g, getConfigRoot())
     .replace(/\{\{HOME\}\}/g, HOME)
     .replace(/\{\{BUN\}\}/g, bunPath)
     .replace(/\{\{BUN_DIR\}\}/g, bunDir);

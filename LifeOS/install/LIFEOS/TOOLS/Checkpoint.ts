@@ -16,13 +16,14 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { parseCriteriaList } from '../../hooks/lib/isa-utils';
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 // Allowlist path: top of ~/.claude per spec. We only READ it (never write),
 // so the ContainmentGuard write restriction does not apply. Parser must match
 // the hook's parser exactly: skip blanks and '#' lines, expand tilde / $HOME
 // prefixes, treat the rest as absolute repo paths.
-const ALLOWLIST_PATH = join(homedir(), '.claude', 'checkpoint-repos.txt');
-const WORK_DIR = join(homedir(), '.claude', 'LIFEOS', 'MEMORY', 'WORK');
+const ALLOWLIST_PATH = join(getConfigRoot(), 'checkpoint-repos.txt');
+const WORK_DIR = join(getConfigRoot(), 'LIFEOS', 'MEMORY', 'WORK');
 
 function expandPath(p: string): string {
   let s = p.trim();

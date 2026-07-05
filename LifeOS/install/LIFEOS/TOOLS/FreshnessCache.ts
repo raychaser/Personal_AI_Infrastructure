@@ -15,9 +15,10 @@
 import { writeFileSync, renameSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { readContextFreshness } from "./TelosFreshness";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const CACHE_DIR = join(LIFEOS_DIR, "USER", "CACHE");
 const CACHE_PATH = join(CACHE_DIR, "freshness.json");
 
@@ -68,8 +69,7 @@ export function buildFreshnessPayload(): FreshnessCachePayload {
           reviewed_age_days: c.most_stale.effective_reviewed_age_days,
           pct: c.most_stale.pct,
           grade: c.most_stale.grade,
-          why: c.most_stale.why,
-        }
+          why: c.most_stale.why }
       : null,
     files: c.files.map((f) => ({
       slug: f.slug,
@@ -80,10 +80,8 @@ export function buildFreshnessPayload(): FreshnessCachePayload {
       pct: f.pct,
       grade: f.grade,
       stale: f.stale,
-      why: f.why,
-    })),
-    generated_at: new Date().toISOString(),
-  };
+      why: f.why })),
+    generated_at: new Date().toISOString() };
 }
 
 export interface WriteResult {

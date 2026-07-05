@@ -24,9 +24,10 @@
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { basename, join } from "path";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(getConfigRoot(), "LIFEOS");
 const TELOS_PATH = join(LIFEOS_DIR, "USER", "TELOS", "TELOS.md");
 const DA_IDENTITY_PATH = join(LIFEOS_DIR, "USER", "DIGITAL_ASSISTANT", "DA_IDENTITY.md");
 const PRINCIPAL_IDENTITY_PATH = join(LIFEOS_DIR, "USER", "PRINCIPAL", "PRINCIPAL_IDENTITY.md");
@@ -94,8 +95,7 @@ export const STALENESS_THRESHOLDS: Record<string, number> = {
   architecture_summary: 30,
 
   // Source / authored docs that derivatives inherit from
-  pai_system_architecture: 90,
-};
+  pai_system_architecture: 90 };
 
 const DEFAULT_THRESHOLD_DAYS = 180;
 
@@ -360,8 +360,7 @@ export function readTelosFreshness(path: string = TELOS_PATH): TelosFreshness {
       sections: [],
       staleSections: [],
       hasStale: true,
-      totalSections: 0,
-    };
+      totalSections: 0 };
   }
 
   const raw = readFileSync(path, "utf-8");
@@ -421,8 +420,7 @@ export function readTelosFreshness(path: string = TELOS_PATH): TelosFreshness {
     sections,
     staleSections,
     hasStale: staleSections.length > 0 || fileUpdated === null,
-    totalSections: sections.length,
-  };
+    totalSections: sections.length };
 }
 
 export function readContextFreshness(): ContextFreshness {
@@ -490,8 +488,7 @@ export function readContextFreshness(): ContextFreshness {
       why,
       is_auto_generated: entry.is_auto_generated,
       pct: freshnessPct(effective_reviewed_age_days, effective_threshold_days),
-      grade: freshnessGrade(effective_reviewed_age_days, effective_threshold_days),
-    };
+      grade: freshnessGrade(effective_reviewed_age_days, effective_threshold_days) };
   });
 
   const staleFiles = files.filter((file) => file.stale);
@@ -516,8 +513,7 @@ export function readContextFreshness(): ContextFreshness {
     most_stale,
     generated_at: now,
     overall_pct,
-    overall_grade,
-  };
+    overall_grade };
 }
 
 // ─── Writer ───────────────────────────────────────────────────────────────

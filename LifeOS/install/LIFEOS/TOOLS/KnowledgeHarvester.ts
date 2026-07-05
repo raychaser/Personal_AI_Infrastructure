@@ -21,13 +21,14 @@
 import { parseArgs } from "util";
 import * as fs from "fs";
 import * as path from "path";
+import { getConfigRoot, normalizeConfigRoot } from "../../hooks/lib/paths";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(getConfigRoot(), "LIFEOS");
 const MEMORY_DIR = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY_DIR, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY_DIR, "WORK");
@@ -36,13 +37,15 @@ const RESEARCH_DIR = path.join(MEMORY_DIR, "RESEARCH");
 const HARVEST_QUEUE_DIR = path.join(KNOWLEDGE_DIR, "_harvest-queue");
 const ARCHIVE_DIR = path.join(KNOWLEDGE_DIR, "_archive");
 
-const CURRENT_USER = process.env.USER;
-if (!CURRENT_USER) {
-  console.error("KnowledgeHarvester: USER env var is required to locate auto-memory dir");
-  process.exit(1);
-}
-const AUTO_MEMORY_DIR = path.join(HOME, ".claude", "projects",
-  `-Users-${CURRENT_USER}--claude`, "memory");
+// Claude Code names each project dir by the workspace path with [/.] mapped to "-".
+// Derive the slug from the NORMALIZED config root — a raw trailing-slash or
+// ~/$HOME value produces a wrong slug and silently harvests nothing (matches
+// SessionHarvester). See the divergent-normalizer fail-open class this PR closes.
+const CONFIG_ROOT = process.env.CLAUDE_CONFIG_DIR
+  ? normalizeConfigRoot(process.env.CLAUDE_CONFIG_DIR)
+  : path.join(HOME, ".claude");
+const PROJECT_SLUG = CONFIG_ROOT.replace(/[/.]/g, "-");
+const AUTO_MEMORY_DIR = path.join(CONFIG_ROOT, "projects", PROJECT_SLUG, "memory");
 
 const HARVEST_STATE_FILE = path.join(KNOWLEDGE_DIR, ".harvest-state.json");
 const REFLECTIONS_FILE = path.join(LEARNING_DIR, "REFLECTIONS", "algorithm-reflections.jsonl");
@@ -59,8 +62,7 @@ const TYPE_KEYWORDS: Record<string, string[]> = {
   People: ["osint", "person", "contact", "linkedin", "career", "background", "dossier", "profile", "biography"],
   Companies: ["company", "corporation", "startup", "organization", "acquired", "revenue", "employees", "founded"],
   Ideas: ["insight", "pattern", "thesis", "analysis", "framework", "discovery", "finding", "principle", "technique"],
-  Research: ["research", "investigation", "multi-source", "extensive", "deep-dive", "methodology", "findings", "verified", "agents"],
-};
+  Research: ["research", "investigation", "multi-source", "extensive", "deep-dive", "methodology", "findings", "verified", "agents"] };
 
 // ============================================================================
 // Types
@@ -135,8 +137,7 @@ function scanAutoMemory(state: HarvestState): HarvestCandidate[] {
       content: content.replace(/^---[\s\S]*?---\n*/, ""), // Strip frontmatter
       domain,
       type,
-      tags: extractTags(content),
-    });
+      tags: extractTags(content) });
   }
   return candidates;
 }
@@ -186,8 +187,7 @@ function scanWorkISAs(state: HarvestState, backfillMode: boolean = false): Harve
             content: `Flagged by Algorithm LEARN phase.\n\n**Source ISA:** ${dir}\n**Task:** ${frontmatter.task || dir}\n\n${description}`,
             domain: domainName,
             type: "idea",
-            tags: extractTags(content),
-          });
+            tags: extractTags(content) });
         }
       }
       continue; // Explicit flags found — don't also scan Decisions/Verification
@@ -209,8 +209,7 @@ function scanWorkISAs(state: HarvestState, backfillMode: boolean = false): Harve
       content: [decisions, verification].filter(Boolean).join("\n\n"),
       domain,
       type: "idea",
-      tags: extractTags(content),
-    });
+      tags: extractTags(content) });
   }
   return candidates;
 }
@@ -246,8 +245,7 @@ function scanResearch(state: HarvestState): HarvestCandidate[] {
         content: content.substring(0, 5000), // Cap content length
         domain,
         type,
-        tags: extractTags(content),
-      });
+        tags: extractTags(content) });
     }
   }
   walk(RESEARCH_DIR);
@@ -268,8 +266,7 @@ function scanHarvestQueue(state: HarvestState): HarvestCandidate[] {
         content: data.content || "",
         domain: data.domain || "Ideas",
         type: data.type || "reference",
-        tags: data.tags || [],
-      });
+        tags: data.tags || [] });
       // Remove queue file after processing
       fs.unlinkSync(path.join(HARVEST_QUEUE_DIR, file));
     } catch { /* skip malformed */ }
@@ -475,8 +472,7 @@ function regenerateMOC(domain: string): void {
       quality: typeof fm.quality === "number" ? fm.quality : (fm.quality ? parseInt(fm.quality) : 5),
       tags: Array.isArray(fm.tags) ? fm.tags : (typeof fm.tags === "string" ? fm.tags.split(",").map((t: string) => t.trim()) : []),
       updated: fm.updated || fm.created || "unknown",
-      backlinkCount,
-    });
+      backlinkCount });
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -568,8 +564,7 @@ function regenerateMasterMOC(): void {
         slug: `${domain.toLowerCase()}/${file.replace(/\.md$/, "")}`,
         domain: domain.toLowerCase(),
         title: fm.title || file.replace(/\.md$/, ""),
-        updated: fm.updated || fm.created || "unknown",
-      });
+        updated: fm.updated || fm.created || "unknown" });
     }
     domainStats.push({ name: domain, count });
   }
@@ -631,8 +626,7 @@ function getArchiveStats(): ArchiveStats {
     byType: {},
     orphanLinks: [],
     staleSeedlings: [],
-    lastHarvest: null,
-  };
+    lastHarvest: null };
 
   const state = loadHarvestState();
   stats.lastHarvest = state.lastHarvest !== "1970-01-01T00:00:00Z" ? state.lastHarvest : null;
@@ -913,8 +907,7 @@ function cmdContradictions(): void {
         title: fm.title || file.replace(/\.md$/, ""),
         tags,
         path: filePath,
-        fm,
-      });
+        fm });
     }
   }
 
@@ -999,11 +992,9 @@ const { values, positionals } = parseArgs({
     "dry-run": { type: "boolean" },
     backfill: { type: "boolean" },
     limit: { type: "string", short: "n" },
-    help: { type: "boolean", short: "h" },
-  },
+    help: { type: "boolean", short: "h" } },
   allowPositionals: true,
-  strict: false,
-});
+  strict: false });
 
 const command = positionals[0] || "status";
 

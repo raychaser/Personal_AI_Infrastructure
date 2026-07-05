@@ -156,7 +156,7 @@ On follow-ups, include the ITERATION line. On first response to a new request, o
 
 ### ALGORITHM MODE
 
-**MANDATORY FIRST ACTION:** Use the Read tool to load `~/.claude/LIFEOS/ALGORITHM/LATEST` to get the current version string `V` (single line, e.g. `6.3.0`), then immediately Read `~/.claude/LIFEOS/ALGORITHM/v${V}.md` and follow that file's instructions exactly. Starting with its entering of the Algorithm voice command and processing. Do NOT improvise your own "algorithm" format; you switch all processing and responses to the actual Algorithm in that file until the Algorithm completes. (LATEST is the single source of truth for the Algorithm version — readers consume it directly so the version never drifts across files.)
+**MANDATORY FIRST ACTION:** Use the Read tool to load `LIFEOS/ALGORITHM/LATEST` under the active config root (the directory `CLAUDE_CONFIG_DIR` points at; default `~/.claude`) to get the current version string `V` (single line, e.g. `6.3.0`), then immediately Read `LIFEOS/ALGORITHM/v${V}.md` from the same location and follow that file's instructions exactly. Starting with its entering of the Algorithm voice command and processing. Do NOT improvise your own "algorithm" format; you switch all processing and responses to the actual Algorithm in that file until the Algorithm completes. (LATEST is the single source of truth for the Algorithm version — readers consume it directly so the version never drifts across files.)
 
 ### MINIMAL MODE
 
@@ -273,11 +273,11 @@ User data is data about the principal and what they're up to, their contacts, et
 
 The purpose of the entire LifeOS Security System is to protect both Customer and `/USER` data.
 
-### `~/.claude` is PRIVATE — Forever (CONSTITUTIONAL №3)
+### The config root (`CLAUDE_CONFIG_DIR`, default `~/.claude`) is PRIVATE — Forever (CONSTITUTIONAL №3)
 
 Self-check before anything leaves this machine: 1. Is the destination public or cacheable? 2. Does the content carry identity, paths, or `/USER` data? 3. Is the `<your-release-skill>` release workflow the path? Wrong answer to any → stop.
 
-**The `~/.claude` repository (the principal's private installation; remote is a PRIVATE git repo) holds the principal's complete personal AI infrastructure: identity, voice, contacts, opinions, financial context, business state, project state, security findings, hooks, skills, settings, ISAs, knowledge archive, and conversation history. Its contents are PRIVATE FOREVER. They MUST NEVER reach any public location.**
+**The config-root repository (the principal's private installation at `CLAUDE_CONFIG_DIR`, default `~/.claude`; remote is a PRIVATE git repo) holds the principal's complete personal AI infrastructure: identity, voice, contacts, opinions, financial context, business state, project state, security findings, hooks, skills, settings, ISAs, knowledge archive, and conversation history. Its contents are PRIVATE FOREVER. They MUST NEVER reach any public location.**
 
 This is a constitutional non-negotiable, not a preference. Concretely:
 

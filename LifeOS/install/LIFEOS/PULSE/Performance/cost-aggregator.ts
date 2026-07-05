@@ -12,10 +12,11 @@
 
 import { join, basename, dirname } from "path"
 import { existsSync, readFileSync, writeFileSync, appendFileSync, readdirSync, statSync, mkdirSync } from "fs"
+import { getConfigRoot } from "../../../hooks/lib/paths";
 
 const HOME = process.env.HOME ?? ""
-const LIFEOS_DIR = join(HOME, ".claude", "LIFEOS")
-const PROJECTS_DIR = join(HOME, ".claude", "projects")
+const LIFEOS_DIR = join(getConfigRoot(), "LIFEOS")
+const PROJECTS_DIR = join(getConfigRoot(), "projects")
 const OUTPUT_FILE = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY", "session-costs.jsonl")
 const STATE_FILE = join(LIFEOS_DIR, "PULSE", "Performance", "aggregator-state.json")
 
@@ -29,8 +30,7 @@ const MODEL_PRICING: Record<string, { input: number; output: number; cacheWrite:
   "claude-sonnet-4-6": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.30 },
   "claude-sonnet-4-5-20250514": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.30 },
   // Haiku 4.5
-  "claude-haiku-4-5-20251001": { input: 0.80, output: 4, cacheWrite: 1.00, cacheRead: 0.08 },
-}
+  "claude-haiku-4-5-20251001": { input: 0.80, output: 4, cacheWrite: 1.00, cacheRead: 0.08 } }
 
 function getPricing(model: string): { input: number; output: number; cacheWrite: number; cacheRead: number } {
   // Exact match
@@ -179,8 +179,7 @@ function processSessionFile(filePath: string, projectSlug: string): SessionCost 
       costCacheRead: Math.round(costCacheRead * 10000) / 10000,
       costTotal: Math.round((costInput + costOutput + costCacheWrite + costCacheRead) * 10000) / 10000,
       fileSize,
-      filePath,
-    }
+      filePath }
   } catch {
     return null
   }

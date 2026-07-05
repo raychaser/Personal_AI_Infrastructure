@@ -14,9 +14,10 @@ import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
 import { paiUserDir } from "./LifeosConfig";
+import { getConfigRoot } from "../../hooks/lib/paths";
 
 const HOME = process.env.HOME!;
-const CLAUDE_DIR = join(HOME, ".claude");
+const CLAUDE_DIR = getConfigRoot();
 
 // ═══════════════════════════════════════════════════════════════════════
 // Terminal Width Detection
@@ -123,30 +124,26 @@ const UI = {
 const BRAILLE = {
   empty: "⠀", full: "⣿",
   dots: "⠁⠂⠃⠄⠅⠆⠇⡀⡁⡂⡃⡄⡅⡆⡇⢀⢁⢂⢃⢄⢅⢆⢇⣀⣁⣂⣃⣄⣅⣆⣇",
-  gradients: ["⠀", "⢀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"],
-};
+  gradients: ["⠀", "⢀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"] };
 
 // Block elements for shading
 const BLOCKS = {
   full: "█", light: "░", medium: "▒", dark: "▓",
   upper: "▀", lower: "▄", left: "▌", right: "▐",
   eighths: ["", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"],
-  vEighths: ["", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"],
-};
+  vEighths: ["", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"] };
 
 // Geometric shapes
 const SHAPES = {
   triangles: { tl: "◤", tr: "◥", bl: "◣", br: "◢" },
   diamonds: { filled: "◆", empty: "◇", small: "⬥" },
-  circles: { filled: "●", empty: "○", half: ["◐", "◑", "◒", "◓"] },
-};
+  circles: { filled: "●", empty: "○", half: ["◐", "◑", "◒", "◓"] } };
 
 // Box drawing - rounded corners for modern feel
 const BOX = {
   tl: "╭", tr: "╮", bl: "╰", br: "╯",
   h: "─", v: "│",
-  lt: "├", rt: "┤", tt: "┬", bt: "┴",
-};
+  lt: "├", rt: "┤", tt: "┬", bt: "┴" };
 
 // Sparkline characters (8 levels)
 const SPARK = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
@@ -325,8 +322,7 @@ function getStats(): SystemStats {
     workItems: countWorkItems(),
     learnings: countLearnings(),
     userFiles: countUserFiles(),
-    model: "Opus 4.5",
-  };
+    model: "Opus 4.5" };
 }
 
 // ═══════════════════════════════════════════════════════════════════════

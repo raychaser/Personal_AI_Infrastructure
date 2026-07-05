@@ -12,11 +12,19 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
+import { getConfigRoot, normalizeConfigRoot } from "./paths";
 
-const HOME = process.env.HOME ?? homedir();
-const CLAUDE_ROOT = join(HOME, ".claude");
+// Back-compat alias to the shared canonical normalizer.
+export const normalizeRoot = normalizeConfigRoot;
+
+// Resolve the config root through the SAME accessor the tools use — getConfigRoot()
+// applies the full precedence chain (CLAUDE_PLUGIN_ROOT > CLAUDE_CONFIG_DIR > ~/.claude)
+// and normalizes it. Sharing it means the guard and the tools can never derive
+// different roots (a divergence that would silently fail the containment guard open),
+// and the guard protects whatever root the tools operate on — including a not-yet-
+// created custom root — instead of re-pointing at ~/.claude.
+const CLAUDE_ROOT = getConfigRoot();
 const DEFAULT_DENY_LIST_PATH = join(CLAUDE_ROOT, "skills/_LIFEOS/DENY_LIST.txt");
 
 export type GuardClassification = "system" | "user" | "out-of-tree";
@@ -41,7 +49,7 @@ export interface GuardDecision {
  * Classify a target file path. SYSTEM files are everything under CLAUDE_ROOT
  * that does NOT live in a containment zone AND is not pattern-allowlisted.
  * USER files are anything inside a containment zone OR pattern-allowlisted.
- * Out-of-tree files (outside ~/.claude) are never blocked.
+ * Out-of-tree files (outside the config root: CLAUDE_CONFIG_DIR, default ~/.claude) are never blocked.
  */
 export function classifyTarget(
   absolutePath: string,

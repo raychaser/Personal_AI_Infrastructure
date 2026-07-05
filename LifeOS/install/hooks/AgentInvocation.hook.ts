@@ -19,8 +19,7 @@
 
 import { existsSync, mkdirSync, appendFileSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
-import { paiPath } from './lib/paths';
+import { getConfigRoot, paiPath } from './lib/paths';
 import { getISOTimestamp } from './lib/time';
 import { EFFORT_MODEL, ALIAS, CROSS_VENDOR } from '../LIFEOS/TOOLS/models';
 
@@ -49,7 +48,7 @@ function resolveDispatch(subagentType: string, inputModel?: string): { model: st
   if (CROSS_VENDOR[cvKey]) return { model: CROSS_VENDOR[cvKey], level: 'cross-vendor' };
   if (inputModel) return { model: inputModel, level: levelForModel(inputModel) };
   try {
-    const fm = readFileSync(join(homedir(), '.claude', 'agents', `${subagentType}.md`), 'utf-8').slice(0, 4000);
+    const fm = readFileSync(join(getConfigRoot(), 'agents', `${subagentType}.md`), 'utf-8').slice(0, 4000);
     const m = fm.match(/^model:\s*(\S+)/m);
     if (m) return { model: m[1], level: `${levelForModel(m[1])}-pin` };
   } catch { /* no agent file — built-in type */ }
@@ -123,8 +122,7 @@ async function main() {
         subagent_type: subagentType,
         description,
         model: dispatch.model,
-        level: dispatch.level,
-      };
+        level: dispatch.level };
       writeStarts(starts);
 
       const event = {
@@ -136,8 +134,7 @@ async function main() {
         subagent_model: dispatch.model,
         subagent_level: dispatch.level,
         description,
-        prompt_preview: prompt.slice(0, 200),
-      };
+        prompt_preview: prompt.slice(0, 200) };
       appendFileSync(EVENTS_FILE, JSON.stringify(event) + '\n', 'utf-8');
       console.error(`[AgentInvocation] START: ${subagentType} (${dispatch.level} → ${dispatch.model}) — ${description.slice(0, 48)}`);
     } else {
@@ -157,8 +154,7 @@ async function main() {
         subagent_id: key,
         subagent_type: subagentType,
         description,
-        duration_seconds: duration,
-      };
+        duration_seconds: duration };
       appendFileSync(EVENTS_FILE, JSON.stringify(event) + '\n', 'utf-8');
       console.error(`[AgentInvocation] STOP: ${subagentType} — ${description.slice(0, 48)} (${duration ?? '?'}s)`);
     }
