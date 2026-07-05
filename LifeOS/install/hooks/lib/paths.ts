@@ -52,7 +52,7 @@ export function getLifeosDir(): string {
     return expandPath(envLifeosDir);
   }
 
-  return join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'LIFEOS');
+  return join(getClaudeDir(), 'LIFEOS');
 }
 
 /**
@@ -70,7 +70,15 @@ export function getClaudeDir(): string {
     return expandPath(pluginRoot);
   }
 
-  return (process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'));
+  const configDir = process.env.CLAUDE_CONFIG_DIR;
+  if (configDir) {
+    // Normalized like system-file-guard-core.normalizeRoot: expand ~/$HOME forms,
+    // strip trailing slashes — every consumer must derive the SAME root.
+    let out = expandPath(configDir.trim());
+    while (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
+    return out;
+  }
+  return join(homedir(), '.claude');
 }
 
 /**

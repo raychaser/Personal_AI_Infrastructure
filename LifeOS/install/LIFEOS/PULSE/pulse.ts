@@ -24,7 +24,9 @@ const HOME = process.env.HOME ?? "~"
 const LIFEOS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS")
 const PULSE_DIR = join(LIFEOS_DIR, "PULSE")
 
-const envPath = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), ".env")
+const envPathCandidates = [join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), ".env"), join(HOME ?? "~", ".claude", ".env")]
+const envPath = envPathCandidates.find((p) => existsSync(p)) ?? envPathCandidates[0]
+if (envPath !== envPathCandidates[0]) console.error(`[env] .env not found at ${envPathCandidates[0]} — using legacy ${envPath}`)
 try {
   const envContent = readFileSync(envPath, "utf-8")
   for (const line of envContent.split("\n")) {

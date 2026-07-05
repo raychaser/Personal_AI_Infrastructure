@@ -27,7 +27,20 @@ export function normalizeRoot(p: string): string {
   while (out.length > 1 && out.endsWith("/")) out = out.slice(0, -1);
   return out;
 }
-const CLAUDE_ROOT = normalizeRoot(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+function resolveClaudeRoot(): string {
+  const fallback = join(HOME, ".claude");
+  const env = process.env.CLAUDE_CONFIG_DIR;
+  if (!env) return fallback;
+  const candidate = normalizeRoot(env);
+  // A guard must never fail open because of a typo'd/stale env value: if the
+  // env-derived root does not exist, fall back to ~/.claude and say so.
+  if (!existsSync(candidate)) {
+    console.error(`[SystemFileGuard] CLAUDE_CONFIG_DIR points at nonexistent ${candidate} — guarding ${fallback} instead`);
+    return fallback;
+  }
+  return candidate;
+}
+const CLAUDE_ROOT = resolveClaudeRoot();
 const DEFAULT_DENY_LIST_PATH = join(CLAUDE_ROOT, "skills/_LIFEOS/DENY_LIST.txt");
 
 export type GuardClassification = "system" | "user" | "out-of-tree";

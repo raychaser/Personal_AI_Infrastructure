@@ -7,7 +7,9 @@ import { join } from "path"
 import { readFileSync } from "fs"
 
 // Load .env
-const envPath = join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"), ".env")
+const envPathCandidates = [join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"), ".env"), join(HOME ?? "~", ".claude", ".env")]
+const envPath = envPathCandidates.find((p) => existsSync(p)) ?? envPathCandidates[0]
+if (envPath !== envPathCandidates[0]) console.error(`[env] .env not found at ${envPathCandidates[0]} — using legacy ${envPath}`)
 try {
   const envContent = readFileSync(envPath, "utf-8")
   for (const line of envContent.split("\n")) {

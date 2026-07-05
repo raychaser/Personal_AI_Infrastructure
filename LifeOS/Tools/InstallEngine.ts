@@ -116,7 +116,11 @@ export function detectHarness(home: string): HarnessInfo {
   // Explicit env override wins outright — even if the directory does not exist
   // yet (fresh install into a custom root). Doc'd order: explicit env first.
   if (process.env.CLAUDE_CONFIG_DIR) {
-    const explicitRoot = process.env.CLAUDE_CONFIG_DIR;
+    // Normalize before the value gets baked into settings paths and plists.
+    let explicitRoot = process.env.CLAUDE_CONFIG_DIR.trim();
+    if (explicitRoot === "~" || explicitRoot.startsWith("~/")) explicitRoot = join(home, explicitRoot.slice(1));
+    explicitRoot = resolve(explicitRoot);
+    console.error(`[detect] config root: ${explicitRoot} (from CLAUDE_CONFIG_DIR)`);
     return { name: "claude-code", configRoot: explicitRoot, skillsDir: join(explicitRoot, "skills") };
   }
   const candidates: Array<{ name: Harness; root: string; skills: string }> = [

@@ -36,11 +36,6 @@ const RESEARCH_DIR = path.join(MEMORY_DIR, "RESEARCH");
 const HARVEST_QUEUE_DIR = path.join(KNOWLEDGE_DIR, "_harvest-queue");
 const ARCHIVE_DIR = path.join(KNOWLEDGE_DIR, "_archive");
 
-const CURRENT_USER = process.env.USER;
-if (!CURRENT_USER) {
-  console.error("KnowledgeHarvester: USER env var is required to locate auto-memory dir");
-  process.exit(1);
-}
 // Claude Code names each project dir by the workspace path with [/.] mapped to "-".
 // Derive the slug from the real config root so relocated installs resolve correctly.
 const CONFIG_ROOT = process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude");
