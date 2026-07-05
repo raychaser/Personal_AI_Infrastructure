@@ -16,7 +16,7 @@ import { homedir } from "node:os";
 import { isContained, isPatternAllowlisted, relativeToClaudeRoot } from "./containment-zones";
 
 const HOME = process.env.HOME ?? homedir();
-const CLAUDE_ROOT = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
+const CLAUDE_ROOT = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"));
 const DEFAULT_DENY_LIST_PATH = join(CLAUDE_ROOT, "skills/_LIFEOS/DENY_LIST.txt");
 
 export type GuardClassification = "system" | "user" | "out-of-tree";

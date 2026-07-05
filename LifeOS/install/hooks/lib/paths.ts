@@ -69,7 +69,7 @@ export function getClaudeDir(): string {
     return expandPath(pluginRoot);
   }
 
-  return join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'));
+  return (process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'));
 }
 
 /**

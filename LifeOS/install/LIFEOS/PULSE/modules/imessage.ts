@@ -62,7 +62,7 @@ export interface IMessageHealth {
 // ── Module State ──
 
 const HOME = process.env.HOME ?? ""
-const CWD = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"))
+const CWD = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"))
 const STATE_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "state", "imessage")
 const LOGS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "logs", "imessage")
 

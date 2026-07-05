@@ -63,7 +63,7 @@ export interface TelegramConfig {
 // ── Constants ──
 
 const HOME = process.env.HOME ?? ""
-const CWD = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"))
+const CWD = (process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"))
 const STATE_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "state", "telegram")
 const LOGS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "PULSE", "logs", "telegram")
 const STALE_ACK_CACHE_DIR = join(STATE_DIR, "ack-cache")

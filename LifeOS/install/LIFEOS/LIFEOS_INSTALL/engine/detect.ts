@@ -344,7 +344,7 @@ function detectVoice(): DetectionResult["voice"] {
  */
 export function detectSystem(): DetectionResult {
   const home = homedir();
-  const paiDir = join(home, ".claude");
+  const paiDir = process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
   const configDir = process.env.LIFEOS_CONFIG_DIR || join(home, ".config", "LifeOS");
 
   return {

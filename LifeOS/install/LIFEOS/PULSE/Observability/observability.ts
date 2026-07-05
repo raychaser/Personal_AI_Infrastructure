@@ -1626,7 +1626,7 @@ function readDirMdFiles(dir: string): { name: string, content: string, sections:
 
 function handleUserIndexApi(filter: string | null): Response {
   try {
-    const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.HOME || "", ".claude", "LIFEOS")
+    const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || "", ".claude"), "LIFEOS")
     const indexPath = join(LIFEOS_DIR, "PULSE", "state", "user-index.json")
     const raw = Bun.file(indexPath)
     if (!raw.size) {
