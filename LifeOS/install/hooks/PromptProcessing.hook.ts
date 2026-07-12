@@ -81,7 +81,7 @@ function appendPromptProcessingTelemetry(entry: Record<string, unknown>): void {
 
 // ── Constants ──
 
-const BASE_DIR = process.env.LIFEOS_DIR || join(process.env.HOME!, '.claude', 'LIFEOS');
+const BASE_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, '.claude'), 'LIFEOS');
 const SESSION_NAMES_PATH = paiPath('MEMORY', 'STATE', 'session-names.json');
 const LOCK_PATH = SESSION_NAMES_PATH + '.lock';
 const MIN_PROMPT_LENGTH = 3;

@@ -54,7 +54,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 }
 
 
-const BASE_DIR = process.env.LIFEOS_DIR || join(process.env.HOME!, '.claude', 'LIFEOS');
+const BASE_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, '.claude'), 'LIFEOS');
 const MEMORY_DIR = join(BASE_DIR, 'MEMORY');
 const STATE_DIR = join(MEMORY_DIR, 'STATE');
 const WORK_DIR = join(MEMORY_DIR, 'WORK');

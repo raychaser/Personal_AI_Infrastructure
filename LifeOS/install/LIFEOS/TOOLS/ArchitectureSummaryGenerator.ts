@@ -34,12 +34,12 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
 const ARCH_SOURCE = path.join(LIFEOS_DIR, "DOCUMENTATION", "LifeosSystemArchitecture.md");
 const SUMMARY_OUTPUT = path.join(LIFEOS_DIR, "DOCUMENTATION", "ARCHITECTURE_SUMMARY.md");
 const ALGORITHM_DIR = path.join(LIFEOS_DIR, "ALGORITHM");
 const MEMORY_SYSTEM_DOC = path.join(LIFEOS_DIR, "DOCUMENTATION", "Memory", "MemorySystem.md");
-const CLAUDE_MD = path.join(HOME, ".claude", "CLAUDE.md");
+const CLAUDE_MD = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "CLAUDE.md");
 
 // ============================================================================
 // Version detection (source-of-truth lookups — no hardcoded versions)
@@ -274,7 +274,7 @@ function cmdCheck(): void {
 
   const sourceMtime = getMtime(ARCH_SOURCE);
   const summaryMtime = getMtime(SUMMARY_OUTPUT);
-  const claudeMdMtime = getMtime(path.join(HOME, ".claude", "CLAUDE.md"));
+  const claudeMdMtime = getMtime(path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "CLAUDE.md"));
 
   if (sourceMtime > summaryMtime || claudeMdMtime > summaryMtime) {
     console.log("STALE: Source files are newer than summary");

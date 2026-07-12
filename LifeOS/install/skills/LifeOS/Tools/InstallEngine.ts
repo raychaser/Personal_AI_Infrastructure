@@ -564,7 +564,7 @@ type HooksMap = Record<string, MatcherGroup[]>;
  */
 function normalizeCommand(cmd: string): string {
   return cmd
-    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
+    .replace(/\$\{CLAUDE_CONFIG_DIR:-\$HOME\/\.claude\}|\$\{?CLAUDE_CONFIG_DIR\}?|\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
     .replace(/\s+/g, " ")
     .trim();
 }

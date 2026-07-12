@@ -47,7 +47,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
 const STATE_FILE = join(LIFEOS_DIR, "PULSE", "state", "notification-governor.json");
 const LOG_FILE = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY", "notification-governor.jsonl");
 const NOTIFY_URL = "http://localhost:31337/notify";

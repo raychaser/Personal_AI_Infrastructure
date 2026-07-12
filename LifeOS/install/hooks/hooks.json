@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ContextReduction.hook.sh"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ContextReduction.hook.sh"
           }
         ]
       },
@@ -28,7 +28,7 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/AgentInvocation.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/AgentInvocation.hook.ts"
           }
         ]
       },
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/TabState.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/TabState.hook.ts"
           }
         ]
       },
@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/PreToolGuard.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/PreToolGuard.hook.ts"
           }
         ]
       }
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/AgentInvocation.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/AgentInvocation.hook.ts"
           }
         ]
       },
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/Safety.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts",
             "timeout": 5
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/Safety.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts",
             "timeout": 5
           }
         ]
@@ -86,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/TabState.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/TabState.hook.ts"
           }
         ]
       },
@@ -95,11 +95,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ISASync.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ISASync.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/CheckpointPerISC.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/CheckpointPerISC.hook.ts",
             "timeout": 30
           }
         ]
@@ -109,11 +109,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ISASync.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ISASync.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/CheckpointPerISC.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/CheckpointPerISC.hook.ts",
             "timeout": 30
           }
         ]
@@ -123,11 +123,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ISASync.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ISASync.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/CheckpointPerISC.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/CheckpointPerISC.hook.ts",
             "timeout": 30
           }
         ]
@@ -136,7 +136,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/EventLogger.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/EventLogger.hook.ts",
             "timeout": 5,
             "async": true
           }
@@ -148,27 +148,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/WorkCompletionLearning.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/WorkCompletionLearning.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/SessionCleanup.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/SessionCleanup.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/UpdateCounts.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/UpdateCounts.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/MemoryHealthGate.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/MemoryHealthGate.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/DocIntegrity.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/DocIntegrity.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/IntegrityCheck.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/IntegrityCheck.hook.ts"
           }
         ]
       }
@@ -178,7 +178,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/PromptProcessing.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/PromptProcessing.hook.ts",
             "timeout": 30,
             "async": true
           }
@@ -188,7 +188,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/SatisfactionCapture.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/SatisfactionCapture.hook.ts",
             "timeout": 20,
             "async": true
           }
@@ -198,7 +198,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ReminderRouter.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ReminderRouter.hook.ts",
             "timeout": 5,
             "async": true
           }
@@ -208,7 +208,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/MemoryTurnStart.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/MemoryTurnStart.hook.ts",
             "timeout": 8
           }
         ]
@@ -219,7 +219,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/EventLogger.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/EventLogger.hook.ts"
           }
         ]
       },
@@ -227,7 +227,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/AlgorithmNudge.hook.ts",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/AlgorithmNudge.hook.ts",
             "timeout": 5
           }
         ]
@@ -238,7 +238,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/TaskGovernance.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/TaskGovernance.hook.ts"
           }
         ]
       }
@@ -248,7 +248,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/EventLogger.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/EventLogger.hook.ts"
           }
         ]
       }
@@ -258,26 +258,26 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun $HOME/.claude/hooks/HookHealer.hook.ts",
+            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/HookHealer.hook.ts",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/KittyEnvPersist.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/KittyEnvPersist.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/LoadContext.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/LoadContext.hook.ts"
           },
           {
             "type": "command",
-            "command": "bun $HOME/.claude/LIFEOS/TOOLS/FreshnessCache.ts --quiet",
+            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/FreshnessCache.ts --quiet",
             "timeout": 5,
             "async": true
           },
           {
             "type": "command",
-            "command": "bun $HOME/.claude/LIFEOS/TOOLS/SettingsBackport.ts; bun $HOME/.claude/LIFEOS/TOOLS/MergeSettings.ts --system $HOME/.claude/settings.system.json --user $HOME/.claude/LIFEOS/USER/CONFIG/settings.user.json --output $HOME/.claude/settings.json",
+            "command": "bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/SettingsBackport.ts; bun ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/MergeSettings.ts --system ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.system.json --user ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/USER/CONFIG/settings.user.json --output ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json",
             "timeout": 15,
             "async": true
           }
@@ -289,27 +289,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/LastResponseCache.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/LastResponseCache.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/TabState.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/TabState.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/VoiceCompletion.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/VoiceCompletion.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/ISARenderOnStop.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/ISARenderOnStop.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/StopGates.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/StopGates.hook.ts"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/MemoryReviewFire.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/MemoryReviewFire.hook.ts"
           }
         ]
       }
@@ -319,7 +319,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/EventLogger.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/EventLogger.hook.ts"
           }
         ]
       }
@@ -330,7 +330,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/Safety.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts"
           }
         ]
       },
@@ -339,7 +339,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/Safety.hook.ts"
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts"
           }
         ]
       }

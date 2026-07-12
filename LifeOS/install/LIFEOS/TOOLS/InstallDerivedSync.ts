@@ -34,7 +34,7 @@ type LaunchctlResult = {
 };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(HOME, ".claude", "LIFEOS", "TOOLS", "com.lifeos.derivedsync.plist.template");
+const TEMPLATE_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "TOOLS", "com.lifeos.derivedsync.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.derivedsync.plist");
 const LABEL = "com.lifeos.derivedsync";
@@ -87,10 +87,12 @@ async function install(): Promise<void> {
   }
   const bunPath = await detectBun();
   const bunDir = bunPath.replace(/\/bun$/, "");
-  const userDir = realpathSync(join(HOME, ".claude", "LIFEOS", "USER"));
+  const configRoot = process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude");
+  const userDir = realpathSync(join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "USER"));
   console.log(`[InstallDerivedSync] detected bun at ${bunPath}`);
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   const materialized = template
+    .replace(/\{\{CONFIG_ROOT\}\}/g, configRoot)
     .replace(/\{\{HOME\}\}/g, HOME)
     .replace(/\{\{BUN\}\}/g, bunPath)
     .replace(/\{\{BUN_DIR\}\}/g, bunDir)

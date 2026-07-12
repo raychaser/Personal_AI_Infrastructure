@@ -38,7 +38,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 // ============================================================================
 
 const HOME = process.env.HOME || os.homedir();
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
 const DEFAULT_WORK_DIR = path.join(LIFEOS_DIR, "MEMORY", "WORK");
 const DEFAULT_ARCH_DOC = path.join(LIFEOS_DIR, "DOCUMENTATION", "LifeosSystemArchitecture.md");
 const ARCH_DECISIONS_HEADING = "## Architecture Decisions";

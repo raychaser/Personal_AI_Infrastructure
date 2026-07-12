@@ -39,7 +39,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 function loadEnv(): void {
   const envPath = process.env.LIFEOS_CONFIG_DIR
     ? resolve(process.env.LIFEOS_CONFIG_DIR, ".env")
-    : resolve(homedir(), ".claude/.env");
+    : resolve(process.env.CLAUDE_CONFIG_DIR || resolve(homedir(), ".claude"), ".env");
   try {
     const content = readFileSync(envPath, "utf-8");
     for (const line of content.split("\n")) {

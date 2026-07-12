@@ -59,7 +59,7 @@ export interface ContentState {
 
 export function eventsPath(): string {
   return join(
-    process.env.LIFEOS_DIR || join(homedir(), '.claude', 'LIFEOS'),
+    process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'LIFEOS'),
     'MEMORY',
     'STATE',
     'content-pipeline',
