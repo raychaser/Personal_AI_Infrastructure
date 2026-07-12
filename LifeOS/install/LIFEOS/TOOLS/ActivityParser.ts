@@ -23,8 +23,7 @@ import * as path from "path";
 
 const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || path.join(process.env.HOME!, ".claude"));
 const MEMORY_DIR = path.join(CLAUDE_DIR, "LIFEOS", "MEMORY");
-const USERNAME = process.env.USER || require("os").userInfo().username;
-const PROJECTS_DIR = path.join(CLAUDE_DIR, "projects", `-Users-${USERNAME}--claude`);  // Claude Code native storage
+const PROJECTS_DIR = path.join(CLAUDE_DIR, "projects", CLAUDE_DIR.replace(/[/.]/g, "-"));  // Claude Code native storage (slug derived from the actual root)
 const SYSTEM_UPDATES_DIR = path.join(MEMORY_DIR, "SYSTEMUPDATES");  // Canonical system change history
 
 // ============================================================================

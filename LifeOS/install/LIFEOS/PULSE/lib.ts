@@ -49,8 +49,8 @@ export interface DaemonConfig {
 // structural privacy lever — no separate scrub policy needed.
 
 export const USER_CRON_PATH = join(
-  process.env.HOME ?? "~",
-  ".claude", "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
+  process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"),
+  "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
 )
 
 export interface JobState {

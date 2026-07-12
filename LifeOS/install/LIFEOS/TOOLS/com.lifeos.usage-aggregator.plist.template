@@ -23,7 +23,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>{{BUN}}</string>
-    <string>{{HOME}}/.claude/LIFEOS/TOOLS/UsageAggregator.ts</string>
+    <string>{{CONFIG_ROOT}}/LIFEOS/TOOLS/UsageAggregator.ts</string>
   </array>
 
   <key>RunAtLoad</key>
@@ -41,13 +41,13 @@
   <integer>60</integer>
 
   <key>StandardOutPath</key>
-  <string>{{HOME}}/.claude/LIFEOS/MEMORY/STATE/com.lifeos.usage-aggregator.log</string>
+  <string>{{CONFIG_ROOT}}/LIFEOS/MEMORY/STATE/com.lifeos.usage-aggregator.log</string>
 
   <key>StandardErrorPath</key>
-  <string>{{HOME}}/.claude/LIFEOS/MEMORY/STATE/com.lifeos.usage-aggregator.log</string>
+  <string>{{CONFIG_ROOT}}/LIFEOS/MEMORY/STATE/com.lifeos.usage-aggregator.log</string>
 
   <key>WorkingDirectory</key>
-  <string>{{HOME}}/.claude</string>
+  <string>{{CONFIG_ROOT}}</string>
 
   <key>EnvironmentVariables</key>
   <dict>
@@ -55,6 +55,8 @@
     <string>{{BUN_DIR}}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     <key>HOME</key>
     <string>{{HOME}}</string>
+    <key>CLAUDE_CONFIG_DIR</key>
+    <string>{{CONFIG_ROOT}}</string>
   </dict>
 </dict>
 </plist>

@@ -91,7 +91,12 @@ function heal(p: string, source: string): boolean {
 }
 
 function expandHome(token: string): string {
-  return token.replace(/^\$HOME/, homedir()).replace(/^~(?=\/)/, homedir());
+  const configRoot = process.env.CLAUDE_CONFIG_DIR || homedir() + "/.claude";
+  return token
+    .replace(/^\$\{CLAUDE_CONFIG_DIR:-\$HOME\/\.claude\}/, configRoot)
+    .replace(/^\$\{?CLAUDE_CONFIG_DIR\}?(?=\/)/, configRoot)
+    .replace(/^\$HOME/, homedir())
+    .replace(/^~(?=\/)/, homedir());
 }
 
 /**

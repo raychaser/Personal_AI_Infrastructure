@@ -278,7 +278,7 @@ async function handleAnthropicCostApi(): Promise<Response> {
   const { readFileSync, existsSync } = await import("fs")
   const { join } = await import("path")
   const home = process.env.HOME ?? ""
-  const obsDir = join(home, ".claude", "LIFEOS", "MEMORY", "OBSERVABILITY")
+  const obsDir = join(process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"), "LIFEOS", "MEMORY", "OBSERVABILITY")
   const ledgerPath = join(obsDir, "anthropic-cost.jsonl")
   const sitesPath = join(obsDir, "anthropic-call-sites.json")
 

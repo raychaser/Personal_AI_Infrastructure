@@ -9,13 +9,15 @@
     <array>
         <string>__BUN_PATH__</string>
         <string>run</string>
-        <string>__HOME__/.claude/LIFEOS/TOOLS/LearningPatternSynthesis.ts</string>
+        <string>__CONFIG_ROOT__/LIFEOS/TOOLS/LearningPatternSynthesis.ts</string>
         <string>--hypothesize</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>__HOME__/.claude</string>
+    <string>__CONFIG_ROOT__</string>
     <key>EnvironmentVariables</key>
     <dict>
+    <key>CLAUDE_CONFIG_DIR</key>
+    <string>__CONFIG_ROOT__</string>
         <key>HOME</key>
         <string>__HOME__</string>
         <key>PATH</key>
@@ -31,9 +33,9 @@
     <key>RunAtLoad</key>
     <false/>
     <key>StandardOutPath</key>
-    <string>__HOME__/.claude/LIFEOS/MEMORY/OBSERVABILITY/deriver.log</string>
+    <string>__CONFIG_ROOT__/LIFEOS/MEMORY/OBSERVABILITY/deriver.log</string>
     <key>StandardErrorPath</key>
-    <string>__HOME__/.claude/LIFEOS/MEMORY/OBSERVABILITY/deriver.log</string>
+    <string>__CONFIG_ROOT__/LIFEOS/MEMORY/OBSERVABILITY/deriver.log</string>
     <key>ThrottleInterval</key>
     <integer>60</integer>
 </dict>

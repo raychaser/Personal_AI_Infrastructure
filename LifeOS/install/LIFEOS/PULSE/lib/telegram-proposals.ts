@@ -123,7 +123,7 @@ export function logProposalReply(event: Record<string, unknown>, path: string = 
 }
 
 export function formatProposalMessage(p: ProposalRow, home: string = HOME): string {
-  const fileLabel = p.target_file.replace(`${home}/.claude/`, "");
+  const fileLabel = p.target_file.replace(`${process.env.CLAUDE_CONFIG_DIR || `${home}/.claude`}/`, "");
   const conf = p.confidence.toFixed(2);
   const obs = p.observed_across_sessions ?? 1;
   // P1 2026-05-25: prepend subtype badge so the principal sees at a glance

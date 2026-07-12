@@ -50,7 +50,7 @@ function install(): void {
   mkdirSync(STATE_DIR, { recursive: true });
 
   const raw = readFileSync(TEMPLATE, "utf8");
-  const materialized = raw.replaceAll("__HOME__", HOME);
+  const materialized = raw.replaceAll("__CONFIG_ROOT__", process.env.CLAUDE_CONFIG_DIR || HOME + "/.claude").replaceAll("__HOME__", HOME);
   writeFileSync(TARGET, materialized, { mode: 0o644 });
   console.log(`[InstallCommitmentSweep] wrote ${TARGET}`);
 

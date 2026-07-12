@@ -44,8 +44,7 @@ const PREFIX = "[HealthSync]";
 const SOURCE_NAMES: readonly SourceName[] = ["oura", "eightsleep", "apple", "function"];
 const CURRENT_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "USER", "HEALTH", "current.json");
 const HEALTHSYNC_LOG_PATH = join(
-  HOME,
-  ".claude",
+  process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"),
   "LIFEOS",
   "MEMORY",
   "OBSERVABILITY",

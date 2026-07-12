@@ -22,8 +22,7 @@ import os from "node:os";
  * clobbered back into the overlay (the 2026-07-11 hooks-BPE incident).
  */
 export const MERGE_SNAPSHOT_PATH = path.join(
-  os.homedir(),
-  ".claude",
+  process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude"),
   "LIFEOS",
   "MEMORY",
   "STATE",
@@ -141,6 +140,13 @@ export function mergeSettings(system: any, user: any): any {
  * ($HOMEFOO is left untouched). Returns the string unchanged if no match.
  */
 function expandLeadingHome(value: string, home: string): string {
+  const configRoot = process.env.CLAUDE_CONFIG_DIR;
+  if (configRoot) {
+    for (const p of ["${HOME}/.claude", "$HOME/.claude", "~/.claude"]) {
+      if (value === p) return configRoot;
+      if (value.startsWith(p + "/")) return configRoot + value.slice(p.length);
+    }
+  }
   if (value === "${HOME}") return home;
   if (value.startsWith("${HOME}/")) return home + value.slice("${HOME}".length);
   if (value === "$HOME") return home;

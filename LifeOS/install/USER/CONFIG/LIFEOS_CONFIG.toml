@@ -51,6 +51,8 @@ token_env_var = "CLOUDFLARE_API_TOKEN"
 allowlist = []
 
 [paths]
-user_dir = "~/.claude/LIFEOS/USER"
-memory_dir = "~/.claude/LIFEOS/MEMORY"
+# Leave user_dir/memory_dir unset to resolve them from the active config root
+# (CLAUDE_CONFIG_DIR-aware). Uncomment only to pin explicit locations.
+# user_dir = "~/.claude/LIFEOS/USER"
+# memory_dir = "~/.claude/LIFEOS/MEMORY"
 projects_dir = "~/Projects"
