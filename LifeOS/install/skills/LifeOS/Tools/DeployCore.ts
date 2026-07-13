@@ -146,8 +146,11 @@ function deployDependencies(payloadInstall: string, configRoot: string, apply: b
     r.blockers.push(`dependency manifest missing: ${src} — point --skill-root at a staged release`);
     return r;
   }
+  const pulseSrc = join(payloadInstall, "LIFEOS", "PULSE", "package.json");
+  const pulseDir = join(configRoot, "LIFEOS", "PULSE");
   if (!apply) {
     r.actions.push(`copyMissing ${src} → ${dst}`, `bun install --cwd ${configRoot}`);
+    if (existsSync(pulseSrc)) r.actions.push(`bun install --cwd ${pulseDir}`);
     return r;
   }
   const { copied, failures } = copyMissing(src, dst);
@@ -159,6 +162,19 @@ function deployDependencies(payloadInstall: string, configRoot: string, apply: b
       r.failures.push(`bun install --cwd ${configRoot} exited ${proc.exitCode}: ${proc.stderr.toString().trim()}`);
     } else {
       r.actions.push(`bun install --cwd ${configRoot}`);
+    }
+    // PULSE carries its own manifest (zod, smol-toml); without this install the
+    // daemon exits on first boot with "Cannot find package 'zod'".
+    if (existsSync(pulseSrc) && !existsSync(join(pulseDir, "package.json"))) {
+      r.failures.push(`PULSE manifest expected at ${pulseDir}/package.json but missing — runtime copy did not deploy; bun install skipped`);
+    }
+    if (existsSync(pulseSrc) && existsSync(join(pulseDir, "package.json"))) {
+      const pulseProc = Bun.spawnSync(["bun", "install"], { cwd: pulseDir, stdout: "pipe", stderr: "pipe" });
+      if (pulseProc.exitCode !== 0) {
+        r.failures.push(`bun install --cwd ${pulseDir} exited ${pulseProc.exitCode}: ${pulseProc.stderr.toString().trim()}`);
+      } else {
+        r.actions.push(`bun install --cwd ${pulseDir}`);
+      }
     }
   }
   return r;

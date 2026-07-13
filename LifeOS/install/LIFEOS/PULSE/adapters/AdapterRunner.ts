@@ -15,9 +15,11 @@ const ADAPTER_TIMEOUT_MS = 120_000;
 
 function modelToLevel(model: string): InferenceLevel {
   const m = model.toLowerCase();
-  if (m.includes("haiku")) return "fast";
-  if (m.includes("opus")) return "smart";
-  return "standard";
+  if (m.includes("haiku")) return "low";
+  if (m.includes("fable")) return "max";
+  if (m.includes("opus")) return "high";
+  if (!m.includes("sonnet")) console.error(`[AdapterRunner] unrecognized model '${model}' — defaulting to level 'medium'`);
+  return "medium";
 }
 
 export interface AdapterResult {

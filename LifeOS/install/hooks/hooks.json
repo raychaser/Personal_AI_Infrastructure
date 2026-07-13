@@ -82,6 +82,26 @@
         ]
       },
       {
+        "matcher": "mcp__.*([Gg]mail|[Mm]ail|[Dd]rive|[Cc]alendar|[Ii]nbox).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "ToolSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/Safety.hook.ts",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "AskUserQuestion",
         "hooks": [
           {
@@ -134,6 +154,11 @@
       },
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/PostToolObserver.hook.ts",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/EventLogger.hook.ts",
@@ -208,8 +233,28 @@
         "hooks": [
           {
             "type": "command",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/DriftReminder.hook.ts",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/MemoryTurnStart.hook.ts",
             "timeout": 8
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/AlgorithmNudge.hook.ts",
+            "timeout": 5,
+            "async": true
           }
         ]
       }
