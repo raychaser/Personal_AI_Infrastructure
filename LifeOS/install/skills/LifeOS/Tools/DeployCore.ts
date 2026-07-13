@@ -165,6 +165,9 @@ function deployDependencies(payloadInstall: string, configRoot: string, apply: b
     }
     // PULSE carries its own manifest (zod, smol-toml); without this install the
     // daemon exits on first boot with "Cannot find package 'zod'".
+    if (existsSync(pulseSrc) && !existsSync(join(pulseDir, "package.json"))) {
+      r.failures.push(`PULSE manifest expected at ${pulseDir}/package.json but missing — runtime copy did not deploy; bun install skipped`);
+    }
     if (existsSync(pulseSrc) && existsSync(join(pulseDir, "package.json"))) {
       const pulseProc = Bun.spawnSync(["bun", "install"], { cwd: pulseDir, stdout: "pipe", stderr: "pipe" });
       if (pulseProc.exitCode !== 0) {

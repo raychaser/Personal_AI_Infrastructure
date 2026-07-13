@@ -18,6 +18,7 @@ function modelToLevel(model: string): InferenceLevel {
   if (m.includes("haiku")) return "low";
   if (m.includes("fable")) return "max";
   if (m.includes("opus")) return "high";
+  if (!m.includes("sonnet")) console.error(`[AdapterRunner] unrecognized model '${model}' — defaulting to level 'medium'`);
   return "medium";
 }
 

@@ -30,7 +30,7 @@
  */
 import { readFileSync, writeFileSync, existsSync, appendFileSync, readdirSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 
 const HOME = process.env.HOME || homedir();
@@ -198,7 +198,7 @@ function main(): void {
     note: "Salted hashes of distinctive private tokens. No plaintext. Salt in .env (never ships).",
     hashes,
   };
-  mkdirSync(join(CLAUDE, "skills", "_LIFEOS"), { recursive: true });
+  mkdirSync(dirname(OUT_PATH), { recursive: true });
   writeFileSync(OUT_PATH, JSON.stringify(payload, null, 0) + "\n");
   console.log(`[DeriveDenyHashes] wrote ${hashes.length} salted hashes -> ${OUT_PATH} (no plaintext)`);
 }
