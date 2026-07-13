@@ -41,7 +41,7 @@ import { appendFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } fr
 import { dirname, join } from "path";
 import { createHash } from "crypto";
 
-const LIFEOS = process.env.LIFEOS_DIR || join(process.env.HOME!, ".claude", "LIFEOS");
+const LIFEOS = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, ".claude"), "LIFEOS");
 const OBS_PATH = join(LIFEOS, "MEMORY", "OBSERVABILITY", "verification-gate.jsonl");
 const STATE_PATH = join(LIFEOS, "MEMORY", "STATE", "verification-gate-blocked.json");
 

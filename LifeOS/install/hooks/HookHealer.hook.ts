@@ -37,7 +37,7 @@ import {
 import { join } from 'path';
 import { homedir } from 'os';
 
-const CLAUDE_DIR = join(homedir(), '.claude');
+const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'));
 const OBS_DIR = join(CLAUDE_DIR, 'LIFEOS', 'MEMORY', 'OBSERVABILITY');
 const LOG_FILE = join(OBS_DIR, 'hook-healer.jsonl');
 const SETTINGS_FILES = ['settings.json', 'settings.local.json'];
@@ -91,7 +91,12 @@ function heal(p: string, source: string): boolean {
 }
 
 function expandHome(token: string): string {
-  return token.replace(/^\$HOME/, homedir()).replace(/^~(?=\/)/, homedir());
+  const configRoot = process.env.CLAUDE_CONFIG_DIR || homedir() + "/.claude";
+  return token
+    .replace(/^\$\{CLAUDE_CONFIG_DIR:-\$HOME\/\.claude\}/, configRoot)
+    .replace(/^\$\{?CLAUDE_CONFIG_DIR\}?(?=\/)/, configRoot)
+    .replace(/^\$HOME/, homedir())
+    .replace(/^~(?=\/)/, homedir());
 }
 
 /**

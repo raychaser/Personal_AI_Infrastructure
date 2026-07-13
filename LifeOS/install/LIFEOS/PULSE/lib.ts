@@ -49,8 +49,8 @@ export interface DaemonConfig {
 // structural privacy lever — no separate scrub policy needed.
 
 export const USER_CRON_PATH = join(
-  process.env.HOME ?? "~",
-  ".claude", "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
+  process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"),
+  "LIFEOS", "USER", "CONFIG", "PULSE.user.toml",
 )
 
 export interface JobState {
@@ -319,7 +319,7 @@ export async function spawnScript(command: string, timeoutMs = 60_000): Promise<
   const proc = Bun.spawn([BASH_PATH, "-c", command], {
     stdout: "pipe",
     stderr: "pipe",
-    cwd: join(process.env.HOME ?? "~", ".claude", "LIFEOS", "PULSE"),
+    cwd: join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME ?? "~", ".claude"), "LIFEOS", "PULSE"),
     env: { ...process.env },
   })
 

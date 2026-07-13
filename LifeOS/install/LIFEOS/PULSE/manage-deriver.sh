@@ -13,11 +13,11 @@
 
 set -euo pipefail
 
-PULSE_DIR="$HOME/.claude/LIFEOS/PULSE"
+PULSE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/PULSE"
 PLIST_NAME="com.lifeos.deriver"
 PLIST_SRC="$PULSE_DIR/$PLIST_NAME.plist"
 PLIST_DST="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
-OBSERVABILITY_DIR="$HOME/.claude/LIFEOS/MEMORY/OBSERVABILITY"
+OBSERVABILITY_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/MEMORY/OBSERVABILITY"
 
 if [ -x "$HOME/.bun/bin/bun" ]; then
   BUN_PATH="$HOME/.bun/bin/bun"
@@ -49,7 +49,7 @@ case "${1:-}" in
     if [ -f "$PLIST_DST" ]; then
       launchctl unload "$PLIST_DST" 2>/dev/null || true
     fi
-    sed -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$PLIST_SRC" > "$PLIST_DST"
+    sed -e "s|__CONFIG_ROOT__|${CLAUDE_CONFIG_DIR:-$HOME/.claude}|g" -e "s|__HOME__|$HOME|g" -e "s|__BUN_PATH__|$BUN_PATH|g" "$PLIST_SRC" > "$PLIST_DST"
     launchctl load "$PLIST_DST"
     echo "LifeOS deriver installed (bun: $BUN_PATH, schedule: daily 03:00)"
     ;;
@@ -81,7 +81,7 @@ case "${1:-}" in
 
   run-now)
     # One-shot manual invocation for testing / first-run priming.
-    exec "$BUN_PATH" run "$HOME/.claude/LIFEOS/TOOLS/LearningPatternSynthesis.ts" --hypothesize
+    exec "$BUN_PATH" run "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/TOOLS/LearningPatternSynthesis.ts" --hypothesize
     ;;
 
   *)

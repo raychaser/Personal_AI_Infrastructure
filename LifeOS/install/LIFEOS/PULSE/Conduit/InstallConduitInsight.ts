@@ -61,6 +61,10 @@ function plistBody(): string {
   <key>Nice</key><integer>10</integer>
   <key>StandardOutPath</key><string>${escapeXml(join(LOG_DIR, "conduit-insight.out.log"))}</string>
   <key>StandardErrorPath</key><string>${escapeXml(join(LOG_DIR, "conduit-insight.err.log"))}</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>CLAUDE_CONFIG_DIR</key><string>${escapeXml(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"))}</string>
+  </dict>
 </dict>
 </plist>
 `

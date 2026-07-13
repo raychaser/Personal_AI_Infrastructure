@@ -40,7 +40,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
  * This ensures API keys are available regardless of how the CLI is invoked
  */
 async function loadEnv(): Promise<void> {
-  const paiDir = process.env.LIFEOS_DIR || resolve(process.env.HOME!, '.claude');
+  const paiDir = process.env.LIFEOS_DIR || (process.env.CLAUDE_CONFIG_DIR || resolve(process.env.HOME!, '.claude'));
   const envPath = resolve(paiDir, '.env');
   try {
     const envContent = await readFile(envPath, 'utf-8');

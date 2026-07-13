@@ -146,7 +146,8 @@ export function detectHarness(home: string): HarnessInfo {
     if (hasBin(c)) return info(c, "detected");
   }
   // Default assumption when nothing is present yet (a clean machine pre-bootstrap).
-  return { name: "claude-code", configRoot: join(home, ".claude"), skillsDir: join(home, ".claude", "skills"), confidence: "assumed" };
+  const assumedRoot = process.env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+  return { name: "claude-code", configRoot: assumedRoot, skillsDir: join(assumedRoot, "skills"), confidence: "assumed" };
 }
 
 /**
@@ -166,7 +167,7 @@ export function detectEnv(): EnvDetection {
   const home = homedir();
   const os = detectOS();
   const harness = detectHarness(home);
-  const configRoot = harness.configRoot || join(home, ".claude");
+  const configRoot = harness.configRoot || (process.env.CLAUDE_CONFIG_DIR || join(home, ".claude"));
   const settingsPath = join(configRoot, "settings.json");
   const claudeMdPath = join(configRoot, "CLAUDE.md");
   const ssh = !!(process.env.SSH_CONNECTION || process.env.SSH_TTY || process.env.SSH_CLIENT);
@@ -564,7 +565,7 @@ type HooksMap = Record<string, MatcherGroup[]>;
  */
 function normalizeCommand(cmd: string): string {
   return cmd
-    .replace(/\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
+    .replace(/\$\{CLAUDE_CONFIG_DIR:-\$HOME\/\.claude\}|\$\{?CLAUDE_CONFIG_DIR\}?|\$\{?LIFEOS_DIR\}?|\$\{?CLAUDE_PROJECT_DIR\}?|\$\{?CLAUDE_PLUGIN_ROOT\}?|~\/\.claude|\$HOME\/\.claude|\$\{HOME\}\/\.claude/g, "§ROOT§")
     .replace(/\s+/g, " ")
     .trim();
 }

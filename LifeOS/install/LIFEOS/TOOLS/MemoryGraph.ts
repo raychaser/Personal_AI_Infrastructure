@@ -43,7 +43,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
 const MEMORY = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY, "WORK");

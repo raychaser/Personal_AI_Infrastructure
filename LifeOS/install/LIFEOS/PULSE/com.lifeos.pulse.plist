@@ -12,9 +12,11 @@
         <string>pulse.ts</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>__HOME__/.claude/LIFEOS/PULSE</string>
+    <string>__CONFIG_ROOT__/LIFEOS/PULSE</string>
     <key>EnvironmentVariables</key>
     <dict>
+    <key>CLAUDE_CONFIG_DIR</key>
+    <string>__CONFIG_ROOT__</string>
         <key>HOME</key>
         <string>__HOME__</string>
         <key>PATH</key>
@@ -25,9 +27,9 @@
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>__HOME__/.claude/LIFEOS/PULSE/logs/pulse-stdout.log</string>
+    <string>__CONFIG_ROOT__/LIFEOS/PULSE/logs/pulse-stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>__HOME__/.claude/LIFEOS/PULSE/logs/pulse-stderr.log</string>
+    <string>__CONFIG_ROOT__/LIFEOS/PULSE/logs/pulse-stderr.log</string>
     <key>ThrottleInterval</key>
     <integer>30</integer>
 </dict>

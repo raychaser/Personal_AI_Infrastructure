@@ -49,7 +49,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 // ============================================================================
 
 const HOME = process.env.HOME!;
-const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "LIFEOS");
 const MEMORY_DIR = path.join(LIFEOS_DIR, "MEMORY");
 const KNOWLEDGE_DIR = path.join(MEMORY_DIR, "KNOWLEDGE");
 const WORK_DIR = path.join(MEMORY_DIR, "WORK");
@@ -58,7 +58,7 @@ const RESEARCH_DIR = path.join(MEMORY_DIR, "RESEARCH");
 const HARVEST_QUEUE_DIR = path.join(KNOWLEDGE_DIR, "_harvest-queue");
 const ARCHIVE_DIR = path.join(KNOWLEDGE_DIR, "_archive");
 
-const PROJECTS_DIR = path.join(HOME, ".claude", "projects");
+const PROJECTS_DIR = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(HOME, ".claude"), "projects");
 
 /**
  * Auto-memory dirs — multi-instance aware (#1170).

@@ -68,8 +68,8 @@ interface PromptOutput {
 // ============================================================================
 
 const ART_AESTHETIC_PATH = resolve(
-  process.env.HOME!,
-  ".claude/LIFEOS/Aesthetic.md"
+  process.env.CLAUDE_CONFIG_DIR || resolve(process.env.HOME!, ".claude"),
+  "LIFEOS/Aesthetic.md"
 );
 
 const COLOR_HEX_MAP: Record<TokyoNightColor, string> = {

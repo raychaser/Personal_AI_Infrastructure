@@ -29,7 +29,7 @@ import { join, resolve, dirname, relative, extname, sep } from 'path';
 import { execSync } from 'child_process';
 
 const HOME = process.env.HOME || '';
-const CLAUDE_DIR = join(HOME, '.claude');
+const CLAUDE_DIR = (process.env.CLAUDE_CONFIG_DIR || join(HOME, '.claude'));
 const LIFEOS_DIR = join(CLAUDE_DIR, 'LIFEOS');
 
 // ── Arg parsing (manual, zero deps) ──
@@ -301,7 +301,7 @@ const REF_PATTERNS: { re: RegExp; label: string }[] = [
   // TS/TSX relative imports with explicit relative prefix
   { re: /from\s+["'](\.\.?\/[\w/@.-]+?)["']/g, label: 'ts-import' },
   // settings.json style: "command": "... $HOME/.claude/hooks/Foo.hook.ts ..."
-  { re: new RegExp('\\$\\{?HOME\\}?\\/\\.claude\\/((?:hooks|LifeOS|skills|agents)\\/[\\w/@.-]+?' + EXT + ')', 'g'), label: 'json-home' },
+  { re: new RegExp('(?:\\$\\{CLAUDE_CONFIG_DIR:-\\$HOME\\/\\.claude\\}|\\$\\{?HOME\\}?\\/\\.claude)\\/((?:hooks|LifeOS|skills|agents)\\/[\\w/@.-]+?' + EXT + ')', 'g'), label: 'json-home' },
 ];
 
 interface RefHit {

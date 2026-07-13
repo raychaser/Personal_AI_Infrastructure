@@ -15,7 +15,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>{{BUN}}</string>
-    <string>{{HOME}}/.claude/LIFEOS/TOOLS/HealthSync.ts</string>
+    <string>{{CONFIG_ROOT}}/LIFEOS/TOOLS/HealthSync.ts</string>
     <string>pull</string>
   </array>
   <key>RunAtLoad</key>
@@ -23,17 +23,19 @@
   <key>StartInterval</key>
   <integer>3600</integer>
   <key>StandardOutPath</key>
-  <string>{{HOME}}/.claude/LIFEOS/MEMORY/OBSERVABILITY/health-sync.log</string>
+  <string>{{CONFIG_ROOT}}/LIFEOS/MEMORY/OBSERVABILITY/health-sync.log</string>
   <key>StandardErrorPath</key>
-  <string>{{HOME}}/.claude/LIFEOS/MEMORY/OBSERVABILITY/health-sync.log</string>
+  <string>{{CONFIG_ROOT}}/LIFEOS/MEMORY/OBSERVABILITY/health-sync.log</string>
   <key>WorkingDirectory</key>
-  <string>{{HOME}}/.claude</string>
+  <string>{{CONFIG_ROOT}}</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
     <string>{{BUN_DIR}}:{{HOME}}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     <key>HOME</key>
     <string>{{HOME}}</string>
+    <key>CLAUDE_CONFIG_DIR</key>
+    <string>{{CONFIG_ROOT}}</string>
   </dict>
 </dict>
 </plist>

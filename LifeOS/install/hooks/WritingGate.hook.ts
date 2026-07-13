@@ -45,7 +45,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 }
 
 
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.HOME!, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, ".claude"), "LIFEOS");
 const OBS_PATH = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY", "writing-gate.jsonl");
 const RUNS_PATH = join(LIFEOS_DIR, "MEMORY", "OBSERVABILITY", "pangram-runs.jsonl");
 const RUN_WINDOW_MS = 30 * 60 * 1000; // a run counts as "this turn" within 30 min

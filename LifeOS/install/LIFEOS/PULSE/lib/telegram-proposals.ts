@@ -21,7 +21,7 @@ import {
 } from "../../TOOLS/MemoryTypes";
 
 const HOME = process.env.HOME ?? homedir();
-const OBS_DIR = join(HOME, ".claude", "LIFEOS", "MEMORY", "OBSERVABILITY");
+const OBS_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "MEMORY", "OBSERVABILITY");
 const PROPOSAL_REPLIES_LOG_PATH = join(OBS_DIR, "proposal-replies.jsonl");
 const IDENTITY_PROPOSALS_LOG_PATH = join(OBS_DIR, "identity-proposals.jsonl");
 
@@ -123,7 +123,7 @@ export function logProposalReply(event: Record<string, unknown>, path: string = 
 }
 
 export function formatProposalMessage(p: ProposalRow, home: string = HOME): string {
-  const fileLabel = p.target_file.replace(`${home}/.claude/`, "");
+  const fileLabel = p.target_file.replace(`${process.env.CLAUDE_CONFIG_DIR || `${home}/.claude`}/`, "");
   const conf = p.confidence.toFixed(2);
   const obs = p.observed_across_sessions ?? 1;
   // P1 2026-05-25: prepend subtype badge so the principal sees at a glance

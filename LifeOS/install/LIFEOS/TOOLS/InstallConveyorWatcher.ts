@@ -19,7 +19,7 @@ import { join } from "path";
 declare const Bun: { spawn: (cmd: string[], opts?: any) => any };
 
 const HOME = process.env.HOME || "";
-const TEMPLATE_PATH = join(HOME, ".claude", "LIFEOS", "TOOLS", "com.lifeos.conveyor-watcher.plist.template");
+const TEMPLATE_PATH = join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS", "TOOLS", "com.lifeos.conveyor-watcher.plist.template");
 const LAUNCH_AGENTS_DIR = join(HOME, "Library", "LaunchAgents");
 const TARGET_PLIST = join(LAUNCH_AGENTS_DIR, "com.lifeos.conveyor-watcher.plist");
 const LABEL = "com.lifeos.conveyor-watcher";
@@ -59,6 +59,7 @@ async function install(): Promise<void> {
   console.log(`[InstallConveyorWatcher] detected bun at ${bunPath}`);
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   const materialized = template
+    .replace(/\{\{CONFIG_ROOT\}\}/g, process.env.CLAUDE_CONFIG_DIR || HOME + "/.claude")
     .replace(/\{\{HOME\}\}/g, HOME)
     .replace(/\{\{BUN\}\}/g, bunPath)
     .replace(/\{\{BUN_DIR\}\}/g, bunDir);

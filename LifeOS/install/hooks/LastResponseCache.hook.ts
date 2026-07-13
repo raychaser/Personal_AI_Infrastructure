@@ -43,7 +43,7 @@ async function main() {
 
   if (lastResponse) {
     try {
-      const paiDir = process.env.LIFEOS_DIR || join(process.env.HOME!, '.claude', 'LIFEOS');
+      const paiDir = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, '.claude'), 'LIFEOS');
       const cachePath = join(paiDir, 'MEMORY', 'STATE', 'last-response.txt');
       writeFileSync(cachePath, lastResponse.slice(0, 2000), 'utf-8');
     } catch (err) {

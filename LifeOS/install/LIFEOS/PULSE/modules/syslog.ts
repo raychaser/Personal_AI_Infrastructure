@@ -22,8 +22,7 @@ const DEFAULT_PORT = 5514
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB rotation threshold
 
 const LOG_PATH = join(
-  HOME,
-  ".claude",
+  process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"),
   "LIFEOS",
   "MEMORY",
   "OBSERVABILITY",

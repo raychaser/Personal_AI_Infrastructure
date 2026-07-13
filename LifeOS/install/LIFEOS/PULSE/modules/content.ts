@@ -160,7 +160,7 @@ function deleteItem(id: string): Response {
 
   // 3. Artifacts (audio, transcript, derivatives).
   const artifacts = join(
-    process.env.LIFEOS_DIR || join(homedir(), ".claude", "LIFEOS"),
+    process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"), "LIFEOS"),
     "MEMORY", "STATE", "content-pipeline", "artifacts", id,
   );
   try {

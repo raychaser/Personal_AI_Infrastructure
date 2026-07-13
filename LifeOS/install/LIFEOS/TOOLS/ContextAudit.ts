@@ -27,7 +27,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 
 
 const HOME = process.env.HOME || "";
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(HOME, ".claude", "LIFEOS");
+const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude"), "LIFEOS");
 const CLAUDE_DIR = dirname(LIFEOS_DIR);
 const AUDIT_PATH = join(
   LIFEOS_DIR,
@@ -207,7 +207,7 @@ function normalizeReference(raw: string): string | null {
 
   if (value.startsWith("LIFEOS/")) return join(CLAUDE_DIR, value);
   if (value.startsWith("~/.claude/LIFEOS/")) return join(HOME, value.slice(2));
-  if (value.startsWith(`${HOME}/.claude/LIFEOS/`)) return value;
+  if (value.startsWith(`${process.env.CLAUDE_CONFIG_DIR || `${HOME}/.claude`}/LIFEOS/`)) return value;
   return null;
 }
 

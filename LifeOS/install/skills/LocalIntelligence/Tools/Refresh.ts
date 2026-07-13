@@ -22,7 +22,7 @@ import { fetchArrests } from "./FetchArrests.ts"
 import { fetchNews } from "./FetchNews.ts"
 import { fetchCrime } from "./FetchCrime.ts"
 
-const DATA_DIR = join(homedir(), ".claude", "LIFEOS", "MEMORY", "DATA", "LocalIntelligence")
+const DATA_DIR = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude"), "LIFEOS", "MEMORY", "DATA", "LocalIntelligence")
 
 const fetchers: Record<SectionKey, Fetcher> = {
   construction: fetchConstruction,

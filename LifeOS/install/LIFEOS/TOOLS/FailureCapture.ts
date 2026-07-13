@@ -43,7 +43,7 @@ for (const k of ["LIFEOS_DIR", "LIFEOS_CONFIG_DIR", "PROJECTS_DIR"]) {
 }
 
 
-const LIFEOS_DIR = process.env.LIFEOS_DIR || join(process.env.HOME!, '.claude');
+const LIFEOS_DIR = process.env.LIFEOS_DIR || (process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME!, '.claude'));
 
 interface FailureCaptureInput {
   transcriptPath: string;

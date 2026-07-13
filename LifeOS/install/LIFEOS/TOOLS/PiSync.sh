@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# PiSync.sh — bring ~/.pi/agent/ in line with current ~/.claude/LIFEOS/
+# PiSync.sh — bring ~/.pi/agent/ in line with current ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS/
 #
 # v2 — matches existing Pi skills by frontmatter `name:` field rather than
 # regex on dir name. Avoids the ALLCAPS/ArXiv duplicate problem in v1.
 
 set -euo pipefail
 
-LifeOS=~/.claude
+LifeOS=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 PI=~/.pi/agent
 
 [ -d "$PI" ] || { echo "✗ ~/.pi/agent missing"; exit 1; }
-[ -d "$LifeOS/LIFEOS" ] || { echo "✗ ~/.claude/LIFEOS missing"; exit 1; }
+[ -d "$LifeOS/LIFEOS" ] || { echo "✗ ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/LIFEOS missing"; exit 1; }
 
 echo "→ PiSync v2"
 
